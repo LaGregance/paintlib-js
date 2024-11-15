@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es5", // Specifies ECMAScript target version
+    "module": "es6", // Specifies module code generation
+    "moduleResolution": "node",
+    "strict": true,  // Enable all strict type-checking options
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true, // Compatibility for common modules
+    "strictNullChecks": false,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src"]
+}
