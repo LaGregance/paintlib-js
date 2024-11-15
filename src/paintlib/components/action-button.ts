@@ -1,23 +1,25 @@
 import { StoreApi } from 'zustand/vanilla';
 import { UIStore } from '../store/ui-store';
-import { UIActionType } from '../actions/base-action';
+import { BaseAction, UIActionType } from '../actions/base-action';
 import { Component } from './component';
 import { useState } from '../utils/use-state';
-import { ShapeAction } from '../actions/shape-action';
 
-export class ToolButton extends Component<'button'> {
+export class ActionButton extends Component<'button'> {
+  private type: UIActionType;
+
   constructor(
     private uiStore: StoreApi<UIStore>,
-    private type: UIActionType,
+    private actionCreator: () => BaseAction,
     private image: string,
   ) {
     super('button');
+    this.type = actionCreator().type;
   }
 
   init() {
     this.element.className = 'paintlib-menu-button selected';
     this.element.onclick = () => {
-      this.uiStore.getState().setAction(new ShapeAction(this.type));
+      this.uiStore.getState().setAction(this.actionCreator());
     };
 
     useState(

@@ -25,24 +25,27 @@ export class PaintLib extends Component<'div'> {
     // 1. Create root container
     this.element.className = 'paintlib-root';
 
-    // 2. Create menu
-    const mainMenu = new MainMenu(this.uiStore);
+    // 2. Create canvas
+
+    // 3. Create menu
+    const mainMenu = new MainMenu(() => this.canvas, this.uiStore);
     this.add(mainMenu);
 
-    // 3. Create canvas within its own container
+    // 4. Populate canvas
+    this.canvasEl = document.createElement('canvas');
+
     const canvasContainer = document.createElement('div');
     canvasContainer.className = 'paintlib-canvas-container';
     this.element.appendChild(canvasContainer);
 
-    this.canvasEl = document.createElement('canvas');
     this.canvasEl.width = canvasContainer.clientWidth;
     this.canvasEl.height = canvasContainer.clientHeight;
     canvasContainer.appendChild(this.canvasEl);
 
     this.canvas = new Canvas(this.canvasEl);
-
     this.canvas.defaultCursor = 'pointer';
 
+    // 5. Manage event
     let isDragging = false;
     this.canvas.on('mouse:down', (event) => {
       isDragging = true;

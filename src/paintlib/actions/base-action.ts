@@ -1,4 +1,4 @@
-import { TPointerEvent, TPointerEventInfo } from 'fabric';
+import { Canvas, TPointerEvent, TPointerEventInfo } from 'fabric';
 
 export enum UIActionType {
   SELECT = 'select',
@@ -10,7 +10,7 @@ export enum UIActionType {
   UNDO = 'undo',
   REDO = 'redo',
 
-  SQUARE = 'square',
+  RECT = 'rect',
   CIRCLE = 'circle',
   DRAW = 'draw',
   TEXT = 'text',
@@ -30,7 +30,7 @@ export enum UIActionType {
     | UIActionType.TEXT;
 };
 
-export type ShapeAction = {
+export type RectAction = {
   type: UIActionType.SHAPE;
   options: {
     borderColor?: string;
@@ -39,7 +39,13 @@ export type ShapeAction = {
 }*/
 
 export abstract class BaseAction {
-  constructor(public type: UIActionType) {}
+  constructor(
+    public readonly canvas: Canvas,
+    public readonly type: UIActionType,
+  ) {}
+
+  abstract onSelected(): void;
+  abstract onDeselected(): void;
 
   abstract onMouseDown(event: TPointerEventInfo<TPointerEvent>): void;
   abstract onMouseMove(event: TPointerEventInfo<TPointerEvent>): void;
