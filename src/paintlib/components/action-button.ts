@@ -1,14 +1,13 @@
-import { StoreApi } from 'zustand/vanilla';
-import { UIStore } from '../store/ui-store';
 import { BaseAction, UIActionType } from '../actions/base-action';
 import { Component } from './component';
 import { useState } from '../utils/use-state';
+import { PaintLib } from '../paintlib';
 
 export class ActionButton extends Component<'button'> {
   private type: UIActionType;
 
   constructor(
-    private uiStore: StoreApi<UIStore>,
+    private paintlib: PaintLib,
     private actionCreator: () => BaseAction,
     private image: string,
   ) {
@@ -19,11 +18,11 @@ export class ActionButton extends Component<'button'> {
   init() {
     this.element.className = 'paintlib-menu-button selected';
     this.element.onclick = () => {
-      this.uiStore.getState().setAction(this.actionCreator());
+      this.paintlib.uiStore.getState().setAction(this.actionCreator());
     };
 
     useState(
-      this.uiStore,
+      this.paintlib.uiStore,
       (state) => state.activeAction,
       (action) => {
         if (action === this.type) {

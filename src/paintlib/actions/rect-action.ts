@@ -1,12 +1,13 @@
 import { BaseAction, UIActionType } from './base-action';
-import { Canvas, Point, Rect, TPointerEvent, TPointerEventInfo } from 'fabric';
+import { Point, Rect, TPointerEvent, TPointerEventInfo } from 'fabric';
+import { PaintLib } from '../paintlib';
 
 export class RectAction extends BaseAction {
   private shape: Rect;
   private originalXY: Point;
 
-  constructor(canvas: Canvas) {
-    super(canvas, UIActionType.RECT);
+  constructor(paintlib: PaintLib) {
+    super(paintlib, UIActionType.RECT);
   }
 
   onSelected() {}
@@ -18,8 +19,13 @@ export class RectAction extends BaseAction {
     this.shape.setXY(event.scenePoint);
     this.shape.width = 1;
     this.shape.height = 1;
+
+    this.shape.selectable = false;
+    this.shape.lockMovementY = true;
+    this.shape.lockMovementX = true;
+
     this.originalXY = event.scenePoint;
-    this.canvas.add(this.shape);
+    this.paintlib.canvas.add(this.shape);
   }
 
   onMouseMove(event: TPointerEventInfo<TPointerEvent>): void {
@@ -43,12 +49,12 @@ export class RectAction extends BaseAction {
       this.shape.setY(this.originalXY.y + height);
     }
 
-    this.canvas.renderAll();
+    this.paintlib.canvas.renderAll();
   }
 
   onMouseUp(event: TPointerEventInfo<TPointerEvent>): void {
     if (this.shape.width <= 2 || this.shape.height <= 2) {
-      this.canvas.remove(this.shape);
+      this.paintlib.canvas.remove(this.shape);
     }
     console.log('onMouseUp: ', this.type);
   }

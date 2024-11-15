@@ -6,11 +6,11 @@ import { StoreApi } from 'zustand/vanilla';
 import { Component } from './components/component';
 
 export class PaintLib extends Component<'div'> {
-  private canvasEl: HTMLCanvasElement;
-  private canvas: Canvas;
+  public canvas: Canvas;
+  public readonly uiStore: StoreApi<UIStore>;
 
+  private canvasEl: HTMLCanvasElement;
   private image?: FabricImage;
-  private uiStore: StoreApi<UIStore>;
 
   constructor(public readonly container: HTMLElement) {
     super('div');
@@ -25,13 +25,11 @@ export class PaintLib extends Component<'div'> {
     // 1. Create root container
     this.element.className = 'paintlib-root';
 
-    // 2. Create canvas
-
-    // 3. Create menu
-    const mainMenu = new MainMenu(() => this.canvas, this.uiStore);
+    // 2. Create menu
+    const mainMenu = new MainMenu(this);
     this.add(mainMenu);
 
-    // 4. Populate canvas
+    // 3. Create & Populate canvas
     this.canvasEl = document.createElement('canvas');
 
     const canvasContainer = document.createElement('div');
@@ -43,9 +41,10 @@ export class PaintLib extends Component<'div'> {
     canvasContainer.appendChild(this.canvasEl);
 
     this.canvas = new Canvas(this.canvasEl);
+    this.canvas.selection = false;
     this.canvas.defaultCursor = 'pointer';
 
-    // 5. Manage event
+    // 4. Manage event
     let isDragging = false;
     this.canvas.on('mouse:down', (event) => {
       isDragging = true;
@@ -113,5 +112,27 @@ export class PaintLib extends Component<'div'> {
 
     text.fill = 'red';
     text.backgroundColor = 'blue';
+  }
+
+  enableSelection(enable: boolean) {
+    this.canvas.forEachObject((object) => {
+      if (!(object instanceof FabricImage)) {
+        object.hasControls = enable;
+        object.selectable = enable;
+        object.lockMovementY = !enable;
+        object.lockMovementX = !enable;
+        object.lockRotation = !enable;
+
+        if (enable) {
+          // Apparently selection may not be enabled back if this is not called
+          this.canvas.setActiveObject(object);
+        }
+      }
+    });
+
+    if (enable) {
+      this.canvas.discardActiveObject();
+    }
+    this.canvas.requestRenderAll();
   }
 }

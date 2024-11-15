@@ -1,12 +1,13 @@
 import { BaseAction, UIActionType } from './base-action';
-import { Canvas, Ellipse, Point, TPointerEvent, TPointerEventInfo } from 'fabric';
+import { Ellipse, Point, TPointerEvent, TPointerEventInfo } from 'fabric';
+import { PaintLib } from '../paintlib';
 
 export class CircleAction extends BaseAction {
   private shape: Ellipse;
   private originalXY: Point;
 
-  constructor(canvas: Canvas) {
-    super(canvas, UIActionType.CIRCLE);
+  constructor(paintlib: PaintLib) {
+    super(paintlib, UIActionType.CIRCLE);
   }
 
   onSelected() {
@@ -23,7 +24,7 @@ export class CircleAction extends BaseAction {
     this.shape.width = 1;
     this.shape.height = 1;
     this.originalXY = event.scenePoint;
-    this.canvas.add(this.shape);
+    this.paintlib.canvas.add(this.shape);
   }
 
   onMouseMove(event: TPointerEventInfo<TPointerEvent>): void {
@@ -45,12 +46,12 @@ export class CircleAction extends BaseAction {
       this.shape.setY(this.originalXY.y + height);
     }
 
-    this.canvas.renderAll();
+    this.paintlib.canvas.renderAll();
   }
 
   onMouseUp(event: TPointerEventInfo<TPointerEvent>): void {
     if (this.shape.width <= 2 || this.shape.height <= 2) {
-      this.canvas.remove(this.shape);
+      this.paintlib.canvas.remove(this.shape);
     }
     console.log('onMouseUp: ', this.type);
   }

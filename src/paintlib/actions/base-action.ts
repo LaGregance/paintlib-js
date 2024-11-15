@@ -1,4 +1,5 @@
-import { Canvas, TPointerEvent, TPointerEventInfo } from 'fabric';
+import { TPointerEvent, TPointerEventInfo } from 'fabric';
+import { PaintLib } from '../paintlib';
 
 export enum UIActionType {
   SELECT = 'select',
@@ -40,7 +41,7 @@ export type RectAction = {
 
 export abstract class BaseAction {
   constructor(
-    public readonly canvas: Canvas,
+    public readonly paintlib: PaintLib,
     public readonly type: UIActionType,
   ) {}
 
