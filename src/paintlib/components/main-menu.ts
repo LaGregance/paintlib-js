@@ -3,7 +3,7 @@ import ElipseSVG from '../svgs/elipse.svg';
 import { ToolButton } from './tool-button';
 import { StoreApi } from 'zustand/vanilla';
 import { UIStore } from '../store/ui-store';
-import { UIActionType } from '../models/ui-action';
+import { UIActionType } from '../actions/base-action';
 import { Component } from './component';
 
 export class MainMenu extends Component<'div'> {

@@ -1,8 +1,8 @@
 import { Canvas, FabricImage, Textbox } from 'fabric';
 import { calculateImageScaleToFitViewport } from './utils/size-utils';
 import { MainMenu } from './components/main-menu';
-import { UIStore } from './store/ui-store';
-import { createStore, StoreApi } from 'zustand/vanilla';
+import { createUIStore, UIStore } from './store/ui-store';
+import { StoreApi } from 'zustand/vanilla';
 import { Component } from './components/component';
 
 export class PaintLib extends Component<'div'> {
@@ -15,9 +15,7 @@ export class PaintLib extends Component<'div'> {
   constructor(public readonly container: HTMLElement) {
     super('div');
 
-    this.uiStore = createStore<UIStore>(() => ({
-      allActions: {},
-    }));
+    this.uiStore = createUIStore();
 
     container.appendChild(this.element);
     this.init();
@@ -44,8 +42,37 @@ export class PaintLib extends Component<'div'> {
     this.canvas = new Canvas(this.canvasEl);
 
     this.canvas.defaultCursor = 'pointer';
-    this.canvas.on('mouse:down', () => {
-      console.log('DOwn');
+
+    let isDragging = false;
+    this.canvas.on('mouse:down', (event) => {
+      isDragging = true;
+      const state = this.uiStore.getState();
+      const action = state.allActions[state.activeAction];
+
+      if (action) {
+        action.onMouseDown(event);
+      }
+    });
+    this.canvas.on('mouse:move', (event) => {
+      if (isDragging) {
+        const state = this.uiStore.getState();
+        const action = state.allActions[state.activeAction];
+
+        if (action) {
+          action.onMouseMove(event);
+        }
+      }
+    });
+    this.canvas.on('mouse:up', (event) => {
+      if (isDragging) {
+        isDragging = false;
+        const state = this.uiStore.getState();
+        const action = state.allActions[state.activeAction];
+
+        if (action) {
+          action.onMouseUp(event);
+        }
+      }
     });
     // this.canvas.selection = false;
 

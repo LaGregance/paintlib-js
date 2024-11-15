@@ -1,3 +1,5 @@
+import { TPointerEvent, TPointerEventInfo } from 'fabric';
+
 export enum UIActionType {
   SELECT = 'select',
   TRASH = 'trash',
@@ -36,6 +38,10 @@ export type ShapeAction = {
   }
 }*/
 
-export class UIAction {
+export abstract class BaseAction {
   constructor(public type: UIActionType) {}
+
+  abstract onMouseDown(event: TPointerEventInfo<TPointerEvent>): void;
+  abstract onMouseMove(event: TPointerEventInfo<TPointerEvent>): void;
+  abstract onMouseUp(event: TPointerEventInfo<TPointerEvent>): void;
 }
