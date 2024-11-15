@@ -1,21 +1,53 @@
 import { Canvas, FabricImage, Textbox } from 'fabric';
 import { calculateImageScaleToFitViewport } from './utils/size-utils';
+import { MainMenu } from './components/main-menu';
+import { UIStore } from './store/ui-store';
+import { createStore, StoreApi } from 'zustand/vanilla';
+import { Component } from './components/component';
 
-export class PaintLib {
+export class PaintLib extends Component<'div'> {
   private canvasEl: HTMLCanvasElement;
   private canvas: Canvas;
 
   private image?: FabricImage;
+  private uiStore: StoreApi<UIStore>;
 
   constructor(public readonly container: HTMLElement) {
-    // 1. Create canvas element with full container width
-    this.canvasEl = document.createElement('canvas');
-    this.canvasEl.width = container.clientWidth;
-    this.canvasEl.height = container.clientHeight;
-    container.appendChild(this.canvasEl);
+    super('div');
 
-    // 2. Create Fabric canvas
+    this.uiStore = createStore<UIStore>(() => ({
+      allActions: {},
+    }));
+
+    container.appendChild(this.element);
+    this.init();
+  }
+
+  init() {
+    // 1. Create root container
+    this.element.className = 'paintlib-root';
+
+    // 2. Create menu
+    const mainMenu = new MainMenu(this.uiStore);
+    this.add(mainMenu);
+
+    // 3. Create canvas within its own container
+    const canvasContainer = document.createElement('div');
+    canvasContainer.className = 'paintlib-canvas-container';
+    this.element.appendChild(canvasContainer);
+
+    this.canvasEl = document.createElement('canvas');
+    this.canvasEl.width = canvasContainer.clientWidth;
+    this.canvasEl.height = canvasContainer.clientHeight;
+    canvasContainer.appendChild(this.canvasEl);
+
     this.canvas = new Canvas(this.canvasEl);
+
+    this.canvas.defaultCursor = 'pointer';
+    this.canvas.on('mouse:down', () => {
+      console.log('DOwn');
+    });
+    // this.canvas.selection = false;
 
     /*new ResizeObserver(() => {
       console.log('Resize: ', container.clientWidth, container.clientHeight);
@@ -30,6 +62,11 @@ export class PaintLib {
     );*/
     this.image.hasControls = false;
     this.image.selectable = false;
+    this.image.lockMovementX = true;
+    this.image.lockMovementY = true;
+    this.image.moveCursor = 'pointer';
+    this.image.hoverCursor = 'pointer';
+
     this.image.scale(
       calculateImageScaleToFitViewport({ width: this.canvas.width, height: this.canvas.height }, { width: this.image.width, height: this.image.height }),
     );

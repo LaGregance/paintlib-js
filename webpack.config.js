@@ -24,6 +24,10 @@ module.exports = {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'], // Handles CSS files
       },
+      {
+        test: /\.svg$/,
+        type: 'asset/source', // Inline the SVG as a string
+      },
     ],
   },
   plugins: [
