@@ -1,62 +1,22 @@
-import { BaseAction, UIActionType } from './base-action';
-import { Point, Rect, TPointerEvent, TPointerEventInfo } from 'fabric';
+import { UIActionType } from './base-action';
+import { Rect } from 'fabric';
 import { PaintLib } from '../paintlib';
-import { SelectAction } from './select-action';
+import { BaseShapeAction } from './base-shape-action';
 
-export class RectAction extends BaseAction {
-  private shape: Rect;
-  private originalXY: Point;
-
+export class RectAction extends BaseShapeAction<Rect> {
   constructor(paintlib: PaintLib) {
     super(paintlib, UIActionType.RECT);
   }
 
-  onSelected() {}
-  onDeselected() {}
-
-  onMouseDown(event: TPointerEventInfo<TPointerEvent>): void {
-    console.log('onMouseDown: ', this.type);
-    this.shape = new Rect({ fill: 'red', stroke: 'blue' });
-    this.shape.setXY(event.scenePoint);
-    this.shape.width = 1;
-    this.shape.height = 1;
-
-    this.shape.selectable = false;
-    this.shape.lockMovementY = true;
-    this.shape.lockMovementX = true;
-
-    this.originalXY = event.scenePoint;
-    this.paintlib.canvas.add(this.shape);
+  protected createShape(): Rect {
+    return new Rect({ fill: 'red', stroke: 'blue' });
   }
 
-  onMouseMove(event: TPointerEventInfo<TPointerEvent>): void {
-    console.log('onMouseMove: ', this.type, event.scenePoint);
-    const width = event.scenePoint.x - this.originalXY.x;
-    const height = event.scenePoint.y - this.originalXY.y;
-
-    if (width > 0) {
-      this.shape.set({ width });
-      this.shape.setX(this.originalXY.x);
-    } else {
-      this.shape.set({ width: -width });
-      this.shape.setX(this.originalXY.x + width);
-    }
-
-    if (height > 0) {
-      this.shape.set({ height, y: this.originalXY.y });
-      this.shape.setY(this.originalXY.y);
-    } else {
-      this.shape.set({ height: -height });
-      this.shape.setY(this.originalXY.y + height);
-    }
-
-    this.paintlib.canvas.renderAll();
+  protected updateShapePosition(x: number, y: number, width: number, height: number): void {
+    this.shape.setX(x);
+    this.shape.setY(y);
+    this.shape.set({ width, height });
   }
 
-  onMouseUp(): void {
-    if (this.shape.width <= 2 || this.shape.height <= 2) {
-      this.paintlib.canvas.remove(this.shape);
-    }
-    this.paintlib.uiStore.getState().setAction(new SelectAction(this.paintlib, this.shape));
-  }
+  protected finishShape(): void {}
 }

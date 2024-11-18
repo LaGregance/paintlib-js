@@ -24,6 +24,11 @@ body {
     height: 80px;
     width: 100%;
     display: flex;
+    gap: 20px;
+}
+
+.paintlib-menu-group {
+    display: flex;
     gap: 5px;
 }
 

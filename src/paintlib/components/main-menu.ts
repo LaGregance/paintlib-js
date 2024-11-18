@@ -1,12 +1,15 @@
 import RectangleSVG from '../svgs/rectangle.svg';
 import ElipseSVG from '../svgs/elipse.svg';
 import CursorSVG from '../svgs/cursor.svg';
+import EraserSVG from '../svgs/eraser.svg';
 import { ActionButton } from './action-button';
 import { Component } from './component';
 import { RectAction } from '../actions/rect-action';
 import { CircleAction } from '../actions/circle-action';
 import { SelectAction } from '../actions/select-action';
 import { PaintLib } from '../paintlib';
+import { EraseAction } from '../actions/erase-action';
+import { ActionGroup } from './action-group';
 
 export class MainMenu extends Component<'div'> {
   constructor(private paintlib: PaintLib) {
@@ -17,11 +20,11 @@ export class MainMenu extends Component<'div'> {
     this.element.className = 'paintlib-menu';
 
     const select = new ActionButton(this.paintlib, () => new SelectAction(this.paintlib), CursorSVG);
+    const erase = new ActionButton(this.paintlib, () => new EraseAction(this.paintlib), EraserSVG);
     const rectangle = new ActionButton(this.paintlib, () => new RectAction(this.paintlib), RectangleSVG);
     const circle = new ActionButton(this.paintlib, () => new CircleAction(this.paintlib), ElipseSVG);
 
-    this.add(select);
-    this.add(rectangle);
-    this.add(circle);
+    this.add(new ActionGroup([select, erase]));
+    this.add(new ActionGroup([rectangle, circle]));
   }
 }
