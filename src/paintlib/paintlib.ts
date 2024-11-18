@@ -15,7 +15,7 @@ export class PaintLib extends Component<'div'> {
   constructor(public readonly container: HTMLElement) {
     super('div');
 
-    this.uiStore = createUIStore();
+    this.uiStore = createUIStore(this);
 
     container.appendChild(this.element);
     this.init();

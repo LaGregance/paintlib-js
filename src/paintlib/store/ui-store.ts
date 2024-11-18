@@ -1,5 +1,7 @@
 import { BaseAction, UIActionType } from '../actions/base-action';
 import { createStore } from 'zustand/vanilla';
+import { PaintLib } from '../paintlib';
+import { SelectAction } from '../actions/select-action';
 
 export type UIStore = {
   allActions: {
@@ -9,8 +11,8 @@ export type UIStore = {
   setAction: (action: BaseAction) => void;
 };
 
-export const createUIStore = () => {
-  return createStore<UIStore>((set, get) => {
+export const createUIStore = (paintlib: PaintLib) => {
+  return createStore<UIStore>((set) => {
     const setAction = (action: BaseAction) => {
       set((oldStore) => {
         const oldAction = oldStore.allActions[oldStore.activeAction];
@@ -28,7 +30,10 @@ export const createUIStore = () => {
     };
 
     return {
-      allActions: {},
+      activeAction: UIActionType.SELECT,
+      allActions: {
+        [UIActionType.SELECT]: new SelectAction(paintlib),
+      },
       setAction,
     };
   });

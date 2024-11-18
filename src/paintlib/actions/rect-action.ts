@@ -1,6 +1,7 @@
 import { BaseAction, UIActionType } from './base-action';
 import { Point, Rect, TPointerEvent, TPointerEventInfo } from 'fabric';
 import { PaintLib } from '../paintlib';
+import { SelectAction } from './select-action';
 
 export class RectAction extends BaseAction {
   private shape: Rect;
@@ -52,10 +53,10 @@ export class RectAction extends BaseAction {
     this.paintlib.canvas.renderAll();
   }
 
-  onMouseUp(event: TPointerEventInfo<TPointerEvent>): void {
+  onMouseUp(): void {
     if (this.shape.width <= 2 || this.shape.height <= 2) {
       this.paintlib.canvas.remove(this.shape);
     }
-    console.log('onMouseUp: ', this.type);
+    this.paintlib.uiStore.getState().setAction(new SelectAction(this.paintlib, this.shape));
   }
 }
