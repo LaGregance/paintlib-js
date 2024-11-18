@@ -3,7 +3,7 @@ import { PaintLib } from '../paintlib';
 
 export enum UIActionType {
   SELECT = 'select',
-  ERASE = 'ERASE',
+  ERASE = 'erase',
   CLEAR = 'clear',
   SAVE = 'save',
   CANCEL = 'cancel',
@@ -43,7 +43,10 @@ export abstract class BaseAction {
   constructor(
     public readonly paintlib: PaintLib,
     public readonly type: UIActionType,
+    public readonly behavior: 'selectable' | 'clickable',
   ) {}
+
+  abstract onClick(): void;
 
   abstract onSelected(): void;
   abstract onDeselected(): void;

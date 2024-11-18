@@ -1,9 +1,10 @@
-import { BaseAction, UIActionType } from './base-action';
+import { UIActionType } from './base-action';
 import { Object, Point, TPointerEvent, TPointerEventInfo } from 'fabric';
 import { PaintLib } from '../paintlib';
 import { SelectAction } from './select-action';
+import { BaseSelectableAction } from './base-selectable-action';
 
-export abstract class BaseShapeAction<T extends Object> extends BaseAction {
+export abstract class BaseShapeAction<T extends Object> extends BaseSelectableAction {
   protected shape: T;
   protected originalXY: Point;
 
@@ -15,6 +16,7 @@ export abstract class BaseShapeAction<T extends Object> extends BaseAction {
   protected abstract updateShapePosition(x: number, y: number, width: number, height: number): void;
   protected abstract finishShape(): void;
 
+  onClick() {}
   onSelected() {}
   onDeselected() {}
 

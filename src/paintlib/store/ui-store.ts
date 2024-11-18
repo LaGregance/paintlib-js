@@ -14,21 +14,22 @@ export type UIStore = {
 export const createUIStore = (paintlib: PaintLib) => {
   return createStore<UIStore>((set, get) => {
     const setAction = (action: BaseAction) => {
-      const oldAction = get().allActions[get().activeAction];
-      if (oldAction && oldAction.type === action.type) {
-        // Skip setting the action if it's the same
+      if (action.behavior === 'clickable') {
+        action.onClick();
         return;
-      }
+      } else {
+        const oldAction = get().allActions[get().activeAction];
+        if (oldAction) {
+          oldAction.onDeselected();
+        }
 
-      set((oldStore) => ({
-        activeAction: action.type,
-        allActions: { ...oldStore.allActions, [action.type]: action },
-      }));
+        set((oldStore) => ({
+          activeAction: action.type,
+          allActions: { ...oldStore.allActions, [action.type]: action },
+        }));
 
-      if (oldAction) {
-        oldAction.onDeselected();
+        action.onSelected();
       }
-      action.onSelected();
     };
 
     return {
