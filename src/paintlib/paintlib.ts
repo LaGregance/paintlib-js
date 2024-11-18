@@ -4,6 +4,7 @@ import { MainMenu } from './components/main-menu';
 import { createUIStore, UIStore } from './store/ui-store';
 import { StoreApi } from 'zustand/vanilla';
 import { Component } from './components/component';
+import { PaintLibOptions } from './paintlib-options';
 
 export class PaintLib extends Component<'div'> {
   public canvas: Canvas;
@@ -12,7 +13,10 @@ export class PaintLib extends Component<'div'> {
   private canvasEl: HTMLCanvasElement;
   private image?: FabricImage;
 
-  constructor(public readonly container: HTMLElement) {
+  constructor(
+    public readonly container: HTMLElement,
+    public readonly options?: PaintLibOptions,
+  ) {
     super('div');
 
     this.uiStore = createUIStore(this);
@@ -134,5 +138,21 @@ export class PaintLib extends Component<'div'> {
       this.canvas.discardActiveObject();
     }
     this.canvas.requestRenderAll();
+  }
+
+  getPalette() {
+    if (!this.options?.palette) {
+      return [
+        '#FF0000', // Red
+        '#FFA500', // Orange
+        '#FFD700', // Yellow (gold)
+        '#008000', // Green
+        '#4169E1', // Blue (royal)
+        '#808080', // Gray
+        '#FFFFFF', // White
+        '#000000', // Dark
+      ];
+    }
+    return this.options.palette;
   }
 }

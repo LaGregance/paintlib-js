@@ -8,6 +8,7 @@
     "esModuleInterop": true, // Compatibility for common modules
     "strictNullChecks": false,
     "sourceMap": true,
+    "downlevelIteration": true,
     "outDir": "./dist",
     "rootDir": "./src"
   },

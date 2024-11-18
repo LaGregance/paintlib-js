@@ -9,6 +9,11 @@ export type UIStore = {
   };
   activeAction?: UIActionType;
   setAction: (action: BaseAction) => void;
+  options: {
+    fgColor: string;
+    bgColor: string;
+    tickness: number;
+  };
 };
 
 export const createUIStore = (paintlib: PaintLib) => {
@@ -38,6 +43,11 @@ export const createUIStore = (paintlib: PaintLib) => {
         [UIActionType.SELECT]: new SelectAction(paintlib),
       },
       setAction,
+      options: {
+        fgColor: 'green',
+        bgColor: 'blue',
+        tickness: 5,
+      },
     };
   });
 };

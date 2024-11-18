@@ -21,7 +21,14 @@ body {
 
 .paintlib-menu {
     background-color: black;
-    height: 80px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.paintlib-menu-line {
+    height: 40px;
     width: 100%;
     display: flex;
     gap: 20px;
@@ -34,7 +41,7 @@ body {
 
 .paintlib-canvas-container {
     flex: 1 1 0;
-    background-color: red;
+    background-color: silver;
 }
 
 .paintlib-menu-button {
@@ -60,4 +67,30 @@ body {
 .paintlib-menu-button:hover {
     background-color: silver;
     color: #5f6368;
+}
+
+.display-none {
+    display: none !important;
+}
+
+.option-floating-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background-color: #ffffffB4;
+    z-index: 1000;
+    padding: 5px;
+
+    /*display: flex;
+    column-gap: 10px;
+    row-gap: 5px;*/
+}
+
+.color-picker {
+    display: flex;
+    gap: 6px;
+}
+
+.hoverable {
+    cursor: pointer;
 }

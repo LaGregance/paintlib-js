@@ -16,7 +16,7 @@ export class ActionButton extends Component<'button'> {
   }
 
   init() {
-    this.element.className = 'paintlib-menu-button selected';
+    this.element.className = 'paintlib-menu-button';
     this.element.onclick = () => {
       this.paintlib.uiStore.getState().setAction(this.actionCreator());
     };
