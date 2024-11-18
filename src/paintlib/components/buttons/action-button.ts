@@ -1,7 +1,7 @@
-import { BaseAction, UIActionType } from '../actions/base-action';
-import { Component } from './component';
-import { useState } from '../utils/use-state';
-import { PaintLib } from '../paintlib';
+import { BaseAction, UIActionType } from '../../actions/base-action';
+import { Component } from '../component';
+import { useState } from '../../utils/use-state';
+import { PaintLib } from '../../paintlib';
 
 export class ActionButton extends Component<'button'> {
   private type: UIActionType;

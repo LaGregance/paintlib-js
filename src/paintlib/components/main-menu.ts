@@ -4,7 +4,8 @@ import CursorSVG from '../svgs/cursor.svg';
 import EraserSVG from '../svgs/eraser.svg';
 import DrawSVG from '../svgs/draw.svg';
 import ForegroundColorSVG from '../svgs/foreground-color.svg';
-import { ActionButton } from './action-button';
+import BackgroundColorSVG from '../svgs/background-color.svg';
+import { ActionButton } from './buttons/action-button';
 import { Component } from './component';
 import { RectAction } from '../actions/rect-action';
 import { CircleAction } from '../actions/circle-action';
@@ -14,7 +15,7 @@ import { EraseAction } from '../actions/erase-action';
 import { ActionGroup } from './action-group';
 import { DrawAction } from '../actions/draw-action';
 import { View } from './view';
-import { OptionButton } from './option-button';
+import { ColorPickerButton } from './buttons/color-picker-button';
 
 export class MainMenu extends Component<'div'> {
   constructor(private paintlib: PaintLib) {
@@ -39,9 +40,28 @@ export class MainMenu extends Component<'div'> {
 
     const optionsView = new View('paintlib-menu-line');
 
-    const fgColor = new OptionButton(this.paintlib, ForegroundColorSVG);
+    const fgColor = new ColorPickerButton(
+      this.paintlib,
+      (state) => state.options.fgColor,
+      (color) => {
+        this.paintlib.uiStore.setState((old) => ({
+          options: { ...old.options, fgColor: color },
+        }));
+      },
+      ForegroundColorSVG,
+    );
+    const bgColor = new ColorPickerButton(
+      this.paintlib,
+      (state) => state.options.bgColor,
+      (color) => {
+        this.paintlib.uiStore.setState((old) => ({
+          options: { ...old.options, bgColor: color },
+        }));
+      },
+      BackgroundColorSVG,
+    );
 
-    optionsView.add(new ActionGroup([fgColor]));
+    optionsView.add(new ActionGroup([fgColor, bgColor]));
     this.add(optionsView);
   }
 }

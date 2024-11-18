@@ -1,15 +1,12 @@
-import { Component } from './component';
-import { PaintLib } from '../paintlib';
-import { ColorPicker } from './color-picker';
-import { View } from './view';
+import { Component } from '../component';
+import { View } from '../view';
 
-export class OptionButton extends Component<'div'> {
-  constructor(
-    private paintlib: PaintLib,
-    private image: string,
-  ) {
+export abstract class MenuButton extends Component<'div'> {
+  constructor(private image: string) {
     super('div');
   }
+
+  protected abstract buildMenu(menu: View): void;
 
   init() {
     const button = document.createElement('button');
@@ -17,17 +14,7 @@ export class OptionButton extends Component<'div'> {
     button.innerHTML = this.image;
 
     const menu = new View('option-floating-menu display-none');
-    menu.add(
-      new ColorPicker(
-        this.paintlib,
-        (state) => state.options.fgColor,
-        (color) => {
-          this.paintlib.uiStore.setState((old) => ({
-            options: { ...old.options, fgColor: color },
-          }));
-        },
-      ),
-    );
+    this.buildMenu(menu);
 
     const cancelEvent = (event: MouseEvent) => {
       menu.element.classList.add('display-none');
@@ -41,14 +28,15 @@ export class OptionButton extends Component<'div'> {
     };
 
     button.onclick = (event) => {
-      // Open color dialog
       if (menu.element.classList.contains('display-none')) {
         const anchor = button.getBoundingClientRect();
         menu.element.style.top = anchor.bottom + 'px';
         menu.element.classList.remove('display-none');
-        event.stopPropagation();
 
-        document.addEventListener('click', cancelEvent);
+        requestAnimationFrame(() => {
+          // If we don't requestAnimationFrame, the cancelEvent is triggered directly
+          document.addEventListener('click', cancelEvent);
+        });
       } else {
         cancelEvent(event);
       }
