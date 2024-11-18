@@ -9,7 +9,7 @@ export class RectAction extends BaseShapeAction<Rect> {
   }
 
   protected createShape(): Rect {
-    return new Rect({ fill: 'red', stroke: 'blue' });
+    return new Rect();
   }
 
   protected updateShapePosition(x: number, y: number, width: number, height: number): void {

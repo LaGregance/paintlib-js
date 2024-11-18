@@ -50,6 +50,7 @@ export class MainMenu extends Component<'div'> {
           options: { ...old.options, fgColor: color },
         }));
       },
+      false,
       ForegroundColorSVG,
     );
     const bgColor = new ColorPickerButton(
@@ -60,6 +61,7 @@ export class MainMenu extends Component<'div'> {
           options: { ...old.options, bgColor: color },
         }));
       },
+      true,
       BackgroundColorSVG,
     );
     const tickness = new TicknessPickerButton(this.paintlib, ThicknessSVG);

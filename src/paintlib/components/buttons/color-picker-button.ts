@@ -10,15 +10,21 @@ export class ColorPickerButton extends MenuButton {
     private paintlib: PaintLib,
     private getColor: (store: UIStore) => string,
     private setColor: (color: string) => void,
+    private allowTransparent: boolean,
     image: string,
   ) {
     super(image);
   }
 
   protected buildMenu(menu: View) {
-    menu.add(new ColorPicker(this.paintlib, this.getColor, this.setColor));
+    menu.add(new ColorPicker(this.paintlib, this.getColor, this.setColor, this.allowTransparent));
+  }
+
+  init() {
+    super.init();
 
     useState(this.paintlib.uiStore, this.getColor, (activeColor) => {
+      this.element.querySelector('rect').setAttribute('opacity', activeColor === 'transparent' ? '0%' : '100%');
       this.element.style.color = activeColor;
     });
   }

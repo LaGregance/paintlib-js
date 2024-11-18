@@ -9,7 +9,7 @@ export class CircleAction extends BaseShapeAction<Ellipse> {
   }
 
   protected createShape(): Ellipse {
-    return new Ellipse({ fill: 'red', stroke: 'blue', rx: 1, ry: 1 });
+    return new Ellipse({ rx: 1, ry: 1 });
   }
 
   protected updateShapePosition(x: number, y: number, width: number, height: number): void {

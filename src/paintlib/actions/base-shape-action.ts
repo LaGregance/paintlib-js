@@ -22,6 +22,12 @@ export abstract class BaseShapeAction<T extends Object> extends BaseSelectableAc
 
   onMouseDown(event: TPointerEventInfo<TPointerEvent>): void {
     this.shape = this.createShape();
+
+    const options = this.paintlib.uiStore.getState().options;
+    this.shape.strokeWidth = options.tickness;
+    this.shape.stroke = options.fgColor;
+    this.shape.fill = options.bgColor;
+
     this.shape.setXY(event.scenePoint);
     this.shape.width = 1;
     this.shape.height = 1;

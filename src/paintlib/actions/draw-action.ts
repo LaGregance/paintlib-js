@@ -9,10 +9,11 @@ export class DrawAction extends BaseSelectableAction {
   }
 
   onSelected() {
-    // Set up the PencilBrush
     const pencil = new PencilBrush(this.paintlib.canvas);
-    pencil.width = 5; // Set the stroke width of the brush
-    pencil.color = 'red'; // Set the brush color
+
+    const options = this.paintlib.uiStore.getState().options;
+    pencil.width = options.tickness;
+    pencil.color = options.fgColor;
 
     // Assign the brush to the canvas & Enable free drawing mode
     this.paintlib.canvas.freeDrawingBrush = pencil;
