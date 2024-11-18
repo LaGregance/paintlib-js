@@ -8,6 +8,7 @@ import { PaintLibOptions } from './paintlib-options';
 import { useState } from './utils/use-state';
 import { UIActionType } from './actions/base-action';
 import { DrawAction } from './actions/draw-action';
+import { setFabricField } from './utils/fabric-utils';
 
 export class PaintLib extends Component<'div'> {
   public canvas: Canvas;
@@ -92,7 +93,7 @@ export class PaintLib extends Component<'div'> {
         }
         const activeObj = this.canvas.getActiveObject();
         if (activeObj) {
-          activeObj.set(field, newValue);
+          setFabricField(activeObj, field, newValue);
           this.canvas.renderAll();
         }
       };

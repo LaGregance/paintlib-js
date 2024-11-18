@@ -1,21 +1,23 @@
 import { UIActionType } from './base-action';
-import { Rect } from 'fabric';
+import { Textbox } from 'fabric';
 import { PaintLib } from '../paintlib';
 import { BaseShapeAction } from './base-shape-action';
 
-export class RectAction extends BaseShapeAction<Rect> {
+export class TextAction extends BaseShapeAction<Textbox> {
   constructor(paintlib: PaintLib) {
-    super(paintlib, UIActionType.RECT);
+    super(paintlib, UIActionType.TEXT);
   }
 
   protected createShape() {
-    return new Rect();
+    const textbox = new Textbox('Text');
+    textbox.editable = true;
+    return textbox;
   }
 
   protected updateShapePosition(x: number, y: number, width: number, height: number): void {
     this.shape.setX(x);
     this.shape.setY(y);
-    this.shape.set({ width, height });
+    this.shape.set({ fontSize: height });
   }
 
   protected finishShape(): void {}

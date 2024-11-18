@@ -3,6 +3,7 @@ import { Object, Point, TPointerEvent, TPointerEventInfo } from 'fabric';
 import { PaintLib } from '../paintlib';
 import { SelectAction } from './select-action';
 import { BaseSelectableAction } from './base-selectable-action';
+import { setFabricField } from '../utils/fabric-utils';
 
 export abstract class BaseShapeAction<T extends Object> extends BaseSelectableAction {
   protected shape: T;
@@ -24,9 +25,9 @@ export abstract class BaseShapeAction<T extends Object> extends BaseSelectableAc
     this.shape = this.createShape();
 
     const options = this.paintlib.uiStore.getState().options;
-    this.shape.strokeWidth = options.tickness;
-    this.shape.stroke = options.fgColor;
-    this.shape.fill = options.bgColor;
+    setFabricField(this.shape, 'strokeWidth', options.tickness);
+    setFabricField(this.shape, 'stroke', options.fgColor);
+    setFabricField(this.shape, 'fill', options.bgColor);
 
     this.shape.setXY(event.scenePoint);
     this.shape.width = 1;
