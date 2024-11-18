@@ -5,6 +5,9 @@ import { createUIStore, UIStore } from './store/ui-store';
 import { StoreApi } from 'zustand/vanilla';
 import { Component } from './components/component';
 import { PaintLibOptions } from './paintlib-options';
+import { useState } from './utils/use-state';
+import { UIActionType } from './actions/base-action';
+import { DrawAction } from './actions/draw-action';
 
 export class PaintLib extends Component<'div'> {
   public canvas: Canvas;
@@ -80,6 +83,25 @@ export class PaintLib extends Component<'div'> {
         }
       }
     });
+
+    // Update selected object with option on change
+    const updateFactory = (field: string) => {
+      return (newValue: any) => {
+        if (this.uiStore.getState().activeAction === UIActionType.DRAW) {
+          (this.uiStore.getState().allActions[UIActionType.DRAW] as DrawAction).update();
+        }
+        const activeObj = this.canvas.getActiveObject();
+        if (activeObj) {
+          activeObj.set(field, newValue);
+          this.canvas.renderAll();
+        }
+      };
+    };
+
+    useState(this.uiStore, (store) => store.options.fgColor, updateFactory('stroke'));
+    useState(this.uiStore, (store) => store.options.bgColor, updateFactory('fill'));
+    useState(this.uiStore, (store) => store.options.tickness, updateFactory('strokeWidth'));
+
     // this.canvas.selection = false;
 
     /*new ResizeObserver(() => {

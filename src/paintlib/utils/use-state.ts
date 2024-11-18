@@ -14,7 +14,7 @@ export const useState = <T extends any, U extends any>(store: StoreApi<T>, selec
   const activeState = selector(store.getState());
   effect(activeState);
 
-  store.subscribe((storeState, prevStoreState) => {
+  return store.subscribe((storeState, prevStoreState) => {
     const newState = selector(storeState);
     const oldState = selector(prevStoreState);
 
