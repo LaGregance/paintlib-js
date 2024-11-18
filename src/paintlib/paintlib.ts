@@ -155,4 +155,11 @@ export class PaintLib extends Component<'div'> {
     }
     return this.options.palette;
   }
+
+  getAvailableTickness() {
+    if (!this.options?.tickness) {
+      return [1, 2, 3, 5, 10];
+    }
+    return this.options.tickness;
+  }
 }

@@ -5,6 +5,7 @@ import EraserSVG from '../svgs/eraser.svg';
 import DrawSVG from '../svgs/draw.svg';
 import ForegroundColorSVG from '../svgs/foreground-color.svg';
 import BackgroundColorSVG from '../svgs/background-color.svg';
+import ThicknessSVG from '../svgs/thickness.svg';
 import { ActionButton } from './buttons/action-button';
 import { Component } from './component';
 import { RectAction } from '../actions/rect-action';
@@ -16,6 +17,7 @@ import { ActionGroup } from './action-group';
 import { DrawAction } from '../actions/draw-action';
 import { View } from './view';
 import { ColorPickerButton } from './buttons/color-picker-button';
+import { TicknessPickerButton } from './buttons/tickness-picker-button';
 
 export class MainMenu extends Component<'div'> {
   constructor(private paintlib: PaintLib) {
@@ -60,8 +62,9 @@ export class MainMenu extends Component<'div'> {
       },
       BackgroundColorSVG,
     );
+    const tickness = new TicknessPickerButton(this.paintlib, ThicknessSVG);
 
-    optionsView.add(new ActionGroup([fgColor, bgColor]));
+    optionsView.add(new ActionGroup([fgColor, bgColor, tickness]));
     this.add(optionsView);
   }
 }

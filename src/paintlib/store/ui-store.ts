@@ -44,9 +44,9 @@ export const createUIStore = (paintlib: PaintLib) => {
       },
       setAction,
       options: {
-        fgColor: 'green',
-        bgColor: 'blue',
-        tickness: 5,
+        fgColor: paintlib.getPalette()[0],
+        bgColor: paintlib.getPalette()[0],
+        tickness: paintlib.getAvailableTickness()[0],
       },
     };
   });

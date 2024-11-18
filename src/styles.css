@@ -92,6 +92,21 @@ body {
     gap: 6px;
 }
 
+.tickness-picker {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.tickness-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
 .hoverable {
     cursor: pointer;
 }
