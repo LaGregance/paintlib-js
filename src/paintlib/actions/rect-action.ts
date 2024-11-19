@@ -1,7 +1,8 @@
 import { UIActionType } from './base-action';
-import { Rect } from 'fabric';
+import { Point, Rect } from 'fabric';
 import { PaintLib } from '../paintlib';
 import { BaseShapeAction } from './base-shape-action';
+import { LayoutRect } from '../models/layout-rect';
 
 export class RectAction extends BaseShapeAction<Rect> {
   constructor(paintlib: PaintLib) {
@@ -12,10 +13,10 @@ export class RectAction extends BaseShapeAction<Rect> {
     return new Rect();
   }
 
-  protected updateShapePosition(x: number, y: number, width: number, height: number): void {
-    this.shape.setX(x);
-    this.shape.setY(y);
-    this.shape.set({ width, height });
+  protected updateShapePosition(_start: Point, _end: Point, rect: LayoutRect): void {
+    this.shape.setX(rect.x);
+    this.shape.setY(rect.y);
+    this.shape.set({ width: rect.width, height: rect.height });
   }
 
   protected finishShape(): void {}

@@ -1,7 +1,8 @@
 import { UIActionType } from './base-action';
-import { Textbox } from 'fabric';
+import { Point, Textbox } from 'fabric';
 import { PaintLib } from '../paintlib';
 import { BaseShapeAction } from './base-shape-action';
+import { LayoutRect } from '../models/layout-rect';
 
 export class TextAction extends BaseShapeAction<Textbox> {
   constructor(paintlib: PaintLib) {
@@ -14,10 +15,10 @@ export class TextAction extends BaseShapeAction<Textbox> {
     return textbox;
   }
 
-  protected updateShapePosition(x: number, y: number, width: number, height: number): void {
-    this.shape.setX(x);
-    this.shape.setY(y);
-    this.shape.set({ fontSize: height });
+  protected updateShapePosition(_start: Point, _end: Point, rect: LayoutRect): void {
+    this.shape.setX(rect.x);
+    this.shape.setY(rect.y);
+    this.shape.set({ fontSize: rect.height });
   }
 
   protected finishShape(): void {}

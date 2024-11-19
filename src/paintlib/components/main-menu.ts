@@ -4,6 +4,7 @@ import CursorSVG from '../svgs/cursor.svg';
 import EraserSVG from '../svgs/eraser.svg';
 import TextSVG from '../svgs/text.svg';
 import DrawSVG from '../svgs/draw.svg';
+import ArrowSVG from '../svgs/arrow.svg';
 import ForegroundColorSVG from '../svgs/foreground-color.svg';
 import BackgroundColorSVG from '../svgs/background-color.svg';
 import ThicknessSVG from '../svgs/thickness.svg';
@@ -20,6 +21,7 @@ import { View } from './view';
 import { ColorPickerButton } from './buttons/color-picker-button';
 import { TicknessPickerButton } from './buttons/tickness-picker-button';
 import { TextAction } from '../actions/text-action';
+import { ArrowAction } from '../actions/arrow-action';
 
 export class MainMenu extends Component<'div'> {
   constructor(private paintlib: PaintLib) {
@@ -35,11 +37,12 @@ export class MainMenu extends Component<'div'> {
     const erase = new ActionButton(this.paintlib, () => new EraseAction(this.paintlib), EraserSVG);
     const rectangle = new ActionButton(this.paintlib, () => new RectAction(this.paintlib), RectangleSVG);
     const circle = new ActionButton(this.paintlib, () => new CircleAction(this.paintlib), ElipseSVG);
+    const arrow = new ActionButton(this.paintlib, () => new ArrowAction(this.paintlib), ArrowSVG);
     const text = new ActionButton(this.paintlib, () => new TextAction(this.paintlib), TextSVG);
     const draw = new ActionButton(this.paintlib, () => new DrawAction(this.paintlib), DrawSVG);
 
     actionsView.add(new ActionGroup([select, erase]));
-    actionsView.add(new ActionGroup([rectangle, circle]));
+    actionsView.add(new ActionGroup([rectangle, circle, arrow]));
     actionsView.add(new ActionGroup([text, draw]));
     this.add(actionsView);
 

@@ -4,6 +4,7 @@ import { PaintLib } from '../paintlib';
 import { SelectAction } from './select-action';
 import { BaseSelectableAction } from './base-selectable-action';
 import { setFabricField } from '../utils/fabric-utils';
+import { LayoutRect } from '../models/layout-rect';
 
 export abstract class BaseShapeAction<T extends Object> extends BaseSelectableAction {
   protected shape: T;
@@ -14,7 +15,7 @@ export abstract class BaseShapeAction<T extends Object> extends BaseSelectableAc
   }
 
   protected abstract createShape(): T;
-  protected abstract updateShapePosition(x: number, y: number, width: number, height: number): void;
+  protected abstract updateShapePosition(start: Point, end: Point, rect: LayoutRect): void;
   protected abstract finishShape(): void;
 
   onClick() {}
@@ -22,6 +23,9 @@ export abstract class BaseShapeAction<T extends Object> extends BaseSelectableAc
   onDeselected() {}
 
   onMouseDown(event: TPointerEventInfo<TPointerEvent>): void {
+    this.originalXY = event.scenePoint;
+    console.log('originql: ', this.originalXY);
+
     this.shape = this.createShape();
 
     const options = this.paintlib.uiStore.getState().options;
@@ -37,7 +41,6 @@ export abstract class BaseShapeAction<T extends Object> extends BaseSelectableAc
     this.shape.lockMovementY = true;
     this.shape.lockMovementX = true;
 
-    this.originalXY = event.scenePoint;
     this.paintlib.canvas.add(this.shape);
   }
 
@@ -57,7 +60,7 @@ export abstract class BaseShapeAction<T extends Object> extends BaseSelectableAc
       y = this.originalXY.y - height;
     }
 
-    this.updateShapePosition(x, y, width, height);
+    this.updateShapePosition(this.originalXY, event.scenePoint, { x, y, width, height });
     this.paintlib.canvas.renderAll();
   }
 
