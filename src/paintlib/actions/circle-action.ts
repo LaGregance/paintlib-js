@@ -10,7 +10,24 @@ export class CircleAction extends BaseShapeAction<Ellipse> {
   }
 
   protected createShape(): Ellipse {
-    return new Ellipse({ rx: 1, ry: 1 });
+    const obj = new Ellipse({ rx: 1, ry: 1, objectCaching: false });
+    obj.on('scaling', (event) => {
+      // Calculate new radius while preserving aspect ratio
+      const scaleX = obj.scaleX;
+      const scaleY = obj.scaleY;
+
+      obj.set({
+        // fill: 'red',
+        rx: obj.rx * scaleX,
+        ry: obj.ry * scaleY,
+        scaleX: 1, // Reset scaleX
+        scaleY: 1, // Reset scaleY
+      });
+      obj.setCoords();
+      this.paintlib.canvas.renderAll();
+      event.e.preventDefault();
+    });
+    return obj;
   }
 
   protected updateShapePosition(_start: Point, _end: Point, rect: LayoutRect) {

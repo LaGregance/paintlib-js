@@ -46,7 +46,7 @@ export const createUIStore = (paintlib: PaintLib) => {
       options: {
         fgColor: paintlib.getPalette()[0],
         bgColor: 'transparent',
-        tickness: paintlib.getAvailableTickness()[0],
+        tickness: paintlib.getAvailableTickness()[4],
       },
     };
   });
