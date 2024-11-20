@@ -5,7 +5,7 @@ import { SelectAction } from './select-action';
 import { BaseSelectableAction } from './base-selectable-action';
 import { PaintObject } from '../objects/paint-object';
 
-export class BaseObjectAction<T extends PaintObject<any>> extends BaseSelectableAction {
+export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectableAction {
   protected object: T;
   protected originalXY: Point;
 

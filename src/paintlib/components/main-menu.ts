@@ -19,7 +19,7 @@ import { DrawAction } from '../actions/draw-action';
 import { View } from './view';
 import { ColorPickerButton } from './buttons/color-picker-button';
 import { TicknessPickerButton } from './buttons/tickness-picker-button';
-import { BaseObjectAction } from '../actions/base-object-action';
+import { CreateObjectAction } from '../actions/create-object-action';
 import { UIActionType } from '../actions/base-action';
 import { PaintEllipse } from '../objects/paint-ellipse';
 import { PaintRect } from '../objects/paint-rect';
@@ -39,11 +39,11 @@ export class MainMenu extends Component<'div'> {
 
     const select = new ActionButton(this.paintlib, () => new SelectAction(this.paintlib), CursorSVG);
     const erase = new ActionButton(this.paintlib, () => new EraseAction(this.paintlib), EraserSVG);
-    const rectangle = new ActionButton(this.paintlib, () => new BaseObjectAction(this.paintlib, UIActionType.RECT, PaintRect), RectangleSVG);
-    const ellipse = new ActionButton(this.paintlib, () => new BaseObjectAction(this.paintlib, UIActionType.ELLIPSE, PaintEllipse), EllipseSVG);
-    const arrow = new ActionButton(this.paintlib, () => new BaseObjectAction(this.paintlib, UIActionType.ARROW, PaintArrow), ArrowSVG);
-    const line = new ActionButton(this.paintlib, () => new BaseObjectAction(this.paintlib, UIActionType.LINE, PaintLine), LineSVG);
-    const text = new ActionButton(this.paintlib, () => new BaseObjectAction(this.paintlib, UIActionType.TEXT, PaintText), TextSVG);
+    const rectangle = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.RECT, PaintRect), RectangleSVG);
+    const ellipse = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.ELLIPSE, PaintEllipse), EllipseSVG);
+    const arrow = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.ARROW, PaintArrow), ArrowSVG);
+    const line = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.LINE, PaintLine), LineSVG);
+    const text = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.TEXT, PaintText), TextSVG);
     const draw = new ActionButton(this.paintlib, () => new DrawAction(this.paintlib), DrawSVG);
 
     actionsView.add(new ActionGroup([select, erase]));
