@@ -62,7 +62,7 @@ export class ArrowAction extends BaseShapeAction<Group> {
     this.line = new Line(undefined);
     this.arrow = new Triangle();
     this.update(new Point(0, 0), new Point(100, 100), { x: 0, y: 0, width: 100, height: 100 });
-    return new Group([this.line, this.arrow]);
+    return new Group([this.line, this.arrow], { hasControls: false, hasBorders: false, perPixelTargetFind: true });
   }
 
   protected updateShapePosition(start: Point, end: Point, rect: LayoutRect): void {
