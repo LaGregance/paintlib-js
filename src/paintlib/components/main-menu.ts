@@ -1,5 +1,5 @@
 import RectangleSVG from '../svgs/rectangle.svg';
-import ElipseSVG from '../svgs/ellipse.svg';
+import EllipseSVG from '../svgs/ellipse.svg';
 import CursorSVG from '../svgs/cursor.svg';
 import EraserSVG from '../svgs/eraser.svg';
 import TextSVG from '../svgs/text.svg';
@@ -11,8 +11,6 @@ import BackgroundColorSVG from '../svgs/background-color.svg';
 import ThicknessSVG from '../svgs/thickness.svg';
 import { ActionButton } from './buttons/action-button';
 import { Component } from './component';
-import { RectAction } from '../actions/rect-action';
-import { CircleAction } from '../actions/circle-action';
 import { SelectAction } from '../actions/select-action';
 import { PaintLib } from '../paintlib';
 import { EraseAction } from '../actions/erase-action';
@@ -21,9 +19,13 @@ import { DrawAction } from '../actions/draw-action';
 import { View } from './view';
 import { ColorPickerButton } from './buttons/color-picker-button';
 import { TicknessPickerButton } from './buttons/tickness-picker-button';
-import { TextAction } from '../actions/text-action';
-import { ArrowAction } from '../actions/arrow-action';
-import { LineAction } from '../actions/line-action';
+import { BaseObjectAction } from '../actions/base-object-action';
+import { UIActionType } from '../actions/base-action';
+import { PaintEllipse } from '../objects/paint-ellipse';
+import { PaintRect } from '../objects/paint-rect';
+import { PaintText } from '../objects/paint-text';
+import { PaintLine } from '../objects/paint-line';
+import { PaintArrow } from '../objects/paint-arrow';
 
 export class MainMenu extends Component<'div'> {
   constructor(private paintlib: PaintLib) {
@@ -37,15 +39,15 @@ export class MainMenu extends Component<'div'> {
 
     const select = new ActionButton(this.paintlib, () => new SelectAction(this.paintlib), CursorSVG);
     const erase = new ActionButton(this.paintlib, () => new EraseAction(this.paintlib), EraserSVG);
-    const rectangle = new ActionButton(this.paintlib, () => new RectAction(this.paintlib), RectangleSVG);
-    const circle = new ActionButton(this.paintlib, () => new CircleAction(this.paintlib), ElipseSVG);
-    const arrow = new ActionButton(this.paintlib, () => new ArrowAction(this.paintlib), ArrowSVG);
-    const line = new ActionButton(this.paintlib, () => new LineAction(this.paintlib), LineSVG);
-    const text = new ActionButton(this.paintlib, () => new TextAction(this.paintlib), TextSVG);
+    const rectangle = new ActionButton(this.paintlib, () => new BaseObjectAction(this.paintlib, UIActionType.RECT, PaintRect), RectangleSVG);
+    const ellipse = new ActionButton(this.paintlib, () => new BaseObjectAction(this.paintlib, UIActionType.ELLIPSE, PaintEllipse), EllipseSVG);
+    const arrow = new ActionButton(this.paintlib, () => new BaseObjectAction(this.paintlib, UIActionType.ARROW, PaintArrow), ArrowSVG);
+    const line = new ActionButton(this.paintlib, () => new BaseObjectAction(this.paintlib, UIActionType.LINE, PaintLine), LineSVG);
+    const text = new ActionButton(this.paintlib, () => new BaseObjectAction(this.paintlib, UIActionType.TEXT, PaintText), TextSVG);
     const draw = new ActionButton(this.paintlib, () => new DrawAction(this.paintlib), DrawSVG);
 
     actionsView.add(new ActionGroup([select, erase]));
-    actionsView.add(new ActionGroup([rectangle, circle, line, arrow]));
+    actionsView.add(new ActionGroup([rectangle, ellipse, line, arrow]));
     actionsView.add(new ActionGroup([text, draw]));
     this.add(actionsView);
 

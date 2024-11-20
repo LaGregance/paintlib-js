@@ -3,26 +3,28 @@ import { calculateImageScaleToFitViewport } from './utils/size-utils';
 import { MainMenu } from './components/main-menu';
 import { createUIStore, UIStore } from './store/ui-store';
 import { StoreApi } from 'zustand/vanilla';
-import { Component } from './components/component';
 import { PaintLibOptions } from './paintlib-options';
 import { useState } from './utils/use-state';
 import { UIActionType } from './actions/base-action';
 import { DrawAction } from './actions/draw-action';
 import { setFabricField } from './utils/fabric-utils';
+import { PaintObject } from './objects/paint-object';
 
-export class PaintLib extends Component<'div'> {
+export class PaintLib {
+  public readonly element: HTMLDivElement;
+
   public canvas: Canvas;
   public readonly uiStore: StoreApi<UIStore>;
 
   private canvasEl: HTMLCanvasElement;
   private image?: FabricImage;
+  private objects: PaintObject<any>[] = [];
 
   constructor(
     public readonly container: HTMLElement,
     public readonly options?: PaintLibOptions,
   ) {
-    super('div');
-
+    this.element = document.createElement('div');
     this.uiStore = createUIStore(this);
 
     container.appendChild(this.element);
@@ -35,7 +37,8 @@ export class PaintLib extends Component<'div'> {
 
     // 2. Create menu
     const mainMenu = new MainMenu(this);
-    this.add(mainMenu);
+    mainMenu.init();
+    this.element.appendChild(mainMenu.element);
 
     // 3. Create & Populate canvas
     this.canvasEl = document.createElement('canvas');
@@ -104,6 +107,32 @@ export class PaintLib extends Component<'div'> {
     useState(this.uiStore, (store) => store.options.tickness, updateFactory('strokeWidth'));
 
     // this.canvas.selection = false;
+    /*this.canvas.on('object:scaling', (event) => {
+      const fabricObj = event.target;
+      const paintObj = this.objects.find((x) => x['fabricObject'] === fabricObj);
+
+      if (!paintObj) {
+        console.warn('Try to scale a non-paintlib object');
+        return;
+      }
+
+      // Calculate new radius while preserving aspect ratio
+      const scaleX = fabricObj.scaleX;
+      const scaleY = fabricObj.scaleY;
+
+      // TODO: Calc layout
+      const transform = event.transform;
+      console.log('signX = ', (transform as any).signX);
+      // paintObj.updateLayout({
+      //   x: })
+
+      fabricObj.set({
+        scaleX: 1, // Reset scaleX
+        scaleY: 1, // Reset scaleY
+      });
+      fabricObj.setCoords();
+      this.canvas.renderAll();
+    });*/
 
     /*new ResizeObserver(() => {
       console.log('Resize: ', container.clientWidth, container.clientHeight);
@@ -174,6 +203,16 @@ export class PaintLib extends Component<'div'> {
       return [1, 2, 3, 5, 10];
     }
     return this.options.tickness;
+  }
+
+  add(object: PaintObject<any>) {
+    this.objects.push(object);
+    this.canvas.add(object['fabricObject']);
+  }
+
+  remove(object: PaintObject<any>) {
+    this.objects = this.objects.filter((x) => x !== object);
+    this.canvas.remove(object['fabricObject']);
   }
 
   getDataURL() {

@@ -6,7 +6,7 @@ import { LayoutRect } from '../models/layout-rect';
 
 export class CircleAction extends BaseShapeAction<Ellipse> {
   constructor(paintlib: PaintLib) {
-    super(paintlib, UIActionType.CIRCLE);
+    super(paintlib, UIActionType.ELLIPSE);
   }
 
   protected createShape(): Ellipse {

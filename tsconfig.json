@@ -6,6 +6,7 @@
     "strict": true,  // Enable all strict type-checking options
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true, // Compatibility for common modules
+    "skipLibCheck": true,
     "strictNullChecks": false,
     "sourceMap": true,
     "downlevelIteration": true,

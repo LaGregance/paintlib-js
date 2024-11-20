@@ -1,15 +1,10 @@
-import { UIActionType } from './base-action';
-import { Control, Line, Point, Transform, TPointerEvent } from 'fabric';
-import { PaintLib } from '../paintlib';
-import { BaseShapeAction } from './base-shape-action';
+import { Control, Line, Point, TPointerEvent, Transform } from 'fabric';
+import { LayoutRect } from '../models/layout-rect';
+import { PaintObject } from './paint-object';
 
-export class LineAction extends BaseShapeAction<Line> {
-  constructor(paintlib: PaintLib) {
-    super(paintlib, UIActionType.LINE);
-  }
-
-  protected createShape() {
-    const obj = new Line(undefined, { hasBorders: false, perPixelTargetFind: true });
+export class PaintLine extends PaintObject<Line> {
+  instantiate(point: Point) {
+    this.fabricObject = new Line([point.x, point.y, point.x + 1, point.y + 1], { hasBorders: false, perPixelTargetFind: true });
 
     // Add the custom actionHandler function
     const changePoint = (eventData: TPointerEvent, transform: Transform, x: number, y: number) => {
@@ -25,14 +20,15 @@ export class LineAction extends BaseShapeAction<Line> {
           target.set({ x2: x, y2: y });
         }
         target.setCoords();
-        this.paintlib.canvas.requestRenderAll();
+        // TODO: access canvas
+        // this.paintlib.canvas.requestRenderAll();
         return true;
       }
 
       return false;
     };
 
-    obj.controls = {
+    this.fabricObject.controls = {
       p1: new Control({
         positionHandler: function (dim, finalMatrix, fabricObject) {
           const line = fabricObject as Line;
@@ -69,12 +65,10 @@ export class LineAction extends BaseShapeAction<Line> {
         offsetY: 0,
       }),
     };
-
-    return obj;
   }
 
-  protected updateShapePosition(start: Point, end: Point): void {
-    this.shape.set({
+  updateLayout(_layout: LayoutRect, start: Point, end: Point) {
+    this.fabricObject.set({
       x1: start.x,
       y1: start.y,
       x2: end.x,
@@ -82,5 +76,9 @@ export class LineAction extends BaseShapeAction<Line> {
     });
   }
 
-  protected finishShape(): void {}
+  restore(data: any) {}
+
+  toJSON(): any {
+    return {};
+  }
 }
