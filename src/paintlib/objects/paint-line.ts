@@ -20,8 +20,6 @@ export class PaintLine extends PaintObject<Line> {
           target.set({ x2: x, y2: y });
         }
         target.setCoords();
-        // TODO: access canvas
-        // this.paintlib.canvas.requestRenderAll();
         return true;
       }
 

@@ -1,3 +1,4 @@
+// TODO: Use TBBox instead
 export type LayoutRect = {
   x: number;
   y: number;
