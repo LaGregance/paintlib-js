@@ -1,5 +1,5 @@
 import { Point, TBBox, Textbox } from 'fabric';
-import { PaintObject } from './paint-object';
+import { PaintObject } from './abstract/paint-object';
 import { PaintObjectFields } from '../models/paint-object-fields';
 
 export class PaintText extends PaintObject<Textbox> {

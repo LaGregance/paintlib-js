@@ -1,4 +1,4 @@
-import { BaseAction, UIActionType } from '../actions/base-action';
+import { BaseAction, UIActionType } from '../actions/abstract/base-action';
 import { createStore } from 'zustand/vanilla';
 import { PaintLib } from '../paintlib';
 import { SelectAction } from '../actions/select-action';

@@ -1,5 +1,5 @@
 import { Object, Point, TBBox } from 'fabric';
-import { PaintObjectFields } from '../models/paint-object-fields';
+import { PaintObjectFields } from '../../models/paint-object-fields';
 
 export abstract class PaintObject<T extends Object> {
   protected fabricObject: T;

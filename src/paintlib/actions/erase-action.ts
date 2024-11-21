@@ -1,6 +1,6 @@
-import { UIActionType } from './base-action';
+import { UIActionType } from './abstract/base-action';
 import { PaintLib } from '../paintlib';
-import { BaseClickableAction } from './base-clickable-action';
+import { BaseClickableAction } from './abstract/base-clickable-action';
 
 export class EraseAction extends BaseClickableAction {
   constructor(paintlib: PaintLib) {

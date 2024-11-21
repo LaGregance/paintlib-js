@@ -1,6 +1,6 @@
 import { Ellipse, Point, TBBox } from 'fabric';
-import { PaintObject } from './paint-object';
-import { createResizeControls } from '../utils/object-resize-control';
+import { PaintObject } from './abstract/paint-object';
+import { createResizeControls2D } from '../utils/object-resize-control-2d';
 import { PaintObjectFields } from '../models/paint-object-fields';
 
 export class PaintEllipse extends PaintObject<Ellipse> {
@@ -11,7 +11,7 @@ export class PaintEllipse extends PaintObject<Ellipse> {
     this.fabricObject.controls = {
       // Keep only existing resize control
       mtr: this.fabricObject.controls.mtr,
-      ...createResizeControls(this),
+      ...createResizeControls2D(this),
     };
   }
 

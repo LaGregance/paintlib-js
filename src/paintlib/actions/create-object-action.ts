@@ -1,9 +1,9 @@
-import { UIActionType } from './base-action';
+import { UIActionType } from './abstract/base-action';
 import { Point, TPointerEvent, TPointerEventInfo } from 'fabric';
 import { PaintLib } from '../paintlib';
 import { SelectAction } from './select-action';
-import { BaseSelectableAction } from './base-selectable-action';
-import { PaintObject } from '../objects/paint-object';
+import { BaseSelectableAction } from './abstract/base-selectable-action';
+import { PaintObject } from '../objects/abstract/paint-object';
 
 export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectableAction {
   protected object: T;

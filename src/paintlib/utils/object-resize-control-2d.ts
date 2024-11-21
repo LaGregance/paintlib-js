@@ -1,8 +1,8 @@
 import { Control, Point, TBBox, TMat2D, TPointerEvent, Transform, util } from 'fabric';
 import { TransformCorner } from './transform-corner';
-import { PaintObject } from '../objects/paint-object';
+import { PaintObject } from '../objects/abstract/paint-object';
 
-export const createResizeControls = (obj: PaintObject<any>) => {
+export const createResizeControls2D = (obj: PaintObject<any>) => {
   const controls: Record<string, Control> = {};
 
   let originalEventInfo: { point: Point; invertMatrix: TMat2D; layout: TBBox } = undefined;

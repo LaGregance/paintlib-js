@@ -20,7 +20,7 @@ import { View } from './view';
 import { ColorPickerButton } from './buttons/color-picker-button';
 import { TicknessPickerButton } from './buttons/tickness-picker-button';
 import { CreateObjectAction } from '../actions/create-object-action';
-import { UIActionType } from '../actions/base-action';
+import { UIActionType } from '../actions/abstract/base-action';
 import { PaintEllipse } from '../objects/paint-ellipse';
 import { PaintRect } from '../objects/paint-rect';
 import { PaintText } from '../objects/paint-text';

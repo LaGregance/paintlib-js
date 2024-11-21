@@ -1,5 +1,5 @@
 import { TPointerEvent, TPointerEventInfo } from 'fabric';
-import { PaintLib } from '../paintlib';
+import { PaintLib } from '../../paintlib';
 
 export enum UIActionType {
   SELECT = 'select',

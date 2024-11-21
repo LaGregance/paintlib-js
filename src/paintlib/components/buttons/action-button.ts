@@ -1,4 +1,4 @@
-import { BaseAction, UIActionType } from '../../actions/base-action';
+import { BaseAction, UIActionType } from '../../actions/abstract/base-action';
 import { Component } from '../component';
 import { useState } from '../../utils/use-state';
 import { PaintLib } from '../../paintlib';

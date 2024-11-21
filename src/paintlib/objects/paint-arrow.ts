@@ -1,7 +1,7 @@
 import { Group, Line, Point, TBBox, Triangle } from 'fabric';
-import { PaintObject } from './paint-object';
+import { PaintVectorObject } from './abstract/paint-vector-object';
 
-export class PaintArrow extends PaintObject<Group> {
+export class PaintArrow extends PaintVectorObject<Group> {
   private line: Line;
   private arrow: Triangle;
 
@@ -10,9 +10,12 @@ export class PaintArrow extends PaintObject<Group> {
     this.arrow = new Triangle();
     this.fabricObject = new Group([this.line, this.arrow], { hasControls: false, hasBorders: false, perPixelTargetFind: true });
     this.updateLayout({ left: point.x, top: point.y, width: 1, height: 1 }, point, new Point(point.x + 1, point.y + 1));
+    super.instantiate(point);
   }
 
   updateLayout(layout: TBBox, start: Point, end: Point) {
+    super.updateLayout(layout, start, end);
+
     // Arrowhead size
     const arrowWidth = 15;
     const arrowHeight = 15;
