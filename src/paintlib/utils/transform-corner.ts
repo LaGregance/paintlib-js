@@ -38,8 +38,8 @@ export class TransformCorner {
       // We move the top point: adjust x,y & height
       transform.height -= deltaY;
 
-      transform.left -= Math.cos(angle) * deltaY;
-      transform.top += Math.sin(angle) * deltaY;
+      transform.left += Math.cos(angle + Math.PI / 2) * deltaY;
+      transform.top += Math.sin(angle + Math.PI / 2) * deltaY;
     } else if (this.vertical === 'b') {
       // We move the bottom point: adjust height
       transform.height += deltaY;

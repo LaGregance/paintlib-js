@@ -6,10 +6,15 @@ export class PaintText extends PaintObject<Textbox> {
   instantiate(point: Point) {
     this.fabricObject = new Textbox('Text', { top: point.y, left: point.x });
     this.fabricObject.editable = true;
+    /*this.fabricObject.controls = {
+      // Keep only existing resize control
+      mtr: this.fabricObject.controls.mtr,
+      ...createResizeControls(this),
+    };*/
   }
 
   updateLayout(layout: TBBox) {
-    this.fabricObject.set({ top: layout.top, left: layout.left, fontSize: layout.height });
+    this.fabricObject.set({ top: layout.top, left: layout.left, fontSize: layout.height, height: layout.height, width: layout.width });
   }
 
   set(fields: PaintObjectFields) {
