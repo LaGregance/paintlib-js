@@ -20,34 +20,6 @@ export class TransformCorner {
     public readonly horizontal: HorizontalPlace,
   ) {}
 
-  private static oppositeHz(hz: HorizontalPlace): HorizontalPlace {
-    if (hz === 'l') return 'r';
-    else if (hz === 'r') return 'l';
-    else return hz;
-  }
-
-  private static oppositeVert(vert: VerticalPlace): VerticalPlace {
-    if (vert === 't') return 'b';
-    else if (vert === 'b') return 't';
-    else return vert;
-  }
-
-  getOpposite(mode: 'horizontal' | 'vertical' | 'diagonal' = 'diagonal'): TransformCorner {
-    let oppositeVertical = this.vertical;
-    let oppositeHorizontal = this.horizontal;
-
-    if (mode === 'horizontal') {
-      oppositeHorizontal = TransformCorner.oppositeHz(oppositeHorizontal);
-    } else if (mode === 'vertical') {
-      oppositeVertical = TransformCorner.oppositeVert(oppositeVertical);
-    } else {
-      oppositeHorizontal = TransformCorner.oppositeHz(oppositeHorizontal);
-      oppositeVertical = TransformCorner.oppositeVert(oppositeVertical);
-    }
-
-    return new TransformCorner(oppositeVertical, oppositeHorizontal);
-  }
-
   getTransformOffset(angle: number, deltaX: number, deltaY: number): TBBox {
     const transform: TBBox = { left: 0, top: 0, width: 0, height: 0 };
 

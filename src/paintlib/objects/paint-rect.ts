@@ -5,6 +5,8 @@ import { createResizeControls } from '../utils/object-resize-control';
 import { PaintObjectFields } from '../models/paint-object-fields';
 
 export class PaintRect extends PaintObject<Rect> {
+  private targetStrokeWidth: number;
+
   instantiate(point: Point) {
     this.fabricObject = new Rect({ left: point.x, top: point.y, width: 1, height: 1 });
     this.fabricObject.controls = {
@@ -15,7 +17,7 @@ export class PaintRect extends PaintObject<Rect> {
   }
 
   updateLayout(layout: LayoutRect) {
-    const strokeWidth = this.fabricObject.strokeWidth;
+    const strokeWidth = Math.min(layout.width - 1, layout.height - 1, this.targetStrokeWidth);
     this.fabricObject.set({
       left: layout.x,
       top: layout.y,
@@ -26,10 +28,14 @@ export class PaintRect extends PaintObject<Rect> {
 
   set(fields: Partial<PaintObjectFields>) {
     if (fields.strokeWidth) {
-      const deltaStroke = fields.strokeWidth - this.fabricObject.strokeWidth;
-      this.fabricObject.set({
-        width: this.fabricObject.width - deltaStroke,
-        height: this.fabricObject.height - deltaStroke,
+      this.targetStrokeWidth = fields.strokeWidth;
+
+      const layout = this.getLayout();
+      this.updateLayout({
+        x: layout.left,
+        y: layout.top,
+        width: layout.width,
+        height: layout.height,
       });
     }
     super.set(fields);

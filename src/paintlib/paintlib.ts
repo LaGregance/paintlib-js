@@ -7,7 +7,6 @@ import { PaintLibOptions } from './paintlib-options';
 import { useState } from './utils/use-state';
 import { UIActionType } from './actions/base-action';
 import { DrawAction } from './actions/draw-action';
-import { setFabricField } from './utils/fabric-utils';
 import { PaintObject } from './objects/paint-object';
 
 export class PaintLib {
@@ -94,9 +93,10 @@ export class PaintLib {
         if (this.uiStore.getState().activeAction === UIActionType.DRAW) {
           (this.uiStore.getState().allActions[UIActionType.DRAW] as DrawAction).update();
         }
-        const activeObj = this.canvas.getActiveObject();
-        if (activeObj) {
-          setFabricField(activeObj, field, newValue);
+        const activeFabricObj = this.canvas.getActiveObject();
+        const activePaintObj = this.objects.find((x) => x['fabricObject'] === activeFabricObj);
+        if (activePaintObj) {
+          activePaintObj.set({ [field]: newValue });
           this.canvas.renderAll();
         }
       };
