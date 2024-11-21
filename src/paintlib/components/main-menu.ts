@@ -37,6 +37,7 @@ import { SaveAction } from '../actions/save-action';
 import { UndoRedoAction } from '../actions/undo-redo-action';
 import { MenuButton } from './buttons/menu-button';
 import { useState } from '../utils/use-state';
+import { DynamicActionGroup } from './dynamic-action-group';
 
 export class MainMenu extends Component<'div'> {
   private trash: ActionButton;
@@ -61,18 +62,22 @@ export class MainMenu extends Component<'div'> {
     const undo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'undo'), UndoSVG);
     const redo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'redo'), RedoSVG);
 
-    const rectangle = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.RECT, PaintRect), RectangleSVG);
-    const ellipse = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.ELLIPSE, PaintEllipse), EllipseSVG);
-    const arrow = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.ARROW, PaintArrow), ArrowSVG);
-    const line = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.LINE, PaintLine), LineSVG);
-    const text = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.TEXT, PaintText), TextSVG);
-    const draw = new ActionButton(this.paintlib, () => new DrawAction(this.paintlib), DrawSVG);
-
     const cancel = new ActionButton(this.paintlib, () => new CancelAction(this.paintlib), CancelSVG);
     const save = new ActionButton(this.paintlib, () => new SaveAction(this.paintlib), SaveSVG);
 
     actionsView.add(new ActionGroup([select, this.trash, undo, redo]));
-    actionsView.add(new ActionGroup([rectangle, ellipse, line, arrow, text, draw]));
+    actionsView.add(
+      new DynamicActionGroup(() => {
+        const rectangle = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.RECT, PaintRect), RectangleSVG);
+        const ellipse = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.ELLIPSE, PaintEllipse), EllipseSVG);
+        const arrow = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.ARROW, PaintArrow), ArrowSVG);
+        const line = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.LINE, PaintLine), LineSVG);
+        const text = new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.TEXT, PaintText), TextSVG);
+        const draw = new ActionButton(this.paintlib, () => new DrawAction(this.paintlib), DrawSVG);
+
+        return [rectangle, ellipse, line, arrow, text, draw];
+      }),
+    );
     actionsView.add(new ActionGroup([cancel, save]));
     this.add(actionsView);
 

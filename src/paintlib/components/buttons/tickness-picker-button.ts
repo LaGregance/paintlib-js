@@ -8,7 +8,7 @@ export class TicknessPickerButton extends MenuButton {
     private paintlib: PaintLib,
     image: string,
   ) {
-    super(image);
+    super(image, '5px');
   }
 
   protected buildMenu(menu: View) {

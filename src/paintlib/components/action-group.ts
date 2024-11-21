@@ -1,7 +1,7 @@
 import { Component } from './component';
 
 export class ActionGroup extends Component<'div'> {
-  constructor(private buttons: Component<any>[]) {
+  constructor(protected buttons: Component<any>[]) {
     super('div');
   }
 

@@ -3,8 +3,13 @@ import { View } from '../view';
 
 export abstract class MenuButton extends Component<'div'> {
   protected button: HTMLButtonElement;
+  protected menu: View;
 
-  constructor(private image: string) {
+  constructor(
+    private image: string,
+    private padding: string,
+    private bgColor: string = '#ffffffB4',
+  ) {
     super('div');
   }
 
@@ -15,40 +20,43 @@ export abstract class MenuButton extends Component<'div'> {
     this.button.className = 'paintlib-menu-button';
     this.button.innerHTML = this.image;
 
-    const menu = new View('option-floating-menu display-none');
-    this.buildMenu(menu);
+    this.menu = new View('option-floating-menu display-none');
+    this.menu.element.style.padding = this.padding;
+    this.menu.element.style.backgroundColor = this.bgColor;
+    this.buildMenu(this.menu);
 
-    const cancelEvent = (event: MouseEvent) => {
-      menu.element.classList.add('display-none');
-      document.removeEventListener('click', cancelEvent);
-      event.stopPropagation();
-      this.button.classList.remove('selected');
-    };
-
-    menu.element.onclick = (event) => {
+    this.menu.element.onclick = (event) => {
       // Avoid trigger cancelEvent when clicking on the menu itself
       event.stopPropagation();
     };
 
     this.button.onclick = (event) => {
-      if (menu.element.classList.contains('display-none')) {
+      if (this.menu.element.classList.contains('display-none')) {
         const anchor = this.button.getBoundingClientRect();
-        menu.element.style.top = anchor.bottom + 'px';
-        menu.element.classList.remove('display-none');
+        this.menu.element.style.top = anchor.bottom + 'px';
+        this.menu.element.classList.remove('display-none');
 
         requestAnimationFrame(() => {
           // If we don't requestAnimationFrame, the cancelEvent is triggered directly
-          document.addEventListener('click', cancelEvent);
+          document.addEventListener('click', this.hideMenu);
           this.button.classList.add('selected');
         });
       } else {
-        cancelEvent(event);
+        this.hideMenu(event);
       }
     };
 
     this.element.appendChild(this.button);
-    this.add(menu);
+    this.add(this.menu);
   }
+
+  hideMenu = (event?: MouseEvent) => {
+    // Arrow function to bind this
+    this.menu.element.classList.add('display-none');
+    document.removeEventListener('click', this.hideMenu);
+    event?.stopPropagation();
+    this.button.classList.remove('selected');
+  };
 
   setImage(image: string) {
     this.image = image;

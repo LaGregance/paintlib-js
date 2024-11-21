@@ -13,7 +13,7 @@ export class ColorPickerButton extends MenuButton {
     private allowTransparent: boolean,
     image: string,
   ) {
-    super(image);
+    super(image, '5px');
   }
 
   protected buildMenu(menu: View) {
