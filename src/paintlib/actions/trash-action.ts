@@ -2,9 +2,9 @@ import { UIActionType } from './abstract/base-action';
 import { PaintLib } from '../paintlib';
 import { BaseClickableAction } from './abstract/base-clickable-action';
 
-export class EraseAction extends BaseClickableAction {
+export class TrashAction extends BaseClickableAction {
   constructor(paintlib: PaintLib) {
-    super(paintlib, UIActionType.ERASE);
+    super(paintlib, UIActionType.TRASH);
   }
 
   onClick() {

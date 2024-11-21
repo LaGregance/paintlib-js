@@ -35,4 +35,12 @@ export class ActionButton extends Component<'button'> {
 
     this.element.innerHTML = this.image;
   }
+
+  setDisable(disable: boolean) {
+    if (disable) {
+      this.element.classList.add('disable');
+    } else {
+      this.element.classList.remove('disable');
+    }
+  }
 }

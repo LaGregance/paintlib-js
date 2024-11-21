@@ -64,6 +64,16 @@ body {
     background-image: linear-gradient(to top, #c0c0c0 0%, transparent 30%);
 }
 
+.paintlib-menu-button.disable {
+    color: #5f6368 !important;
+    cursor: not-allowed !important;
+}
+
+.paintlib-menu-button.disable:hover {
+    background-image: none !important;
+    opacity: 100% !important;
+}
+
 .paintlib-menu-button:hover {
     /*background-color: silver;*/
     background-image: linear-gradient(to top, #c0c0c0 0%, transparent 30%);

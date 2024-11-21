@@ -86,8 +86,9 @@ export class PaintLib {
         }
       }
     });
+    mainMenu.setupEvent();
 
-    // Update selected object with option on change
+    // 5. Update selected object with option on change
     const updateFactory = (field: string) => {
       return (newValue: any) => {
         if (this.uiStore.getState().activeAction === UIActionType.DRAW) {
