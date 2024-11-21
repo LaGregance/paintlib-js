@@ -4,7 +4,6 @@ import { PaintLib } from '../../paintlib';
 export enum UIActionType {
   SELECT = 'select',
   TRASH = 'trash',
-  CLEAR = 'clear',
   SAVE = 'save',
   CANCEL = 'cancel',
 
