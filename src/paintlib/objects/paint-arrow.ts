@@ -1,5 +1,11 @@
 import { Group, Line, Point, TBBox, Triangle } from 'fabric';
 import { PaintVectorObject } from './abstract/paint-vector-object';
+import { PaintObjectFields } from '../models/paint-object-fields';
+
+const ARROW_WIDTH_BASE = 10;
+const ARROW_HEIGHT_BASE = 10;
+const ARROW_WIDTH_FACTOR = 2;
+const ARROW_HEIGHT_FACTOR = 2;
 
 export class PaintArrow extends PaintVectorObject<Group> {
   private line: Line;
@@ -17,8 +23,8 @@ export class PaintArrow extends PaintVectorObject<Group> {
     super.updateLayout(layout, start, end);
 
     // Arrowhead size
-    const arrowWidth = 15;
-    const arrowHeight = 15;
+    const arrowWidth = ARROW_WIDTH_BASE + ARROW_WIDTH_FACTOR * this.line.strokeWidth;
+    const arrowHeight = ARROW_HEIGHT_BASE + ARROW_HEIGHT_FACTOR * this.line.strokeWidth;
 
     // In group object are positioned relative to center, that's why we use width/2 & height/2
     start = new Point(start.x - layout.left - layout.width / 2, start.y - layout.top - layout.height / 2);
@@ -35,8 +41,6 @@ export class PaintArrow extends PaintVectorObject<Group> {
       y1: start.y,
       x2: end.x - deltaX,
       y2: end.y - deltaY,
-      stroke: 'red',
-      strokeWidth: 3,
       selectable: true,
     });
 
@@ -45,7 +49,6 @@ export class PaintArrow extends PaintVectorObject<Group> {
       top: end.y - deltaY,
       width: arrowWidth,
       height: arrowHeight,
-      fill: 'red',
       angle: (angle * 180) / Math.PI + 90,
       originX: 'center',
       originY: 'center',
@@ -57,6 +60,17 @@ export class PaintArrow extends PaintVectorObject<Group> {
       width: layout.width,
       height: layout.height,
     });
+  }
+
+  set(fields: PaintObjectFields) {
+    if (fields.strokeWidth) {
+      this.line.set({ strokeWidth: fields.strokeWidth });
+      this.updateLayout(this.getLayout(), this.start, this.end);
+    }
+    if (fields.stroke) {
+      this.line.set({ stroke: fields.stroke });
+      this.arrow.set({ fill: fields.stroke });
+    }
   }
 
   restore(data: any) {}
