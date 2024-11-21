@@ -10,6 +10,7 @@ export class ActionButton extends Component<'button'> {
     private paintlib: PaintLib,
     private actionCreator: () => BaseAction,
     private image: string,
+    private onClickFinish?: () => void,
   ) {
     super('button');
     this.type = actionCreator().type;
@@ -19,6 +20,7 @@ export class ActionButton extends Component<'button'> {
     this.element.className = 'paintlib-menu-button';
     this.element.onclick = () => {
       this.paintlib.uiStore.getState().setAction(this.actionCreator());
+      this.onClickFinish?.();
     };
 
     useState(
