@@ -57,8 +57,8 @@ export abstract class PaintObject<T extends Object> {
     return {
       top: this.fabricObject.top,
       left: this.fabricObject.left,
-      width: this.fabricObject.width + this.fabricObject.strokeWidth,
-      height: this.fabricObject.height + this.fabricObject.strokeWidth,
+      width: this.fabricObject.width,
+      height: this.fabricObject.height,
     };
   }
 

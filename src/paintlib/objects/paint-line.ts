@@ -17,6 +17,15 @@ export class PaintLine extends PaintVectorObject<Line> {
     });
   }
 
+  getLayout(): TBBox {
+    return {
+      top: Math.min(this.fabricObject.y1, this.fabricObject.y2),
+      left: Math.min(this.fabricObject.x1, this.fabricObject.x2),
+      width: Math.abs(this.fabricObject.x1 - this.fabricObject.x2),
+      height: Math.abs(this.fabricObject.y1 - this.fabricObject.y2),
+    };
+  }
+
   restore(data: any) {}
 
   toJSON(): any {

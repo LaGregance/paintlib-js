@@ -29,6 +29,15 @@ export class PaintEllipse extends PaintObject<Ellipse> {
     });
   }
 
+  getLayout(): TBBox {
+    return {
+      top: this.fabricObject.top,
+      left: this.fabricObject.left,
+      width: this.fabricObject.width + this.fabricObject.strokeWidth,
+      height: this.fabricObject.height + this.fabricObject.strokeWidth,
+    };
+  }
+
   set(fields: Partial<PaintObjectFields>) {
     if (fields.strokeWidth) {
       this.targetStrokeWidth = fields.strokeWidth;

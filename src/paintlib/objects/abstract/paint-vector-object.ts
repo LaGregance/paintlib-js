@@ -2,8 +2,7 @@ import { Control, Object, Point, TBBox, TPointerEvent, Transform } from 'fabric'
 import { PaintObject } from './paint-object';
 
 export abstract class PaintVectorObject<T extends Object> extends PaintObject<T> {
-  protected start: Point;
-  protected end: Point;
+  protected vector: Point;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   instantiate(_point: Point) {
@@ -12,21 +11,30 @@ export abstract class PaintVectorObject<T extends Object> extends PaintObject<T>
 
       // Calculate new coordinates based on control movement
       if (transform.action === 'movePoint') {
+        let start: Point;
+        let end: Point;
+
         if (transform.corner === 'p1') {
-          this.start = new Point(x, y);
+          start = new Point(x, y);
+          end = this.getEnd();
         } else if (transform.corner === 'p2') {
-          this.end = new Point(x, y);
+          start = this.getStart();
+          end = new Point(x, y);
         }
+
+        console.log('start = ', start);
+        console.log('end = ', end);
+        console.log('=====');
 
         this.updateLayout(
           {
-            left: Math.min(this.start.x, this.end.x),
-            top: Math.min(this.start.y, this.end.y),
-            width: Math.abs(this.start.x - this.end.x),
-            height: Math.abs(this.start.y - this.end.y),
+            left: Math.min(start.x, end.x),
+            top: Math.min(start.y, end.y),
+            width: Math.abs(start.x - end.x),
+            height: Math.abs(start.y - end.y),
           },
-          this.start,
-          this.end,
+          start,
+          end,
         );
 
         target.setCoords();
@@ -39,8 +47,8 @@ export abstract class PaintVectorObject<T extends Object> extends PaintObject<T>
     this.fabricObject.controls = {
       p1: new Control({
         positionHandler: (dim, finalMatrix) => {
-          const controlPoint = this.start;
-          const centerPoint = this.end.subtract(this.start).scalarDivide(2).add(this.start);
+          const controlPoint = this.getStart();
+          const centerPoint = this.getEnd().subtract(controlPoint).scalarDivide(2).add(controlPoint);
           const relativePoint = controlPoint.subtract(centerPoint);
           return relativePoint.transform(finalMatrix);
         },
@@ -52,8 +60,9 @@ export abstract class PaintVectorObject<T extends Object> extends PaintObject<T>
       }),
       p2: new Control({
         positionHandler: (dim, finalMatrix) => {
-          const controlPoint = this.end;
-          const centerPoint = this.end.subtract(this.start).scalarDivide(2).add(this.start);
+          const start = this.getStart();
+          const controlPoint = this.getEnd();
+          const centerPoint = controlPoint.subtract(start).scalarDivide(2).add(start);
           const relativePoint = controlPoint.subtract(centerPoint);
           return relativePoint.transform(finalMatrix);
         },
@@ -73,8 +82,37 @@ export abstract class PaintVectorObject<T extends Object> extends PaintObject<T>
     };
   }
 
+  getStart() {
+    const layout = this.getLayout();
+
+    if (this.vector.x >= 0 && this.vector.y >= 0) {
+      return new Point(layout.left, layout.top);
+    } else if (this.vector.x >= 0 && this.vector.y < 0) {
+      return new Point(layout.left, layout.top + layout.height);
+    } else if (this.vector.x < 0 && this.vector.y >= 0) {
+      return new Point(layout.left + layout.width, layout.top);
+    } else {
+      // x < 0 && y < 0
+      return new Point(layout.left + layout.width, layout.top + layout.height);
+    }
+  }
+
+  getEnd() {
+    const layout = this.getLayout();
+
+    if (this.vector.x >= 0 && this.vector.y >= 0) {
+      return new Point(layout.left + layout.width, layout.top + layout.height);
+    } else if (this.vector.x >= 0 && this.vector.y < 0) {
+      return new Point(layout.left + layout.width, layout.top);
+    } else if (this.vector.x < 0 && this.vector.y >= 0) {
+      return new Point(layout.left, layout.top + layout.height);
+    } else {
+      // x < 0 && y < 0
+      return new Point(layout.left, layout.top);
+    }
+  }
+
   updateLayout(_layout: TBBox, start: Point, end: Point) {
-    this.start = start;
-    this.end = end;
+    this.vector = end.subtract(start);
   }
 }

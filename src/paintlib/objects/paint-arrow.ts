@@ -65,7 +65,7 @@ export class PaintArrow extends PaintVectorObject<Group> {
   set(fields: PaintObjectFields) {
     if (fields.strokeWidth) {
       this.line.set({ strokeWidth: fields.strokeWidth });
-      this.updateLayout(this.getLayout(), this.start, this.end);
+      this.updateLayout(this.getLayout(), this.getStart(), this.getEnd());
     }
     if (fields.stroke) {
       this.line.set({ stroke: fields.stroke });
