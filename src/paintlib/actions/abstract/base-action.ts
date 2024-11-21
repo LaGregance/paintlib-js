@@ -12,7 +12,7 @@ export enum UIActionType {
 
   RECT = 'rect',
   ELLIPSE = 'ellipse',
-  LINE = 'LINE',
+  LINE = 'line',
   ARROW = 'arrow',
   DRAW = 'draw',
   TEXT = 'text',

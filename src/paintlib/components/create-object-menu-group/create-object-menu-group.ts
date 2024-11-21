@@ -17,17 +17,70 @@ import { DrawAction } from '../../actions/draw-action';
 import DrawSVG from '../../svgs/draw.svg';
 import { ShowMoreActionButton } from './show-more-action-button';
 import { ActionGroup } from '../action-group';
+import { useState } from '../../utils/use-state';
 
 /**
  * This component is responsible to manage the middle part of the menu (object part).
  * His role is to adapt the menu regarding of the width of the container and add "..." extension if relevant.
  */
 export class CreateObjectMenuGroup extends Component<'div'> {
-  private availableAction = [UIActionType.RECT, UIActionType.ELLIPSE, UIActionType.ARROW, UIActionType.LINE, UIActionType.TEXT, UIActionType.DRAW];
+  private readonly ITEM_WIDTH = 40;
+  private readonly ITEM_GAP = 6;
+  private readonly MIN_WIDTH = 580;
+
+  private availableActions = [UIActionType.RECT, UIActionType.ELLIPSE, UIActionType.ARROW, UIActionType.LINE, UIActionType.TEXT, UIActionType.DRAW];
+  private userActionSlots: { action: UIActionType; addedAt: number }[];
   private moreBtn: ShowMoreActionButton;
+
+  private mainButtonsMap = new Map<UIActionType, ActionButton>();
+  private menuButtonsMap = new Map<UIActionType, ActionButton>();
+
+  private availableBtnCount: number;
+  private container: HTMLDivElement;
 
   constructor(private paintlib: PaintLib) {
     super('div');
+    this.calcAvailableBtnCount();
+    this.userActionSlots = [];
+  }
+
+  private calcAvailableBtnCount() {
+    if (!this.container || this.container.clientWidth > this.MIN_WIDTH) {
+      this.availableBtnCount = this.availableActions.length;
+    } else {
+      const availableWidth = this.container.clientWidth - (this.MIN_WIDTH - this.availableActions.length * (this.ITEM_WIDTH + this.ITEM_GAP));
+      this.availableBtnCount = Math.max(Math.trunc(availableWidth / (this.ITEM_WIDTH + this.ITEM_GAP)), 2) - 1;
+    }
+  }
+
+  private updateUserActionSlot(action: UIActionType) {
+    let updated = false;
+
+    // 1. Trunc the slots to fit availableBtnCount
+    if (this.userActionSlots.length > this.availableBtnCount) {
+      this.userActionSlots = this.userActionSlots.slice(0, this.availableBtnCount);
+      updated = true;
+    }
+
+    // 2. If the action is not present, add it or replace the first action
+    if (action && !this.userActionSlots.find((x) => x.action === action)) {
+      if (this.userActionSlots.length < this.availableBtnCount) {
+        // Remaining slot: add it
+        this.userActionSlots.push({ action, addedAt: Date.now() });
+      } else {
+        // Else: replace le oldest slot
+        let oldestIndex = 0;
+        for (let i = 1; i < this.userActionSlots.length; i++) {
+          if (this.userActionSlots[i].addedAt < this.userActionSlots[oldestIndex].addedAt) {
+            oldestIndex = i;
+          }
+        }
+
+        this.userActionSlots[oldestIndex] = { action, addedAt: Date.now() };
+      }
+      return true;
+    }
+    return updated;
   }
 
   private createObjectBtn(type: UIActionType, targetMore = false) {
@@ -57,45 +110,96 @@ export class CreateObjectMenuGroup extends Component<'div'> {
   init() {
     this.element.className = 'paintlib-menu-group';
 
-    for (const action of this.availableAction) {
-      this.add(this.createObjectBtn(action));
+    for (const action of this.availableActions) {
+      const mainBtn = this.createObjectBtn(action);
+      const menuBtn = this.createObjectBtn(action, true);
+      this.add(mainBtn);
+
+      this.mainButtonsMap.set(action, mainBtn);
+      this.menuButtonsMap.set(action, menuBtn);
     }
 
     this.moreBtn = new ShowMoreActionButton((menu) => {
-      menu.add(new ActionGroup(this.availableAction.map((action) => this.createObjectBtn(action, true))));
+      menu.add(new ActionGroup(this.availableActions.map((action) => this.menuButtonsMap.get(action))));
     });
+    this.moreBtn.element.style.order = (this.availableActions.length + 2).toString();
     this.add(this.moreBtn);
 
-    /*const container = document.querySelector('.paintlib-root');
-
-    const ITEM_WIDTH = 40;
-    const ITEM_GAP = 6;
-    const MIN_WIDTH = 580; // TODO: SHOULD BE DYNAMIC (related to item width in css)
+    this.container = document.querySelector('.paintlib-root');
+    this.update();
 
     new ResizeObserver(() => {
-      if (container.clientWidth < MIN_WIDTH) {
-        // Reduced mode
-        const countBtn = this.buttons.length - 1; // Exclude more btn
-        const availableWidth = container.clientWidth - (MIN_WIDTH - countBtn * (ITEM_WIDTH + ITEM_GAP));
-        const availableBtnCount = Math.max(Math.trunc(availableWidth / (ITEM_WIDTH + ITEM_GAP)), 2) - 1; // Reserve place for more btn
-        let countShownBtn = 0;
+      const previousCount = this.availableBtnCount;
+      this.calcAvailableBtnCount();
 
-        for (const btn of this.buttons) {
-          if (btn instanceof ShowMoreActionButton) {
-            btn.setVisible(true);
-          } else if (countShownBtn < availableBtnCount) {
-            countShownBtn++;
-            btn.setVisible(true);
-          } else {
-            btn.setVisible(false);
-          }
+      if (previousCount !== this.availableBtnCount) {
+        this.updateUserActionSlot(null);
+        this.update();
+      }
+    }).observe(this.container);
+
+    useState(
+      this.paintlib.uiStore,
+      (store) => store.activeAction,
+      (action) => {
+        if (this.availableActions.includes(action) && this.updateUserActionSlot(action)) {
+          this.update();
         }
-      } else {
-        // Regular mode
-        for (const btn of this.buttons) {
-          btn.setVisible(!(btn instanceof ShowMoreActionButton));
+      },
+    );
+  }
+
+  private update() {
+    if (this.availableBtnCount >= this.availableActions.length) {
+      // Full mode
+      for (const action of this.availableActions) {
+        const btn = this.mainButtonsMap.get(action);
+        btn.setVisible(true);
+        btn.element.style.removeProperty('order');
+      }
+      this.moreBtn.setVisible(false);
+    } else {
+      // Reduced mode
+      let remainingSlot = this.availableBtnCount;
+      for (const action of this.availableActions) {
+        const mainBtn = this.mainButtonsMap.get(action);
+        const menuBtn = this.menuButtonsMap.get(action);
+
+        const slotIndex = this.userActionSlots.findIndex((x) => x.action === action);
+
+        if (slotIndex < 0) {
+          mainBtn.setVisible(false);
+          menuBtn.setVisible(true);
+          mainBtn.element.style.order = (this.availableActions.length + 1).toString();
+        } else {
+          mainBtn.setVisible(true);
+          menuBtn.setVisible(false);
+          mainBtn.element.style.order = slotIndex.toString();
+          remainingSlot--;
         }
       }
-    }).observe(container);*/
+
+      if (remainingSlot > 0) {
+        for (const action of this.availableActions) {
+          const mainBtn = this.mainButtonsMap.get(action);
+          const menuBtn = this.menuButtonsMap.get(action);
+
+          const slotIndex = this.userActionSlots.findIndex((x) => x.action === action);
+
+          if (slotIndex < 0) {
+            mainBtn.setVisible(true);
+            menuBtn.setVisible(false);
+            mainBtn.element.style.order = (this.availableActions.length + 1).toString();
+            remainingSlot--;
+
+            if (remainingSlot <= 0) {
+              break;
+            }
+          }
+        }
+      }
+
+      this.moreBtn.setVisible(true);
+    }
   }
 }
