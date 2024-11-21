@@ -11,4 +11,12 @@ export abstract class Component<K extends keyof HTMLElementTagNameMap> {
     this.element.appendChild(child.element);
     child.init();
   }
+
+  setVisible(visible: boolean) {
+    if (visible) {
+      this.element.style.removeProperty('display');
+    } else {
+      this.element.style.display = 'none';
+    }
+  }
 }

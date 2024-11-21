@@ -49,4 +49,9 @@ export abstract class MenuButton extends Component<'div'> {
     this.element.appendChild(this.button);
     this.add(menu);
   }
+
+  setImage(image: string) {
+    this.image = image;
+    this.button.innerHTML = image;
+  }
 }

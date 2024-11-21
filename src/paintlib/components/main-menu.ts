@@ -10,6 +10,7 @@ import LineSVG from '../svgs/line.svg';
 import ArrowSVG from '../svgs/arrow.svg';
 import CancelSVG from '../svgs/cancel.svg';
 import SaveSVG from '../svgs/save.svg';
+import TextColorSVG from '../svgs/text-color.svg';
 import ForegroundColorSVG from '../svgs/foreground-color.svg';
 import BackgroundColorSVG from '../svgs/background-color.svg';
 import ThicknessSVG from '../svgs/thickness.svg';
@@ -34,9 +35,17 @@ import { FabricObject, TEvent, TPointerEvent } from 'fabric';
 import { CancelAction } from '../actions/cancel-action';
 import { SaveAction } from '../actions/save-action';
 import { UndoRedoAction } from '../actions/undo-redo-action';
+import { MenuButton } from './buttons/menu-button';
+import { useState } from '../utils/use-state';
 
 export class MainMenu extends Component<'div'> {
   private trash: ActionButton;
+
+  private options: {
+    fgColor: MenuButton;
+    bgColor: MenuButton;
+    tickness: MenuButton;
+  };
 
   constructor(private paintlib: PaintLib) {
     super('div');
@@ -93,8 +102,43 @@ export class MainMenu extends Component<'div'> {
     );
     const tickness = new TicknessPickerButton(this.paintlib, ThicknessSVG);
 
+    this.options = { fgColor, bgColor, tickness };
+
     optionsView.add(new ActionGroup([fgColor, bgColor, tickness]));
     this.add(optionsView);
+
+    // Set options bar depending of selected tool & proactivelyShowOptions options
+    useState(
+      this.paintlib.uiStore,
+      (store) => store.activeAction,
+      (action) => {
+        if (this.paintlib.options?.proactivelyShowOptions) {
+          const allKeys: (keyof typeof this.options)[] = ['fgColor', 'bgColor', 'tickness'];
+          const visible: (keyof typeof this.options)[] = [];
+
+          if ([UIActionType.RECT, UIActionType.ELLIPSE, UIActionType.LINE, UIActionType.ARROW, UIActionType.TEXT, UIActionType.DRAW].includes(action)) {
+            visible.push('fgColor');
+          }
+
+          if ([UIActionType.RECT, UIActionType.ELLIPSE].includes(action)) {
+            visible.push('bgColor');
+          }
+
+          if ([UIActionType.RECT, UIActionType.ELLIPSE, UIActionType.LINE, UIActionType.ARROW, UIActionType.DRAW].includes(action)) {
+            visible.push('tickness');
+          }
+
+          for (const key of allKeys) {
+            // Keep option visible when whole bar is hidden to keep the size
+            this.options[key].setVisible(visible.includes(key));
+          }
+
+          optionsView.setVisible(visible.length > 0);
+        }
+
+        this.options.fgColor.setImage(action === UIActionType.TEXT ? TextColorSVG : ForegroundColorSVG);
+      },
+    );
   }
 
   setupEvent() {

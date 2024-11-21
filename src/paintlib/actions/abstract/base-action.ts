@@ -18,28 +18,6 @@ export enum UIActionType {
   TEXT = 'text',
 }
 
-/*export type OtherAction = {
-  type:
-    | UIActionType.SELECT
-    | UIActionType.TRASH
-    | UIActionType.CLEAR
-    | UIActionType.SAVE
-    | UIActionType.CANCEL
-    | UIActionType.UNDO
-    | UIActionType.REDO
-    | UIActionType.SHAPE
-    | UIActionType.DRAW
-    | UIActionType.TEXT;
-};
-
-export type RectAction = {
-  type: UIActionType.SHAPE;
-  options: {
-    borderColor?: string;
-    borderColor?: string;
-  }
-}*/
-
 export abstract class BaseAction {
   constructor(
     public readonly paintlib: PaintLib,

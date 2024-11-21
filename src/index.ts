@@ -2,7 +2,9 @@ import './styles.css';
 import { PaintLib } from './paintlib/paintlib';
 
 export async function init(container: HTMLElement) {
-  const paintlib = new PaintLib(container);
+  const paintlib = new PaintLib(container, {
+    proactivelyShowOptions: true,
+  });
   await paintlib.loadImage();
   (window as any).paintlib = paintlib;
 }

@@ -12,7 +12,7 @@ body {
 }
 
 .paintlib-root {
-    background-color: white;
+    background-color: silver;
     height: 100%;
     width: 100%;
     display: flex;
@@ -26,10 +26,14 @@ body {
     flex-direction: column;
     gap: 10px;
     color: #c0c0c0;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
 }
 
 .paintlib-menu-line {
-    height: 40px;
+    height: 40px; /* TODO: SHOULD BE DYNAMIC (related to paintlib-canvas-container margin-top) */
     width: 100%;
     display: flex;
     gap: 20px;
@@ -41,8 +45,8 @@ body {
 }
 
 .paintlib-canvas-container {
+    margin-top: 90px; /* TODO: SHOULD BE DYNAMIC (related to paintlib-menu-line height) */
     flex: 1 1 0;
-    background-color: silver;
 }
 
 .paintlib-menu-button {
