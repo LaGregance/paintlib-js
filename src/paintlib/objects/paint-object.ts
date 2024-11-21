@@ -1,4 +1,4 @@
-import { Object, Point } from 'fabric';
+import { Object, Point, TBBox } from 'fabric';
 import { LayoutRect } from '../models/layout-rect';
 import { PaintObjectFields } from '../models/paint-object-fields';
 
@@ -52,6 +52,15 @@ export abstract class PaintObject<T extends Object> {
    */
   isValidForCreation(): boolean {
     return this.fabricObject.width > 2 && this.fabricObject.height > 2;
+  }
+
+  getLayout(): TBBox {
+    return {
+      top: this.fabricObject.top,
+      left: this.fabricObject.left,
+      width: this.fabricObject.width + this.fabricObject.strokeWidth,
+      height: this.fabricObject.height + this.fabricObject.strokeWidth,
+    };
   }
 
   /**

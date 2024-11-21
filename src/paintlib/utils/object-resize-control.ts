@@ -1,4 +1,4 @@
-import { Control, Point, TPointerEvent, Transform } from 'fabric';
+import { Control, Point, TBBox, TMat2D, TPointerEvent, Transform, util } from 'fabric';
 import { TransformCorner } from './transform-corner';
 import { LayoutRect } from '../models/layout-rect';
 import { PaintObject } from '../objects/paint-object';
@@ -6,37 +6,56 @@ import { PaintObject } from '../objects/paint-object';
 export const createResizeControls = (obj: PaintObject<any>) => {
   const controls: Record<string, Control> = {};
 
+  let originalEventInfo: { point: Point; invertMatrix: TMat2D; layout: TBBox } = undefined;
+  let lastTransform: Transform = undefined;
   const resize = (eventData: TPointerEvent, transform: Transform, eventX: number, eventY: number) => {
     const target = transform.target;
 
     // Calculate new coordinates based on control movement
     if (transform.action === 'resize') {
-      let corner = TransformCorner.parse(transform.corner);
-      const box = { left: target.getX(), top: target.getY(), width: target.width, height: target.height };
-      const offset = corner.getTransformOffset(box, eventX, eventY);
+      if (lastTransform !== transform) {
+        const objectMatrix = target.calcTransformMatrix();
+        const invertMatrix = util.invertTransform(objectMatrix);
+
+        originalEventInfo = {
+          point: new Point(eventX, eventY).transform(invertMatrix),
+          layout: obj.getLayout(),
+          invertMatrix,
+        };
+      }
+      lastTransform = transform;
+
+      /**
+       * Note object x, y (or top/left) are including transformation.
+       * That's why we use cos/sin & invertTransform to calculate good offset
+       */
+
+      const corner = TransformCorner.parse(transform.corner);
+      const eventPoint = new Point(eventX, eventY).transform(originalEventInfo.invertMatrix);
+      const deltaX = eventPoint.x - originalEventInfo.point.x;
+      const deltaY = eventPoint.y - originalEventInfo.point.y;
+
+      const angle = util.degreesToRadians(target.getTotalAngle());
+      const offset = corner.getTransformOffset(angle, deltaX, deltaY);
       const newBox: LayoutRect = {
-        x: box.left + offset.left,
-        y: box.top + offset.top,
-        width: box.width + offset.width,
-        height: box.height + offset.height,
+        x: originalEventInfo.layout.left + offset.left,
+        y: originalEventInfo.layout.top + offset.top,
+        width: originalEventInfo.layout.width + offset.width,
+        height: originalEventInfo.layout.height + offset.height,
       };
 
       if (newBox.width < 0) {
-        corner = corner.getOpposite('horizontal');
-        transform.corner = corner.toString();
-
         newBox.width = -newBox.width;
-        newBox.x -= newBox.width;
+
+        newBox.x -= Math.cos(angle) * newBox.width;
+        newBox.y -= Math.sin(angle) * newBox.width;
       }
       if (newBox.height < 0) {
-        corner = corner.getOpposite('vertical');
-        transform.corner = corner.toString();
-
         newBox.height = -newBox.height;
-        newBox.y -= newBox.height;
+        newBox.x -= Math.cos(angle) * newBox.height;
+        newBox.y -= Math.sin(angle) * newBox.height;
       }
 
-      // TODO: Direction
       obj.updateLayout(newBox, new Point(newBox.x, newBox.y), new Point(newBox.x + newBox.width, newBox.y + newBox.height));
       target.setCoords();
       return true;
