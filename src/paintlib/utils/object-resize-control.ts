@@ -1,6 +1,5 @@
 import { Control, Point, TBBox, TMat2D, TPointerEvent, Transform, util } from 'fabric';
 import { TransformCorner } from './transform-corner';
-import { LayoutRect } from '../models/layout-rect';
 import { PaintObject } from '../objects/paint-object';
 
 export const createResizeControls = (obj: PaintObject<any>) => {
@@ -37,9 +36,9 @@ export const createResizeControls = (obj: PaintObject<any>) => {
 
       const angle = util.degreesToRadians(target.getTotalAngle());
       const offset = corner.getTransformOffset(angle, deltaX, deltaY);
-      const newBox: LayoutRect = {
-        x: originalEventInfo.layout.left + offset.left,
-        y: originalEventInfo.layout.top + offset.top,
+      const newBox: TBBox = {
+        left: originalEventInfo.layout.left + offset.left,
+        top: originalEventInfo.layout.top + offset.top,
         width: originalEventInfo.layout.width + offset.width,
         height: originalEventInfo.layout.height + offset.height,
       };
@@ -47,16 +46,16 @@ export const createResizeControls = (obj: PaintObject<any>) => {
       if (newBox.width < 0) {
         newBox.width = -newBox.width;
 
-        newBox.x -= Math.cos(angle) * newBox.width;
-        newBox.y -= Math.sin(angle) * newBox.width;
+        newBox.left -= Math.cos(angle) * newBox.width;
+        newBox.top -= Math.sin(angle) * newBox.width;
       }
       if (newBox.height < 0) {
         newBox.height = -newBox.height;
-        newBox.x -= Math.cos(angle) * newBox.height;
-        newBox.y -= Math.sin(angle) * newBox.height;
+        newBox.left -= Math.cos(angle) * newBox.height;
+        newBox.top -= Math.sin(angle) * newBox.height;
       }
 
-      obj.updateLayout(newBox, new Point(newBox.x, newBox.y), new Point(newBox.x + newBox.width, newBox.y + newBox.height));
+      obj.updateLayout(newBox, new Point(newBox.left, newBox.top), new Point(newBox.left + newBox.width, newBox.top + newBox.height));
       target.setCoords();
       return true;
     }

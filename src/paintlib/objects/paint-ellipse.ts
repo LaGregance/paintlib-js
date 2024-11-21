@@ -1,5 +1,4 @@
-import { Ellipse, Point } from 'fabric';
-import { LayoutRect } from '../models/layout-rect';
+import { Ellipse, Point, TBBox } from 'fabric';
 import { PaintObject } from './paint-object';
 import { createResizeControls } from '../utils/object-resize-control';
 import { PaintObjectFields } from '../models/paint-object-fields';
@@ -16,14 +15,14 @@ export class PaintEllipse extends PaintObject<Ellipse> {
     };
   }
 
-  updateLayout(layout: LayoutRect) {
+  updateLayout(layout: TBBox) {
     const rx = layout.width / 2;
     const ry = layout.height / 2;
     const strokeWidth = Math.min(rx, ry, this.targetStrokeWidth);
 
     this.fabricObject.set({
-      left: layout.x,
-      top: layout.y,
+      left: layout.left,
+      top: layout.top,
       rx: layout.width / 2 - strokeWidth / 2,
       ry: layout.height / 2 - strokeWidth / 2,
       strokeWidth: strokeWidth,
@@ -33,14 +32,7 @@ export class PaintEllipse extends PaintObject<Ellipse> {
   set(fields: Partial<PaintObjectFields>) {
     if (fields.strokeWidth) {
       this.targetStrokeWidth = fields.strokeWidth;
-
-      const layout = this.getLayout();
-      this.updateLayout({
-        x: layout.left,
-        y: layout.top,
-        width: layout.width,
-        height: layout.height,
-      });
+      this.updateLayout(this.getLayout());
     }
     super.set(fields);
   }

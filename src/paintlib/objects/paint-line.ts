@@ -1,5 +1,4 @@
-import { Control, Line, Point, TPointerEvent, Transform } from 'fabric';
-import { LayoutRect } from '../models/layout-rect';
+import { Control, Line, Point, TBBox, TPointerEvent, Transform } from 'fabric';
 import { PaintObject } from './paint-object';
 
 export class PaintLine extends PaintObject<Line> {
@@ -65,7 +64,7 @@ export class PaintLine extends PaintObject<Line> {
     };
   }
 
-  updateLayout(_layout: LayoutRect, start: Point, end: Point) {
+  updateLayout(_layout: TBBox, start: Point, end: Point) {
     this.fabricObject.set({
       x1: start.x,
       y1: start.y,

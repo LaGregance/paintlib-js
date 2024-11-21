@@ -1,5 +1,4 @@
-import { Point, Rect } from 'fabric';
-import { LayoutRect } from '../models/layout-rect';
+import { Point, Rect, TBBox } from 'fabric';
 import { PaintObject } from './paint-object';
 import { createResizeControls } from '../utils/object-resize-control';
 import { PaintObjectFields } from '../models/paint-object-fields';
@@ -16,11 +15,11 @@ export class PaintRect extends PaintObject<Rect> {
     };
   }
 
-  updateLayout(layout: LayoutRect) {
+  updateLayout(layout: TBBox) {
     const strokeWidth = Math.min(layout.width - 1, layout.height - 1, this.targetStrokeWidth);
     this.fabricObject.set({
-      left: layout.x,
-      top: layout.y,
+      left: layout.left,
+      top: layout.top,
       width: layout.width - strokeWidth,
       height: layout.height - strokeWidth,
     });
@@ -29,14 +28,7 @@ export class PaintRect extends PaintObject<Rect> {
   set(fields: Partial<PaintObjectFields>) {
     if (fields.strokeWidth) {
       this.targetStrokeWidth = fields.strokeWidth;
-
-      const layout = this.getLayout();
-      this.updateLayout({
-        x: layout.left,
-        y: layout.top,
-        width: layout.width,
-        height: layout.height,
-      });
+      this.updateLayout(this.getLayout());
     }
     super.set(fields);
   }

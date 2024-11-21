@@ -1,5 +1,4 @@
-import { Point, Textbox } from 'fabric';
-import { LayoutRect } from '../models/layout-rect';
+import { Point, TBBox, Textbox } from 'fabric';
 import { PaintObject } from './paint-object';
 import { PaintObjectFields } from '../models/paint-object-fields';
 
@@ -9,10 +8,8 @@ export class PaintText extends PaintObject<Textbox> {
     this.fabricObject.editable = true;
   }
 
-  updateLayout(layout: LayoutRect) {
-    this.fabricObject.setX(layout.x);
-    this.fabricObject.setY(layout.y);
-    this.fabricObject.set({ fontSize: layout.height });
+  updateLayout(layout: TBBox) {
+    this.fabricObject.set({ top: layout.top, left: layout.left, fontSize: layout.height });
   }
 
   set(fields: PaintObjectFields) {

@@ -1,5 +1,4 @@
-import { Group, Line, Point, Triangle } from 'fabric';
-import { LayoutRect } from '../models/layout-rect';
+import { Group, Line, Point, TBBox, Triangle } from 'fabric';
 import { PaintObject } from './paint-object';
 
 export class PaintArrow extends PaintObject<Group> {
@@ -10,17 +9,17 @@ export class PaintArrow extends PaintObject<Group> {
     this.line = new Line(undefined);
     this.arrow = new Triangle();
     this.fabricObject = new Group([this.line, this.arrow], { hasControls: false, hasBorders: false, perPixelTargetFind: true });
-    this.updateLayout({ x: point.x, y: point.y, width: 1, height: 1 }, point, new Point(point.x + 1, point.y + 1));
+    this.updateLayout({ left: point.x, top: point.y, width: 1, height: 1 }, point, new Point(point.x + 1, point.y + 1));
   }
 
-  updateLayout(layout: LayoutRect, start: Point, end: Point) {
+  updateLayout(layout: TBBox, start: Point, end: Point) {
     // Arrowhead size
     const arrowWidth = 15;
     const arrowHeight = 15;
 
     // In group object are positioned relative to center, that's why we use width/2 & height/2
-    start = new Point(start.x - layout.x - layout.width / 2, start.y - layout.y - layout.height / 2);
-    end = new Point(end.x - layout.x - layout.width / 2, end.y - layout.y - layout.height / 2);
+    start = new Point(start.x - layout.left - layout.width / 2, start.y - layout.top - layout.height / 2);
+    end = new Point(end.x - layout.left - layout.width / 2, end.y - layout.top - layout.height / 2);
 
     // Calculate the angle for the arrowhead
     const angle = Math.atan2(end.y - start.y, end.x - start.x);
@@ -49,9 +48,9 @@ export class PaintArrow extends PaintObject<Group> {
       originY: 'center',
     });
 
-    this.fabricObject.setX(layout.x);
-    this.fabricObject.setY(layout.y);
     this.fabricObject.set({
+      left: layout.left,
+      top: layout.top,
       width: layout.width,
       height: layout.height,
     });

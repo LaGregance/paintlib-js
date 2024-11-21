@@ -37,7 +37,7 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
       lockMovementY: false,
     });
 
-    this.object.updateLayout({ x: event.scenePoint.x, y: event.scenePoint.y, width: 1, height: 1 }, this.originalXY, event.scenePoint);
+    this.object.updateLayout({ left: event.scenePoint.x, top: event.scenePoint.y, width: 1, height: 1 }, this.originalXY, event.scenePoint);
 
     this.paintlib.add(this.object);
   }
@@ -58,7 +58,7 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
       y = this.originalXY.y - height;
     }
 
-    this.object.updateLayout({ x, y, width, height }, this.originalXY, event.scenePoint);
+    this.object.updateLayout({ left: x, top: y, width, height }, this.originalXY, event.scenePoint);
     this.paintlib.canvas.renderAll();
   }
 

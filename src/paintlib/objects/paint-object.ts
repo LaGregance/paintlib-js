@@ -1,5 +1,4 @@
 import { Object, Point, TBBox } from 'fabric';
-import { LayoutRect } from '../models/layout-rect';
 import { PaintObjectFields } from '../models/paint-object-fields';
 
 export abstract class PaintObject<T extends Object> {
@@ -34,7 +33,7 @@ export abstract class PaintObject<T extends Object> {
    * @param end Last point of the creation
    * @protected
    */
-  abstract updateLayout(layout: LayoutRect, start: Point, end: Point): void;
+  abstract updateLayout(layout: TBBox, start: Point, end: Point): void;
 
   /**
    * Update fields of the underlying fabric object.
