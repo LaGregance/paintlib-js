@@ -26,7 +26,8 @@ import { useState } from '../../utils/use-state';
 export class CreateObjectMenuGroup extends Component<'div'> {
   private readonly ITEM_WIDTH = 40;
   private readonly ITEM_GAP = 6;
-  private readonly MIN_WIDTH = 580;
+  private readonly GROUP_GAP = 6;
+  private readonly MIN_WIDTH: number;
 
   private availableActions = [UIActionType.RECT, UIActionType.ELLIPSE, UIActionType.ARROW, UIActionType.LINE, UIActionType.TEXT, UIActionType.DRAW];
   private userActionSlots: { action: UIActionType; addedAt: number }[];
@@ -40,6 +41,14 @@ export class CreateObjectMenuGroup extends Component<'div'> {
 
   constructor(private paintlib: PaintLib) {
     super('div');
+
+    let minWidth = 580;
+    if (this.paintlib.options?.allowRotate) {
+      minWidth += (this.ITEM_WIDTH + this.ITEM_GAP) * 2 + this.GROUP_GAP;
+    }
+
+    this.MIN_WIDTH = minWidth;
+
     this.calcAvailableBtnCount();
     this.userActionSlots = [];
   }

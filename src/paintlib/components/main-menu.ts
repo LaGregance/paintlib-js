@@ -52,16 +52,16 @@ export class MainMenu extends Component<'div'> {
     const undo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'undo'), UndoSVG);
     const redo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'redo'), RedoSVG);
 
-    // TODO: Only if there is loaded image
-    const rotateLeft = new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'left'), RotateLeftSVG);
-    const rotateRight = new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'right'), RotateRightSVG);
-
     const cancel = new ActionButton(this.paintlib, () => new CancelAction(this.paintlib), CancelSVG);
     const save = new ActionButton(this.paintlib, () => new SaveAction(this.paintlib), SaveSVG);
 
     actionsView.add(new ActionGroup([select, this.trash, undo, redo]));
     actionsView.add(new CreateObjectMenuGroup(this.paintlib));
-    actionsView.add(new ActionGroup([rotateLeft, rotateRight]));
+    if (this.paintlib.options?.allowRotate) {
+      const rotateLeft = new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'left'), RotateLeftSVG);
+      const rotateRight = new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'right'), RotateRightSVG);
+      actionsView.add(new ActionGroup([rotateLeft, rotateRight]));
+    }
     actionsView.add(new ActionGroup([cancel, save]));
     this.add(actionsView);
 
