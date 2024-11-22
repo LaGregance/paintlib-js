@@ -28,6 +28,7 @@ import { MenuButton } from './buttons/menu-button';
 import { useState } from '../utils/use-state';
 import { CreateObjectMenuGroup } from './create-object-menu-group/create-object-menu-group';
 import { RotateAction } from '../actions/rotate-action';
+import { xor } from '../utils/utils';
 
 export class MainMenu extends Component<'div'> {
   private trash: ActionButton;
@@ -141,5 +142,22 @@ export class MainMenu extends Component<'div'> {
     this.paintlib.canvas.on('selection:cleared', selectionEvent);
 
     this.trash.setDisable(!this.paintlib.canvas.getActiveObject());
+
+    document.addEventListener('keydown', (event) => {
+      const ctrl = xor(event.ctrlKey, event.metaKey);
+      const key = event.key.toLowerCase();
+
+      if (ctrl && key === 'z') {
+        if (event.shiftKey) {
+          this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'redo'));
+        } else {
+          this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'undo'));
+        }
+      }
+
+      if (key === 'delete' || key === 'backspace') {
+        this.paintlib.uiStore.getState().setAction(new TrashAction(this.paintlib));
+      }
+    });
   }
 }
