@@ -1,5 +1,6 @@
 import { Control, Object, Point, TPointerEvent, Transform } from 'fabric';
 import { PaintObject } from './paint-object';
+import { getEndPoint, getStartPoint } from '../../utils/vector-utils';
 
 export abstract class PaintVectorObject<T extends Object> extends PaintObject<T> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -82,31 +83,11 @@ export abstract class PaintVectorObject<T extends Object> extends PaintObject<T>
 
   getStart() {
     const layout = this.getLayout();
-
-    if (this.vector.x >= 0 && this.vector.y >= 0) {
-      return new Point(layout.left, layout.top);
-    } else if (this.vector.x >= 0 && this.vector.y < 0) {
-      return new Point(layout.left, layout.top + layout.height);
-    } else if (this.vector.x < 0 && this.vector.y >= 0) {
-      return new Point(layout.left + layout.width, layout.top);
-    } else {
-      // x < 0 && y < 0
-      return new Point(layout.left + layout.width, layout.top + layout.height);
-    }
+    return getStartPoint(layout, this.vector);
   }
 
   getEnd() {
     const layout = this.getLayout();
-
-    if (this.vector.x >= 0 && this.vector.y >= 0) {
-      return new Point(layout.left + layout.width, layout.top + layout.height);
-    } else if (this.vector.x >= 0 && this.vector.y < 0) {
-      return new Point(layout.left + layout.width, layout.top);
-    } else if (this.vector.x < 0 && this.vector.y >= 0) {
-      return new Point(layout.left, layout.top + layout.height);
-    } else {
-      // x < 0 && y < 0
-      return new Point(layout.left, layout.top);
-    }
+    return getEndPoint(layout, this.vector);
   }
 }

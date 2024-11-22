@@ -119,8 +119,11 @@ export abstract class PaintObject<T extends FabricObject> {
   }
 
   /**
-   * Restore the object from a JSON object (obtained from toJSON function)
+   * Restore the object from a JSON object (obtained from serialize function)
    * @param data
    */
-  restore(data: PaintObjectJson) {}
+  public restoreObject(data: PaintObjectJson) {
+    // this.vector = data.vector;
+    // object.updateLayout(data.layout);
+  }
 }

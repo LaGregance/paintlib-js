@@ -10,7 +10,11 @@ import { StoreApi } from 'zustand/vanilla';
  * @param selector
  * @param effect
  */
-export const useState = <T extends any, U extends any>(store: StoreApi<T>, selector: (store: T) => U, effect: (state: U) => void) => {
+export const useState = <T extends any, U extends any>(
+  store: StoreApi<T>,
+  selector: (store: T) => U,
+  effect: (state: U) => void,
+) => {
   const activeState = selector(store.getState());
   effect(activeState);
 
