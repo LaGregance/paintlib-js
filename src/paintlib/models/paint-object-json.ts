@@ -1,4 +1,4 @@
-import { PaintObjectFields } from '../../models/paint-object-fields';
+import { PaintObjectFields } from './paint-object-fields';
 import { Point, TBBox } from 'fabric';
 
 export type PaintObjectJson = {

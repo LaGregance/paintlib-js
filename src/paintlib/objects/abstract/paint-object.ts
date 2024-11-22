@@ -1,6 +1,6 @@
 import { Object as FabricObject, Point, TBBox } from 'fabric';
 import { PaintObjectFields } from '../../models/paint-object-fields';
-import { PaintObjectJson } from './paint-object-json';
+import { PaintObjectJson } from '../../models/paint-object-json';
 import { getEndPoint, getStartPoint } from '../../utils/vector-utils';
 
 export abstract class PaintObject<T extends FabricObject> {
@@ -116,7 +116,14 @@ export abstract class PaintObject<T extends FabricObject> {
    * @param data
    */
   public restoreObject(data: PaintObjectJson) {
-    // this.vector = data.vector;
-    // object.updateLayout(data.layout);
+    // TODO: Scale regarding to the export canvas size & the actual size
+    this.vector = data.vector;
+    this.fabricObject.set({
+      angle: this.fabricObject.angle,
+      scaleX: this.fabricObject.scaleX,
+      scaleY: this.fabricObject.scaleY,
+    });
+    this.set(this.fields);
+    this.updateLayout(data.layout, this.vector);
   }
 }

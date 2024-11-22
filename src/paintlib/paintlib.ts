@@ -9,6 +9,7 @@ import { DrawAction } from './actions/draw-action';
 import { PaintObject } from './objects/abstract/paint-object';
 import { UIActionType } from './config/ui-action-type';
 import { setCssProperty, px } from './utils/utils';
+import { CanvasSerializedJson } from './models/canvas-serialized-json';
 
 export class PaintLib {
   public readonly element: HTMLDivElement;
@@ -296,11 +297,14 @@ export class PaintLib {
     return this.canvas.toDataURL({ format: 'jpeg', multiplier: 1 });
   }
 
-  toJSON() {
-    const data = this.canvas.toJSON();
-    if (data.objects) {
-      data.objects = data.objects.filter((x: any) => x.type !== 'Image');
-    }
-    return data;
+  serialize(): CanvasSerializedJson {
+    return {
+      width: this.canvas.width,
+      height: this.canvas.height,
+      image: {
+        angle: this.image.angle,
+      },
+      objects: this.objects.map((x) => x.serialize()),
+    };
   }
 }

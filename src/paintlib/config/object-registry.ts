@@ -16,7 +16,7 @@ import { PaintLib } from '../paintlib';
 import { CreateObjectAction } from '../actions/create-object-action';
 import { UIActionType } from './ui-action-type';
 import { DrawingOption } from './drawing-option';
-import { PaintObjectJson } from '../objects/abstract/paint-object-json';
+import { PaintObjectJson } from '../models/paint-object-json';
 
 export type PaintObjectClass = new () => PaintObject<any>;
 
