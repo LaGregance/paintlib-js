@@ -5,6 +5,10 @@ export abstract class PaintObject<T extends Object> {
   protected vector: Point;
   protected fabricObject: T;
 
+  attach(obj: T) {
+    this.fabricObject = obj;
+  }
+
   /**
    * Create the object at specific position.
    * You should not override this function in subclass (use instantiate instead).

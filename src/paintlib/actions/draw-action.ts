@@ -1,7 +1,8 @@
 import { UIActionType } from './abstract/base-action';
-import { PencilBrush } from 'fabric';
+import { FabricObject, Path, PencilBrush } from 'fabric';
 import { PaintLib } from '../paintlib';
 import { BaseSelectableAction } from './abstract/base-selectable-action';
+import { PaintPath } from '../objects/paint-path';
 
 export class DrawAction extends BaseSelectableAction {
   private pencil: PencilBrush;
@@ -21,9 +22,20 @@ export class DrawAction extends BaseSelectableAction {
     this.paintlib.canvas.freeDrawingBrush = this.pencil;
     this.paintlib.canvas.isDrawingMode = true;
     this.paintlib.canvas.renderAll();
+
+    this.paintlib.canvas.on('object:added', this.onObjectAdded);
   }
 
+  private onObjectAdded = ({ target }: { target: FabricObject }) => {
+    if (target instanceof Path) {
+      const path = new PaintPath();
+      path.attach(target);
+      this.paintlib.add(path);
+    }
+  };
+
   onDeselected() {
+    this.paintlib.canvas.off('object:added', this.onObjectAdded);
     this.paintlib.canvas.freeDrawingBrush = null;
     this.paintlib.canvas.isDrawingMode = false;
     this.paintlib.canvas.renderAll();
