@@ -251,6 +251,11 @@ export class PaintLib {
     return this.options.tickness;
   }
 
+  getSelectedObject() {
+    const selected = this.canvas.getActiveObject();
+    return this.objects.find((x) => x['fabricObject'] === selected);
+  }
+
   add(object: PaintObject<any>) {
     this.objects.push(object);
     if (!this.canvas.contains(object['fabricObject'])) {

@@ -19,7 +19,6 @@ import { ActionGroup } from './action-group';
 import { View } from './view';
 import { ColorPickerButton } from './buttons/color-picker-button';
 import { TicknessPickerButton } from './buttons/tickness-picker-button';
-import { FabricObject, TEvent, TPointerEvent } from 'fabric';
 import { CancelAction } from '../actions/cancel-action';
 import { SaveAction } from '../actions/save-action';
 import { UndoRedoAction } from '../actions/undo-redo-action';
@@ -30,10 +29,11 @@ import { RotateAction } from '../actions/rotate-action';
 import { xor } from '../utils/utils';
 import { UIActionType } from '../config/ui-action-type';
 import { DrawingOption } from '../config/drawing-option';
-import { ObjectRegistry } from '../config/object-registry';
+import { ObjectRegistry, PaintObjectClass } from '../config/object-registry';
 
 export class MainMenu extends Component<'div'> {
   private trash: ActionButton;
+  private optionsMenu: View;
 
   private options: {
     [key in DrawingOption]: MenuButton;
@@ -70,7 +70,7 @@ export class MainMenu extends Component<'div'> {
     actionsView.add(new ActionGroup([cancel, save]));
     this.add(actionsView);
 
-    const optionsView = new View('paintlib-menu-line');
+    this.optionsMenu = new View('paintlib-menu-line');
 
     const fgColor = new ColorPickerButton(
       this.paintlib,
@@ -98,36 +98,43 @@ export class MainMenu extends Component<'div'> {
 
     this.options = { fgColor, bgColor, tickness };
 
-    optionsView.add(new ActionGroup([fgColor, bgColor, tickness]));
-    this.add(optionsView);
+    this.optionsMenu.add(new ActionGroup([fgColor, bgColor, tickness]));
+    this.add(this.optionsMenu);
 
     // Set options bar depending of selected tool & proactivelyShowOptions options
     useState(
       this.paintlib.uiStore,
       (store) => store.activeAction,
       (action) => {
-        if (this.paintlib.options?.proactivelyShowOptions) {
-          const available: DrawingOption[] = ObjectRegistry.getObjectMeta(action)?.allowedOptions;
-
-          for (const key of Object.values(DrawingOption)) {
-            // Keep option visible when whole bar is hidden to keep the size
-            this.options[key].setVisible(!!available && available.includes(key));
-          }
-
-          optionsView.setVisible(available.length > 0);
-        }
-
-        this.options.fgColor.setImage(action === UIActionType.TEXT ? TextColorSVG : ForegroundColorSVG);
+        this.updateOptions(action);
       },
     );
   }
 
+  updateOptions = (actionOrClazz: UIActionType | PaintObjectClass) => {
+    const meta = ObjectRegistry.getObjectMeta(actionOrClazz);
+    const action = (meta?.action || actionOrClazz) as UIActionType;
+
+    if (this.paintlib.options?.proactivelyShowOptions) {
+      const available: DrawingOption[] = meta?.allowedOptions;
+
+      for (const key of Object.values(DrawingOption)) {
+        // Keep option visible when whole bar is hidden to keep the size
+        this.options[key].setVisible(!!available && available.includes(key));
+      }
+
+      this.optionsMenu.setVisible(available?.length > 0);
+    }
+
+    this.options.fgColor.setImage(action === UIActionType.TEXT ? TextColorSVG : ForegroundColorSVG);
+  };
+
   setupEvent() {
     // Event for enable / disable trash
-    const selectionEvent = (
-      event: Partial<TEvent<TPointerEvent>> & { selected: FabricObject[]; deselected: FabricObject[] },
-    ) => {
-      this.trash.setDisable((event.selected?.length ?? 0) <= 0);
+    const selectionEvent = () => {
+      const selected = this.paintlib.getSelectedObject();
+      this.trash.setDisable(!selected);
+      this.updateOptions(selected ? (selected.constructor as any) : UIActionType.SELECT);
     };
 
     this.paintlib.canvas.on('selection:created', selectionEvent);
