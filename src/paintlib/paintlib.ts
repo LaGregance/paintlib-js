@@ -53,6 +53,7 @@ export class PaintLib {
     this.canvas = new Canvas(this.canvasEl);
     this.canvas.selection = false;
     this.canvas.defaultCursor = 'pointer';
+    this.canvas.backgroundColor = '#ffffff';
 
     // 4. Manage event
     let isDragging = false;
@@ -153,12 +154,17 @@ export class PaintLib {
     this.image.moveCursor = 'pointer';
     this.image.hoverCursor = 'pointer';
 
-    this.image.scale(
-      calculateImageScaleToFitViewport({ width: this.canvas.width, height: this.canvas.height }, { width: this.image.width, height: this.image.height }),
+    const { width, height, scale } = calculateImageScaleToFitViewport(
+      { width: this.canvas.width, height: this.canvas.height },
+      { width: this.image.width, height: this.image.height },
     );
 
-    this.canvas.add(this.image);
-    this.canvas.centerObject(this.image);
+    this.canvas.setDimensions({ width, height });
+    this.image.scale(scale);
+    this.canvas.backgroundImage = this.image;
+
+    // this.canvas.add(this.image);
+    // this.canvas.centerObject(this.image);
   }
 
   enableSelection(enable: boolean) {
