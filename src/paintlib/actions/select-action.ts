@@ -1,7 +1,7 @@
-import { UIActionType } from './abstract/base-action';
 import { PaintLib } from '../paintlib';
 import { Object } from 'fabric';
 import { BaseSelectableAction } from './abstract/base-selectable-action';
+import { UIActionType } from '../config/ui-action-type';
 
 export class SelectAction extends BaseSelectableAction {
   constructor(

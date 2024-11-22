@@ -19,7 +19,6 @@ import { ActionGroup } from './action-group';
 import { View } from './view';
 import { ColorPickerButton } from './buttons/color-picker-button';
 import { TicknessPickerButton } from './buttons/tickness-picker-button';
-import { UIActionType } from '../actions/abstract/base-action';
 import { FabricObject, TEvent, TPointerEvent } from 'fabric';
 import { CancelAction } from '../actions/cancel-action';
 import { SaveAction } from '../actions/save-action';
@@ -29,6 +28,7 @@ import { useState } from '../utils/use-state';
 import { CreateObjectMenuGroup } from './create-object-menu-group/create-object-menu-group';
 import { RotateAction } from '../actions/rotate-action';
 import { xor } from '../utils/utils';
+import { UIActionType } from '../config/ui-action-type';
 
 export class MainMenu extends Component<'div'> {
   private trash: ActionButton;

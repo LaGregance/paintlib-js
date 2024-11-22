@@ -1,23 +1,11 @@
 import { Component } from '../component';
 import { PaintLib } from '../../paintlib';
 import { ActionButton } from '../buttons/action-button';
-import { CreateObjectAction } from '../../actions/create-object-action';
-import { UIActionType } from '../../actions/abstract/base-action';
-import { PaintRect } from '../../objects/paint-rect';
-import RectangleSVG from '../../svgs/rectangle.svg';
-import { PaintEllipse } from '../../objects/paint-ellipse';
-import EllipseSVG from '../../svgs/ellipse.svg';
-import { PaintArrow } from '../../objects/paint-arrow';
-import ArrowSVG from '../../svgs/arrow.svg';
-import { PaintLine } from '../../objects/paint-line';
-import LineSVG from '../../svgs/line.svg';
-import { PaintText } from '../../objects/paint-text';
-import TextSVG from '../../svgs/text.svg';
-import { DrawAction } from '../../actions/draw-action';
-import DrawSVG from '../../svgs/draw.svg';
 import { ShowMoreActionButton } from './show-more-action-button';
 import { ActionGroup } from '../action-group';
 import { useState } from '../../utils/use-state';
+import { UIActionType } from '../../config/ui-action-type';
+import { ObjectRegistry } from '../../config/object-registry';
 
 /**
  * This component is responsible to manage the middle part of the menu (object part).
@@ -29,7 +17,7 @@ export class CreateObjectMenuGroup extends Component<'div'> {
   private readonly GROUP_GAP = 6;
   private readonly MIN_WIDTH: number;
 
-  private availableActions = [UIActionType.RECT, UIActionType.ELLIPSE, UIActionType.ARROW, UIActionType.LINE, UIActionType.TEXT, UIActionType.DRAW];
+  private availableActions: UIActionType[];
   private userActionSlots: { action: UIActionType; addedAt: number }[];
   private moreBtn: ShowMoreActionButton;
 
@@ -41,6 +29,7 @@ export class CreateObjectMenuGroup extends Component<'div'> {
 
   constructor(private paintlib: PaintLib) {
     super('div');
+    this.availableActions = ObjectRegistry.getAllObjectActions();
 
     let minWidth = 580;
     if (this.paintlib.options?.allowRotate) {
@@ -93,27 +82,9 @@ export class CreateObjectMenuGroup extends Component<'div'> {
   }
 
   private createObjectBtn(type: UIActionType, targetMore = false) {
-    const onClick = targetMore
-      ? () => {
-          this.moreBtn?.hideMenu();
-        }
-      : undefined;
-
-    if (type === UIActionType.RECT) {
-      return new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.RECT, PaintRect), RectangleSVG, onClick);
-    } else if (type === UIActionType.ELLIPSE) {
-      return new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.ELLIPSE, PaintEllipse), EllipseSVG, onClick);
-    } else if (type === UIActionType.ARROW) {
-      return new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.ARROW, PaintArrow), ArrowSVG, onClick);
-    } else if (type === UIActionType.LINE) {
-      return new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.LINE, PaintLine), LineSVG, onClick);
-    } else if (type === UIActionType.TEXT) {
-      return new ActionButton(this.paintlib, () => new CreateObjectAction(this.paintlib, UIActionType.TEXT, PaintText), TextSVG, onClick);
-    } else if (type === UIActionType.DRAW) {
-      return new ActionButton(this.paintlib, () => new DrawAction(this.paintlib), DrawSVG, onClick);
-    } else {
-      throw new Error(`Unknown type ${type}`);
-    }
+    const meta = ObjectRegistry.getObjectMeta(type);
+    const onClick = targetMore ? () => this.moreBtn?.hideMenu() : undefined;
+    return new ActionButton(this.paintlib, () => ObjectRegistry.createAction(type, this.paintlib), meta.icon, onClick);
   }
 
   init() {

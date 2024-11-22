@@ -1,8 +1,8 @@
-import { UIActionType } from './abstract/base-action';
 import { FabricObject, Path, PencilBrush } from 'fabric';
 import { PaintLib } from '../paintlib';
 import { BaseSelectableAction } from './abstract/base-selectable-action';
-import { PaintPath } from '../objects/paint-path';
+import { PaintDraw } from '../objects/paint-draw';
+import { UIActionType } from '../config/ui-action-type';
 
 export class DrawAction extends BaseSelectableAction {
   private pencil: PencilBrush;
@@ -28,7 +28,7 @@ export class DrawAction extends BaseSelectableAction {
 
   private onObjectAdded = ({ target }: { target: FabricObject }) => {
     if (target instanceof Path) {
-      const path = new PaintPath();
+      const path = new PaintDraw();
       path.attach(target);
       this.paintlib.add(path);
     }

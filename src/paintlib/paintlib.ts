@@ -5,9 +5,9 @@ import { createUIStore, UIStore } from './store/ui-store';
 import { StoreApi } from 'zustand/vanilla';
 import { PaintLibOptions } from './paintlib-options';
 import { useState } from './utils/use-state';
-import { UIActionType } from './actions/abstract/base-action';
 import { DrawAction } from './actions/draw-action';
 import { PaintObject } from './objects/abstract/paint-object';
+import { UIActionType } from './config/ui-action-type';
 
 export class PaintLib {
   public readonly element: HTMLDivElement;

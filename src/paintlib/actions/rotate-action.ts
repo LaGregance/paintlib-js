@@ -1,6 +1,6 @@
-import { UIActionType } from './abstract/base-action';
 import { PaintLib } from '../paintlib';
 import { BaseClickableAction } from './abstract/base-clickable-action';
+import { UIActionType } from '../config/ui-action-type';
 
 export class RotateAction extends BaseClickableAction {
   constructor(

@@ -1,7 +1,9 @@
-import { BaseAction, UIActionType } from '../actions/abstract/base-action';
+import { BaseAction } from '../actions/abstract/base-action';
 import { createStore } from 'zustand/vanilla';
 import { PaintLib } from '../paintlib';
 import { SelectAction } from '../actions/select-action';
+import { PaintObject } from '../objects/abstract/paint-object';
+import { UIActionType } from '../config/ui-action-type';
 
 export type UIStore = {
   allActions: {
@@ -9,6 +11,7 @@ export type UIStore = {
   };
   activeAction?: UIActionType;
   setAction: (action: BaseAction) => void;
+  selectedObject?: PaintObject<any>;
   options: {
     fgColor: string;
     bgColor: string;

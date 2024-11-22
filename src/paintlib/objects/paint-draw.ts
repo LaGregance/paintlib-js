@@ -1,7 +1,7 @@
 import { Point, Path, util } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 
-export class PaintPath extends PaintObject<Path> {
+export class PaintDraw extends PaintObject<Path> {
   instantiate(point: Point) {}
 
   rotateWithCanvas(direction: 'left' | 'right', scale: number, rotation: number, translation: Point) {
