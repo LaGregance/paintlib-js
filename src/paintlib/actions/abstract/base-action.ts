@@ -16,6 +16,9 @@ export enum UIActionType {
   ARROW = 'arrow',
   DRAW = 'draw',
   TEXT = 'text',
+
+  ROTATE_LEFT = 'rotate-left',
+  ROTATE_RIGHT = 'rotate-right',
 }
 
 export abstract class BaseAction {

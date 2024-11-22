@@ -2,6 +2,7 @@ import { Object, Point, TBBox } from 'fabric';
 import { PaintObjectFields } from '../../models/paint-object-fields';
 
 export abstract class PaintObject<T extends Object> {
+  protected vector: Point;
   protected fabricObject: T;
 
   /**
@@ -33,7 +34,9 @@ export abstract class PaintObject<T extends Object> {
    * @param end Last point of the creation
    * @protected
    */
-  abstract updateLayout(layout: TBBox, start: Point, end: Point): void;
+  updateLayout(layout: TBBox, start: Point, end: Point) {
+    this.vector = end.subtract(start);
+  }
 
   /**
    * Update fields of the underlying fabric object.
@@ -60,6 +63,16 @@ export abstract class PaintObject<T extends Object> {
       width: this.fabricObject.width,
       height: this.fabricObject.height,
     };
+  }
+
+  getStart() {
+    const layout = this.getLayout();
+    return new Point(layout.left, layout.top);
+  }
+
+  getEnd() {
+    const layout = this.getLayout();
+    return new Point(layout.left + layout.width, layout.top + layout.height);
   }
 
   /**

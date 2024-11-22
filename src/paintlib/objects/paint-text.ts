@@ -13,7 +13,8 @@ export class PaintText extends PaintObject<Textbox> {
     };*/
   }
 
-  updateLayout(layout: TBBox) {
+  updateLayout(layout: TBBox, start: Point, end: Point) {
+    super.updateLayout(layout, start, end);
     this.fabricObject.set({ top: layout.top, left: layout.left, fontSize: layout.height, height: layout.height, width: layout.width });
   }
 

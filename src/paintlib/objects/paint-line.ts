@@ -9,6 +9,7 @@ export class PaintLine extends PaintVectorObject<Line> {
 
   updateLayout(_layout: TBBox, start: Point, end: Point) {
     super.updateLayout(_layout, start, end);
+
     this.fabricObject.set({
       x1: start.x,
       y1: start.y,

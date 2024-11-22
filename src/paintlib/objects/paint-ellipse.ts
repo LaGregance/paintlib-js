@@ -15,7 +15,9 @@ export class PaintEllipse extends PaintObject<Ellipse> {
     };
   }
 
-  updateLayout(layout: TBBox) {
+  updateLayout(layout: TBBox, start: Point, end: Point) {
+    super.updateLayout(layout, start, end);
+
     const rx = layout.width / 2;
     const ry = layout.height / 2;
     const strokeWidth = Math.min(rx, ry, this.targetStrokeWidth);
@@ -41,7 +43,7 @@ export class PaintEllipse extends PaintObject<Ellipse> {
   set(fields: Partial<PaintObjectFields>) {
     if (fields.strokeWidth) {
       this.targetStrokeWidth = fields.strokeWidth;
-      this.updateLayout(this.getLayout());
+      this.updateLayout(this.getLayout(), this.getStart(), this.getEnd());
     }
     super.set(fields);
   }

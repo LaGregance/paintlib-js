@@ -1,4 +1,4 @@
-import { Canvas, FabricImage } from 'fabric';
+import { Canvas, FabricImage, Point, util } from 'fabric';
 import { calculateImageScaleToFitViewport } from './utils/size-utils';
 import { MainMenu } from './components/main-menu';
 import { createUIStore, UIStore } from './store/ui-store';
@@ -16,6 +16,7 @@ export class PaintLib {
   public readonly uiStore: StoreApi<UIStore>;
 
   private canvasEl: HTMLCanvasElement;
+  private canvasContainer: HTMLDivElement;
   private image?: FabricImage;
   private objects: PaintObject<any>[] = [];
 
@@ -42,13 +43,13 @@ export class PaintLib {
     // 3. Create & Populate canvas
     this.canvasEl = document.createElement('canvas');
 
-    const canvasContainer = document.createElement('div');
-    canvasContainer.className = 'paintlib-canvas-container';
-    this.element.appendChild(canvasContainer);
+    this.canvasContainer = document.createElement('div');
+    this.canvasContainer.className = 'paintlib-canvas-container';
+    this.element.appendChild(this.canvasContainer);
 
-    this.canvasEl.width = canvasContainer.clientWidth;
-    this.canvasEl.height = canvasContainer.clientHeight;
-    canvasContainer.appendChild(this.canvasEl);
+    this.canvasEl.width = this.canvasContainer.clientWidth;
+    this.canvasEl.height = this.canvasContainer.clientHeight;
+    this.canvasContainer.appendChild(this.canvasEl);
 
     this.canvas = new Canvas(this.canvasEl);
     this.canvas.selection = false;
@@ -161,10 +162,10 @@ export class PaintLib {
 
     this.canvas.setDimensions({ width, height });
     this.image.scale(scale);
-    this.canvas.backgroundImage = this.image;
+    // this.canvas.backgroundImage = this.image;
 
-    // this.canvas.add(this.image);
-    // this.canvas.centerObject(this.image);
+    this.canvas.add(this.image);
+    this.canvas.centerObject(this.image);
   }
 
   enableSelection(enable: boolean) {
@@ -203,6 +204,56 @@ export class PaintLib {
       ];
     }
     return this.options.palette;
+  }
+
+  rotate(direction: 'left' | 'right') {
+    const containerWidth = this.canvasContainer.clientWidth;
+    const containerHeight = this.canvasContainer.clientHeight;
+
+    const actualRotation = this.image.angle;
+    const actualWidth = this.canvas.width;
+    const newRotation = actualRotation + (direction === 'left' ? -90 : 90);
+
+    this.canvas.discardActiveObject();
+
+    const {
+      width: imgWidth,
+      height: imgHeight,
+      scale: imgScale,
+    } = calculateImageScaleToFitViewport(
+      { width: containerWidth, height: containerHeight },
+      {
+        width: newRotation % 180 === 0 ? this.image.width : this.image.height,
+        height: newRotation % 180 === 0 ? this.image.height : this.image.width,
+      },
+    );
+
+    this.canvas.setDimensions({ width: imgWidth, height: imgHeight });
+    this.image.scale(imgScale);
+    this.image.rotate(newRotation);
+    this.canvas.centerObject(this.image);
+
+    const objRotation = util.degreesToRadians(direction === 'left' ? -90 : 90);
+    const objScale = imgHeight / actualWidth;
+    const translate = new Point(direction === 'right' ? imgWidth : 0, direction === 'right' ? 0 : imgHeight);
+
+    for (const obj of this.objects) {
+      const start = obj.getStart().scalarMultiply(objScale).rotate(objRotation).add(translate);
+      const end = obj.getEnd().scalarMultiply(objScale).rotate(objRotation).add(translate);
+
+      obj.updateLayout(
+        {
+          left: Math.min(start.x, end.x),
+          top: Math.min(start.y, end.y),
+          width: Math.abs(start.x - end.x),
+          height: Math.abs(start.y - end.y),
+        },
+        start,
+        end,
+      );
+    }
+
+    this.canvas.renderAll();
   }
 
   getAvailableTickness() {

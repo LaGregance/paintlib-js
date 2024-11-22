@@ -15,7 +15,9 @@ export class PaintRect extends PaintObject<Rect> {
     };
   }
 
-  updateLayout(layout: TBBox) {
+  updateLayout(layout: TBBox, start: Point, end: Point) {
+    super.updateLayout(layout, start, end);
+
     const strokeWidth = Math.min(layout.width - 1, layout.height - 1, this.targetStrokeWidth);
     this.fabricObject.set({
       left: layout.left,
@@ -37,7 +39,7 @@ export class PaintRect extends PaintObject<Rect> {
   set(fields: Partial<PaintObjectFields>) {
     if (fields.strokeWidth) {
       this.targetStrokeWidth = fields.strokeWidth;
-      this.updateLayout(this.getLayout());
+      this.updateLayout(this.getLayout(), this.getStart(), this.getEnd());
     }
     super.set(fields);
   }

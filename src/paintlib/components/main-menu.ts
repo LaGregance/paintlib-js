@@ -2,6 +2,8 @@ import CursorSVG from '../svgs/cursor.svg';
 import TrashSVG from '../svgs/trash.svg';
 import UndoSVG from '../svgs/undo.svg';
 import RedoSVG from '../svgs/redo.svg';
+import RotateLeftSVG from '../svgs/rotate-left.svg';
+import RotateRightSVG from '../svgs/rotate-right.svg';
 import CancelSVG from '../svgs/cancel.svg';
 import SaveSVG from '../svgs/save.svg';
 import TextColorSVG from '../svgs/text-color.svg';
@@ -25,6 +27,7 @@ import { UndoRedoAction } from '../actions/undo-redo-action';
 import { MenuButton } from './buttons/menu-button';
 import { useState } from '../utils/use-state';
 import { CreateObjectMenuGroup } from './create-object-menu-group/create-object-menu-group';
+import { RotateAction } from '../actions/rotate-action';
 
 export class MainMenu extends Component<'div'> {
   private trash: ActionButton;
@@ -49,11 +52,16 @@ export class MainMenu extends Component<'div'> {
     const undo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'undo'), UndoSVG);
     const redo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'redo'), RedoSVG);
 
+    // TODO: Only if there is loaded image
+    const rotateLeft = new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'left'), RotateLeftSVG);
+    const rotateRight = new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'right'), RotateRightSVG);
+
     const cancel = new ActionButton(this.paintlib, () => new CancelAction(this.paintlib), CancelSVG);
     const save = new ActionButton(this.paintlib, () => new SaveAction(this.paintlib), SaveSVG);
 
     actionsView.add(new ActionGroup([select, this.trash, undo, redo]));
     actionsView.add(new CreateObjectMenuGroup(this.paintlib));
+    actionsView.add(new ActionGroup([rotateLeft, rotateRight]));
     actionsView.add(new ActionGroup([cancel, save]));
     this.add(actionsView);
 
