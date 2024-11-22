@@ -29,14 +29,14 @@ import { CreateObjectMenuGroup } from './create-object-menu-group/create-object-
 import { RotateAction } from '../actions/rotate-action';
 import { xor } from '../utils/utils';
 import { UIActionType } from '../config/ui-action-type';
+import { DrawingOption } from '../config/drawing-option';
+import { ObjectRegistry } from '../config/object-registry';
 
 export class MainMenu extends Component<'div'> {
   private trash: ActionButton;
 
   private options: {
-    fgColor: MenuButton;
-    bgColor: MenuButton;
-    tickness: MenuButton;
+    [key in DrawingOption]: MenuButton;
   };
 
   constructor(private paintlib: PaintLib) {
@@ -60,7 +60,11 @@ export class MainMenu extends Component<'div'> {
     actionsView.add(new CreateObjectMenuGroup(this.paintlib));
     if (this.paintlib.options?.allowRotate) {
       const rotateLeft = new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'left'), RotateLeftSVG);
-      const rotateRight = new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'right'), RotateRightSVG);
+      const rotateRight = new ActionButton(
+        this.paintlib,
+        () => new RotateAction(this.paintlib, 'right'),
+        RotateRightSVG,
+      );
       actionsView.add(new ActionGroup([rotateLeft, rotateRight]));
     }
     actionsView.add(new ActionGroup([cancel, save]));
@@ -103,27 +107,14 @@ export class MainMenu extends Component<'div'> {
       (store) => store.activeAction,
       (action) => {
         if (this.paintlib.options?.proactivelyShowOptions) {
-          const allKeys: (keyof typeof this.options)[] = ['fgColor', 'bgColor', 'tickness'];
-          const visible: (keyof typeof this.options)[] = [];
+          const available: DrawingOption[] = ObjectRegistry.getObjectMeta(action)?.allowedOptions;
 
-          if ([UIActionType.RECT, UIActionType.ELLIPSE, UIActionType.LINE, UIActionType.ARROW, UIActionType.TEXT, UIActionType.DRAW].includes(action)) {
-            visible.push('fgColor');
-          }
-
-          if ([UIActionType.RECT, UIActionType.ELLIPSE].includes(action)) {
-            visible.push('bgColor');
-          }
-
-          if ([UIActionType.RECT, UIActionType.ELLIPSE, UIActionType.LINE, UIActionType.ARROW, UIActionType.DRAW].includes(action)) {
-            visible.push('tickness');
-          }
-
-          for (const key of allKeys) {
+          for (const key of Object.values(DrawingOption)) {
             // Keep option visible when whole bar is hidden to keep the size
-            this.options[key].setVisible(visible.includes(key));
+            this.options[key].setVisible(!!available && available.includes(key));
           }
 
-          optionsView.setVisible(visible.length > 0);
+          optionsView.setVisible(available.length > 0);
         }
 
         this.options.fgColor.setImage(action === UIActionType.TEXT ? TextColorSVG : ForegroundColorSVG);
@@ -133,7 +124,9 @@ export class MainMenu extends Component<'div'> {
 
   setupEvent() {
     // Event for enable / disable trash
-    const selectionEvent = (event: Partial<TEvent<TPointerEvent>> & { selected: FabricObject[]; deselected: FabricObject[] }) => {
+    const selectionEvent = (
+      event: Partial<TEvent<TPointerEvent>> & { selected: FabricObject[]; deselected: FabricObject[] },
+    ) => {
       this.trash.setDisable((event.selected?.length ?? 0) <= 0);
     };
 

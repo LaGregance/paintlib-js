@@ -15,6 +15,7 @@ import { DrawAction } from '../actions/draw-action';
 import { PaintLib } from '../paintlib';
 import { CreateObjectAction } from '../actions/create-object-action';
 import { UIActionType } from './ui-action-type';
+import { DrawingOption } from './drawing-option';
 
 export type PaintObjectClass = new () => PaintObject<any>;
 
@@ -22,6 +23,7 @@ export type PaintObjectMetadata = {
   action: UIActionType;
   clazz: PaintObjectClass;
   icon: string;
+  allowedOptions?: DrawingOption[];
 };
 
 export abstract class ObjectRegistry {
@@ -30,12 +32,42 @@ export abstract class ObjectRegistry {
   private static mapClazzToMeta = new Map<PaintObjectClass, PaintObjectMetadata>();
 
   private static readonly configs: PaintObjectMetadata[] = [
-    { action: UIActionType.RECT, clazz: PaintRect, icon: RectangleSVG },
-    { action: UIActionType.ELLIPSE, clazz: PaintEllipse, icon: EllipseSVG },
-    { action: UIActionType.ARROW, clazz: PaintArrow, icon: ArrowSVG },
-    { action: UIActionType.LINE, clazz: PaintLine, icon: LineSVG },
-    { action: UIActionType.TEXT, clazz: PaintText, icon: TextSVG },
-    { action: UIActionType.DRAW, clazz: PaintDraw, icon: DrawSVG },
+    {
+      action: UIActionType.RECT,
+      clazz: PaintRect,
+      icon: RectangleSVG,
+      allowedOptions: [DrawingOption.FG_COLOR, DrawingOption.BG_COLOR, DrawingOption.TICKNESS],
+    },
+    {
+      action: UIActionType.ELLIPSE,
+      clazz: PaintEllipse,
+      icon: EllipseSVG,
+      allowedOptions: [DrawingOption.FG_COLOR, DrawingOption.BG_COLOR, DrawingOption.TICKNESS],
+    },
+    {
+      action: UIActionType.ARROW,
+      clazz: PaintArrow,
+      icon: ArrowSVG,
+      allowedOptions: [DrawingOption.FG_COLOR, DrawingOption.TICKNESS],
+    },
+    {
+      action: UIActionType.LINE,
+      clazz: PaintLine,
+      icon: LineSVG,
+      allowedOptions: [DrawingOption.FG_COLOR, DrawingOption.TICKNESS],
+    },
+    {
+      action: UIActionType.TEXT,
+      clazz: PaintText,
+      icon: TextSVG,
+      allowedOptions: [DrawingOption.FG_COLOR],
+    },
+    {
+      action: UIActionType.DRAW,
+      clazz: PaintDraw,
+      icon: DrawSVG,
+      allowedOptions: [DrawingOption.FG_COLOR, DrawingOption.TICKNESS],
+    },
   ];
 
   private static init() {
