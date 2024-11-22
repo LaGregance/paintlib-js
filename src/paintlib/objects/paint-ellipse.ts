@@ -1,6 +1,6 @@
 import { Ellipse, Point, TBBox } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
-import { createResizeControls2D } from '../utils/object-resize-control-2d';
+import { createResizeControls2D } from '../utils/object-resize-controls-2d';
 import { PaintObjectFields } from '../models/paint-object-fields';
 
 export class PaintEllipse extends PaintObject<Ellipse> {
@@ -13,8 +13,8 @@ export class PaintEllipse extends PaintObject<Ellipse> {
     };
   }
 
-  updateLayout(layout: TBBox, start: Point, end: Point) {
-    super.updateLayout(layout, start, end);
+  updateLayout(layout: TBBox, vector: Point) {
+    super.updateLayout(layout, vector);
 
     const rx = layout.width / 2;
     const ry = layout.height / 2;
@@ -42,7 +42,7 @@ export class PaintEllipse extends PaintObject<Ellipse> {
     super.set(fields);
 
     if (fields.strokeWidth) {
-      this.updateLayout(this.getLayout(), this.getStart(), this.getEnd());
+      this.updateLayout(this.getLayout(), this.vector);
     }
     this.fabricObject.set(fields);
   }

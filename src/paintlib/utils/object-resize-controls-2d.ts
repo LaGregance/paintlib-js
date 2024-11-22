@@ -55,11 +55,7 @@ export const createResizeControls2D = (obj: PaintObject<any>) => {
         newBox.top -= Math.sin(angle + Math.PI / 2) * newBox.height;
       }
 
-      obj.updateLayout(
-        newBox,
-        new Point(newBox.left, newBox.top),
-        new Point(newBox.left + newBox.width, newBox.top + newBox.height),
-      );
+      obj.updateLayout(newBox, new Point(newBox.width, newBox.height));
       target.setCoords();
       return true;
     }

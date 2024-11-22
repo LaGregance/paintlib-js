@@ -1,18 +1,23 @@
 import { Line, Point, TBBox } from 'fabric';
-import { PaintVectorObject } from './abstract/paint-vector-object';
 import { PaintObjectFields } from '../models/paint-object-fields';
+import { PaintObject } from './abstract/paint-object';
+import { createResizeControlsVector } from '../utils/object-resize-controls-vector';
+import { getEndPoint, getStartPoint } from '../utils/vector-utils';
 
-export class PaintLine extends PaintVectorObject<Line> {
+export class PaintLine extends PaintObject<Line> {
   instantiate(point: Point) {
     this.fabricObject = new Line([point.x, point.y, point.x + 1, point.y + 1], {
       hasBorders: false,
       perPixelTargetFind: true,
     });
-    super.instantiate(point);
+    this.fabricObject.controls = createResizeControlsVector(this);
   }
 
-  updateLayout(_layout: TBBox, start: Point, end: Point) {
-    super.updateLayout(_layout, start, end);
+  updateLayout(layout: TBBox, vector: Point) {
+    super.updateLayout(layout, vector);
+
+    const start = getStartPoint(layout, this.vector);
+    const end = getEndPoint(layout, this.vector);
 
     this.fabricObject.set({
       x1: start.x,

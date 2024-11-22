@@ -38,6 +38,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 500;
 }
 
 .paintlib-menu {
@@ -51,6 +52,7 @@ body {
     top: 0;
     right: 0;
     left: 0;
+    z-index: 1000;
 }
 
 .paintlib-menu-line {

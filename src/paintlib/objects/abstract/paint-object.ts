@@ -1,15 +1,12 @@
 import { Object as FabricObject, Point, TBBox } from 'fabric';
 import { PaintObjectFields } from '../../models/paint-object-fields';
 import { PaintObjectJson } from './paint-object-json';
+import { getEndPoint, getStartPoint } from '../../utils/vector-utils';
 
 export abstract class PaintObject<T extends FabricObject> {
   protected vector: Point;
   protected fabricObject: T;
   protected fields: Partial<PaintObjectFields> = {};
-
-  attach(obj: T) {
-    this.fabricObject = obj;
-  }
 
   /**
    * Create the object at specific position.
@@ -36,12 +33,11 @@ export abstract class PaintObject<T extends FabricObject> {
    * Note: start & end are useful when object should be oriented (like arrow)
    *
    * @param layout The layout
-   * @param start First point of the creation
-   * @param end Last point of the creation
+   * @param vector The vector that represent the direction of the object
    * @protected
    */
-  updateLayout(layout: TBBox, start: Point, end: Point) {
-    this.vector = end.subtract(start);
+  updateLayout(layout: TBBox, vector: Point) {
+    this.vector = vector;
   }
 
   /**
@@ -72,13 +68,11 @@ export abstract class PaintObject<T extends FabricObject> {
   }
 
   getStart() {
-    const layout = this.getLayout();
-    return new Point(layout.left, layout.top);
+    return getStartPoint(this.getLayout(), this.vector);
   }
 
   getEnd() {
-    const layout = this.getLayout();
-    return new Point(layout.left + layout.width, layout.top + layout.height);
+    return getEndPoint(this.getLayout(), this.vector);
   }
 
   /**
@@ -88,8 +82,8 @@ export abstract class PaintObject<T extends FabricObject> {
    * @param translation
    */
   rotateWithCanvas(scale: number, rotation: number, translation: Point) {
-    const start = this.getStart().scalarMultiply(scale).rotate(rotation).add(translation);
-    const end = this.getEnd().scalarMultiply(scale).rotate(rotation).add(translation);
+    const start = getStartPoint(this.getLayout(), this.vector).scalarMultiply(scale).rotate(rotation).add(translation);
+    const end = getEndPoint(this.getLayout(), this.vector).scalarMultiply(scale).rotate(rotation).add(translation);
 
     this.updateLayout(
       {
@@ -98,8 +92,7 @@ export abstract class PaintObject<T extends FabricObject> {
         width: Math.abs(start.x - end.x),
         height: Math.abs(start.y - end.y),
       },
-      start,
-      end,
+      end.subtract(start),
     );
   }
 

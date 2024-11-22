@@ -1,13 +1,15 @@
 import { Group, Line, Point, TBBox, Triangle } from 'fabric';
-import { PaintVectorObject } from './abstract/paint-vector-object';
 import { PaintObjectFields } from '../models/paint-object-fields';
+import { PaintObject } from './abstract/paint-object';
+import { createResizeControlsVector } from '../utils/object-resize-controls-vector';
+import { getEndPoint, getStartPoint } from '../utils/vector-utils';
 
 const ARROW_WIDTH_BASE = 10;
 const ARROW_HEIGHT_BASE = 10;
 const ARROW_WIDTH_FACTOR = 2;
 const ARROW_HEIGHT_FACTOR = 2;
 
-export class PaintArrow extends PaintVectorObject<Group> {
+export class PaintArrow extends PaintObject<Group> {
   private line: Line;
   private arrow: Triangle;
 
@@ -19,18 +21,21 @@ export class PaintArrow extends PaintVectorObject<Group> {
       hasBorders: false,
       perPixelTargetFind: true,
     });
-    this.updateLayout({ left: point.x, top: point.y, width: 1, height: 1 }, point, new Point(point.x + 1, point.y + 1));
-    super.instantiate(point);
+    this.updateLayout({ left: point.x, top: point.y, width: 1, height: 1 }, new Point(1, 1));
+    this.fabricObject.controls = createResizeControlsVector(this);
   }
 
-  updateLayout(layout: TBBox, start: Point, end: Point) {
-    super.updateLayout(layout, start, end);
+  updateLayout(layout: TBBox, vector: Point) {
+    super.updateLayout(layout, vector);
 
     // Arrowhead size
     const arrowWidth = ARROW_WIDTH_BASE + ARROW_WIDTH_FACTOR * this.line.strokeWidth;
     const arrowHeight = ARROW_HEIGHT_BASE + ARROW_HEIGHT_FACTOR * this.line.strokeWidth;
 
     // In group object are positioned relative to center, that's why we use width/2 & height/2
+    let start = getStartPoint(layout, this.vector);
+    let end = getEndPoint(layout, this.vector);
+
     start = new Point(start.x - layout.left - layout.width / 2, start.y - layout.top - layout.height / 2);
     end = new Point(end.x - layout.left - layout.width / 2, end.y - layout.top - layout.height / 2);
 
@@ -71,7 +76,7 @@ export class PaintArrow extends PaintVectorObject<Group> {
 
     if (fields.strokeWidth) {
       this.line.set({ strokeWidth: fields.strokeWidth });
-      this.updateLayout(this.getLayout(), this.getStart(), this.getEnd());
+      this.updateLayout(this.getLayout(), this.vector);
     }
     if (fields.stroke) {
       this.line.set({ stroke: fields.stroke });
