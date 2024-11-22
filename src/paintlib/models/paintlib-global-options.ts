@@ -1,4 +1,4 @@
-export type PaintLibOptions = {
+export type PaintlibGlobalOptions = {
   palette?: string[];
   tickness?: number[];
   proactivelyShowOptions?: boolean;

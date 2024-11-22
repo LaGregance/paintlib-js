@@ -13,9 +13,10 @@ export abstract class PaintObject<T extends FabricObject> {
    * You should not override this function in subclass (use instantiate instead).
    *
    * @param point
+   * @param restoreData
    */
-  create(point: Point) {
-    this.instantiate(point);
+  create(point: Point, restoreData?: PaintObjectJson) {
+    this.instantiate(point, restoreData);
   }
 
   /**
@@ -23,9 +24,10 @@ export abstract class PaintObject<T extends FabricObject> {
    * `this.object` need to be defined after this function is called.
    *
    * @param point
+   * @param restoreData
    * @protected
    */
-  abstract instantiate(point: Point): void;
+  abstract instantiate(point: Point, restoreData?: PaintObjectJson): void;
 
   /**
    * Update the layout of the object, used during creation process & resizing.
@@ -97,6 +99,20 @@ export abstract class PaintObject<T extends FabricObject> {
   }
 
   /**
+   * Override this function to add extras during serialization process
+   */
+  serializeExtras(): any {
+    return undefined;
+  }
+
+  /**
+   * Override this function to restore extras
+   */
+  restoreExtras(data: PaintObjectJson): any {
+    return undefined;
+  }
+
+  /**
    * Serialize the object in order to restore it later.
    */
   serialize(): PaintObjectJson {
@@ -108,6 +124,7 @@ export abstract class PaintObject<T extends FabricObject> {
       scaleX: this.fabricObject.scaleX,
       scaleY: this.fabricObject.scaleY,
       fields: this.fields,
+      extras: this.serializeExtras(),
     };
   }
 
@@ -115,15 +132,17 @@ export abstract class PaintObject<T extends FabricObject> {
    * Restore the object from a JSON object (obtained from serialize function)
    * @param data
    */
-  public restoreObject(data: PaintObjectJson) {
+  restoreObject(data: PaintObjectJson) {
     // TODO: Scale regarding to the export canvas size & the actual size
+    this.create(new Point(data.layout.left, data.layout.top), data);
     this.vector = data.vector;
+    this.set(data.fields);
     this.fabricObject.set({
       angle: this.fabricObject.angle,
       scaleX: this.fabricObject.scaleX,
       scaleY: this.fabricObject.scaleY,
     });
-    this.set(this.fields);
+    this.restoreExtras(data);
     this.updateLayout(data.layout, this.vector);
   }
 }

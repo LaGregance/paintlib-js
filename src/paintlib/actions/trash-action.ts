@@ -8,9 +8,9 @@ export class TrashAction extends BaseClickableAction {
   }
 
   onClick() {
-    const target = this.paintlib.canvas.getActiveObject();
+    const target = this.paintlib.getSelectedObject();
     if (target) {
-      this.paintlib.canvas.remove(target);
+      this.paintlib.remove(target);
     }
   }
 }
