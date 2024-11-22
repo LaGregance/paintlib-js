@@ -75,6 +75,22 @@ export abstract class PaintObject<T extends Object> {
     return new Point(layout.left + layout.width, layout.top + layout.height);
   }
 
+  rotateWithCanvas(direction: 'left' | 'right', scale: number, rotation: number, translation: Point) {
+    const start = this.getStart().scalarMultiply(scale).rotate(rotation).add(translation);
+    const end = this.getEnd().scalarMultiply(scale).rotate(rotation).add(translation);
+
+    this.updateLayout(
+      {
+        left: Math.min(start.x, end.x),
+        top: Math.min(start.y, end.y),
+        width: Math.abs(start.x - end.x),
+        height: Math.abs(start.y - end.y),
+      },
+      start,
+      end,
+    );
+  }
+
   /**
    * Serialize the object in order to restore it later.
    */

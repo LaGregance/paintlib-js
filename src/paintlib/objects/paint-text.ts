@@ -1,4 +1,4 @@
-import { Point, TBBox, Textbox } from 'fabric';
+import { Point, TBBox, Textbox, util } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 import { PaintObjectFields } from '../models/paint-object-fields';
 
@@ -29,6 +29,19 @@ export class PaintText extends PaintObject<Textbox> {
     }
 
     super.set(fields);
+  }
+
+  rotateWithCanvas(direction: 'left' | 'right', scale: number, rotation: number, translation: Point) {
+    const start = this.getStart().scalarMultiply(scale).rotate(rotation).add(translation);
+
+    this.fabricObject.set({
+      left: start.x,
+      top: start.y,
+      angle: this.fabricObject.angle + util.radiansToDegrees(rotation),
+      scaleX: this.fabricObject.scaleX * scale,
+      scaleY: this.fabricObject.scaleY * scale,
+    });
+    this.fabricObject.setCoords();
   }
 
   restore(data: any) {}

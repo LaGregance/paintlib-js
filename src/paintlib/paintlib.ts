@@ -235,22 +235,10 @@ export class PaintLib {
 
     const objRotation = util.degreesToRadians(direction === 'left' ? -90 : 90);
     const objScale = imgHeight / actualWidth;
-    const translate = new Point(direction === 'right' ? imgWidth : 0, direction === 'right' ? 0 : imgHeight);
+    const translation = new Point(direction === 'right' ? imgWidth : 0, direction === 'right' ? 0 : imgHeight);
 
     for (const obj of this.objects) {
-      const start = obj.getStart().scalarMultiply(objScale).rotate(objRotation).add(translate);
-      const end = obj.getEnd().scalarMultiply(objScale).rotate(objRotation).add(translate);
-
-      obj.updateLayout(
-        {
-          left: Math.min(start.x, end.x),
-          top: Math.min(start.y, end.y),
-          width: Math.abs(start.x - end.x),
-          height: Math.abs(start.y - end.y),
-        },
-        start,
-        end,
-      );
+      obj.rotateWithCanvas(direction, objScale, objRotation, translation);
     }
 
     this.canvas.renderAll();
