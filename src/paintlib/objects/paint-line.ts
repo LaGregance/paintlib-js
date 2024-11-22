@@ -1,9 +1,13 @@
 import { Line, Point, TBBox } from 'fabric';
 import { PaintVectorObject } from './abstract/paint-vector-object';
+import { PaintObjectFields } from '../models/paint-object-fields';
 
 export class PaintLine extends PaintVectorObject<Line> {
   instantiate(point: Point) {
-    this.fabricObject = new Line([point.x, point.y, point.x + 1, point.y + 1], { hasBorders: false, perPixelTargetFind: true });
+    this.fabricObject = new Line([point.x, point.y, point.x + 1, point.y + 1], {
+      hasBorders: false,
+      perPixelTargetFind: true,
+    });
     super.instantiate(point);
   }
 
@@ -27,9 +31,8 @@ export class PaintLine extends PaintVectorObject<Line> {
     };
   }
 
-  restore(data: any) {}
-
-  toJSON(): any {
-    return {};
+  set(fields: PaintObjectFields) {
+    super.set(fields);
+    this.fabricObject.set(fields);
   }
 }

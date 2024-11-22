@@ -4,8 +4,6 @@ import { createResizeControls2D } from '../utils/object-resize-control-2d';
 import { PaintObjectFields } from '../models/paint-object-fields';
 
 export class PaintEllipse extends PaintObject<Ellipse> {
-  private targetStrokeWidth: number;
-
   instantiate(point: Point) {
     this.fabricObject = new Ellipse({ x: point.x, y: point.y, rx: 1, ry: 1, objectCaching: false });
     this.fabricObject.controls = {
@@ -20,7 +18,7 @@ export class PaintEllipse extends PaintObject<Ellipse> {
 
     const rx = layout.width / 2;
     const ry = layout.height / 2;
-    const strokeWidth = Math.min(rx, ry, this.targetStrokeWidth);
+    const strokeWidth = Math.min(rx, ry, this.fields.strokeWidth);
 
     this.fabricObject.set({
       left: layout.left,
@@ -41,16 +39,11 @@ export class PaintEllipse extends PaintObject<Ellipse> {
   }
 
   set(fields: Partial<PaintObjectFields>) {
+    super.set(fields);
+
     if (fields.strokeWidth) {
-      this.targetStrokeWidth = fields.strokeWidth;
       this.updateLayout(this.getLayout(), this.getStart(), this.getEnd());
     }
-    super.set(fields);
-  }
-
-  restore(data: any) {}
-
-  toJSON(): any {
-    return {};
+    this.fabricObject.set(fields);
   }
 }

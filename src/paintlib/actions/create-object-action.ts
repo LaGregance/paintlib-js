@@ -32,12 +32,18 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
       strokeWidth: options.tickness,
       stroke: options.fgColor,
       fill: options.bgColor,
+    });
+    this.object['fabricObject'].set({
       selectable: false,
       lockMovementX: false,
       lockMovementY: false,
     });
 
-    this.object.updateLayout({ left: event.scenePoint.x, top: event.scenePoint.y, width: 1, height: 1 }, this.originalXY, event.scenePoint);
+    this.object.updateLayout(
+      { left: event.scenePoint.x, top: event.scenePoint.y, width: 1, height: 1 },
+      this.originalXY,
+      event.scenePoint,
+    );
 
     this.paintlib.add(this.object);
   }

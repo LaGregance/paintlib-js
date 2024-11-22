@@ -4,8 +4,6 @@ import { createResizeControls2D } from '../utils/object-resize-control-2d';
 import { PaintObjectFields } from '../models/paint-object-fields';
 
 export class PaintRect extends PaintObject<Rect> {
-  private targetStrokeWidth: number;
-
   instantiate(point: Point) {
     this.fabricObject = new Rect({ left: point.x, top: point.y, width: 1, height: 1 });
     this.fabricObject.controls = {
@@ -18,7 +16,7 @@ export class PaintRect extends PaintObject<Rect> {
   updateLayout(layout: TBBox, start: Point, end: Point) {
     super.updateLayout(layout, start, end);
 
-    const strokeWidth = Math.min(layout.width - 1, layout.height - 1, this.targetStrokeWidth);
+    const strokeWidth = Math.min(layout.width - 1, layout.height - 1, this.fields.strokeWidth);
     this.fabricObject.set({
       left: layout.left,
       top: layout.top,
@@ -37,16 +35,11 @@ export class PaintRect extends PaintObject<Rect> {
   }
 
   set(fields: Partial<PaintObjectFields>) {
+    super.set(fields);
+
     if (fields.strokeWidth) {
-      this.targetStrokeWidth = fields.strokeWidth;
       this.updateLayout(this.getLayout(), this.getStart(), this.getEnd());
     }
-    super.set(fields);
-  }
-
-  restore(data: any) {}
-
-  toJSON(): any {
-    return {};
+    this.fabricObject.set(fields);
   }
 }

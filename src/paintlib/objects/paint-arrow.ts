@@ -14,7 +14,11 @@ export class PaintArrow extends PaintVectorObject<Group> {
   instantiate(point: Point) {
     this.line = new Line(undefined);
     this.arrow = new Triangle();
-    this.fabricObject = new Group([this.line, this.arrow], { hasControls: false, hasBorders: false, perPixelTargetFind: true });
+    this.fabricObject = new Group([this.line, this.arrow], {
+      hasControls: false,
+      hasBorders: false,
+      perPixelTargetFind: true,
+    });
     this.updateLayout({ left: point.x, top: point.y, width: 1, height: 1 }, point, new Point(point.x + 1, point.y + 1));
     super.instantiate(point);
   }
@@ -63,6 +67,8 @@ export class PaintArrow extends PaintVectorObject<Group> {
   }
 
   set(fields: PaintObjectFields) {
+    super.set(fields);
+
     if (fields.strokeWidth) {
       this.line.set({ strokeWidth: fields.strokeWidth });
       this.updateLayout(this.getLayout(), this.getStart(), this.getEnd());
@@ -71,11 +77,5 @@ export class PaintArrow extends PaintVectorObject<Group> {
       this.line.set({ stroke: fields.stroke });
       this.arrow.set({ fill: fields.stroke });
     }
-  }
-
-  restore(data: any) {}
-
-  toJSON(): any {
-    return {};
   }
 }

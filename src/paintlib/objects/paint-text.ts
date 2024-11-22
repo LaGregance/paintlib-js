@@ -25,7 +25,7 @@ export class PaintText extends PaintObject<Textbox> {
   }
 
   set(fields: PaintObjectFields) {
-    fields = { ...fields };
+    super.set(fields);
 
     delete fields.strokeWidth;
     delete fields.fill;
@@ -33,8 +33,7 @@ export class PaintText extends PaintObject<Textbox> {
     if (fields.stroke) {
       fields.fill = fields.stroke;
     }
-
-    super.set(fields);
+    this.fabricObject.set(fields);
   }
 
   rotateWithCanvas(scale: number, rotation: number, translation: Point) {
@@ -48,11 +47,5 @@ export class PaintText extends PaintObject<Textbox> {
       scaleY: this.fabricObject.scaleY * scale,
     });
     this.fabricObject.setCoords();
-  }
-
-  restore(data: any) {}
-
-  toJSON(): any {
-    return {};
   }
 }

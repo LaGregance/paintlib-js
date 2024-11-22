@@ -1,5 +1,6 @@
 import { Point, Path, util } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
+import { PaintObjectFields } from '../models/paint-object-fields';
 
 export class PaintDraw extends PaintObject<Path> {
   instantiate(point: Point) {}
@@ -17,9 +18,8 @@ export class PaintDraw extends PaintObject<Path> {
     this.fabricObject.setCoords();
   }
 
-  restore(data: any) {}
-
-  toJSON(): any {
-    return {};
+  set(fields: PaintObjectFields) {
+    super.set(fields);
+    this.fabricObject.set(fields);
   }
 }

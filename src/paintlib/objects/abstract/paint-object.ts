@@ -1,9 +1,11 @@
-import { Object, Point, TBBox } from 'fabric';
+import { Object as FabricObject, Point, TBBox } from 'fabric';
 import { PaintObjectFields } from '../../models/paint-object-fields';
+import { PaintObjectJson } from './paint-object-json';
 
-export abstract class PaintObject<T extends Object> {
+export abstract class PaintObject<T extends FabricObject> {
   protected vector: Point;
   protected fabricObject: T;
+  protected fields: Partial<PaintObjectFields> = {};
 
   attach(obj: T) {
     this.fabricObject = obj;
@@ -44,12 +46,12 @@ export abstract class PaintObject<T extends Object> {
 
   /**
    * Update fields of the underlying fabric object.
-   * You can override this function in subclass to customize the behavior.
+   * This method should be overridden to effectively set fields.
    *
    * @param fields
    */
   set(fields: Partial<PaintObjectFields>) {
-    this.fabricObject.set(fields);
+    this.fields = Object.assign(this.fields, fields);
   }
 
   /**
@@ -104,11 +106,21 @@ export abstract class PaintObject<T extends Object> {
   /**
    * Serialize the object in order to restore it later.
    */
-  abstract toJSON(): any;
+  serialize(): PaintObjectJson {
+    return {
+      type: this.constructor.name,
+      layout: this.getLayout(),
+      vector: this.vector,
+      angle: this.fabricObject.angle,
+      scaleX: this.fabricObject.scaleX,
+      scaleY: this.fabricObject.scaleY,
+      fields: this.fields,
+    };
+  }
 
   /**
    * Restore the object from a JSON object (obtained from toJSON function)
    * @param data
    */
-  abstract restore(data: any): void;
+  restore(data: PaintObjectJson) {}
 }
