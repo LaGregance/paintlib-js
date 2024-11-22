@@ -7,13 +7,13 @@ import { useState } from '../../utils/use-state';
 
 export class ColorPickerButton extends MenuButton {
   constructor(
-    private paintlib: PaintLib,
+    paintlib: PaintLib,
     private getColor: (store: UIStore) => string,
     private setColor: (color: string) => void,
     private allowTransparent: boolean,
     image: string,
   ) {
-    super(image, '5px');
+    super(paintlib, image, '5px');
   }
 
   protected buildMenu(menu: View) {

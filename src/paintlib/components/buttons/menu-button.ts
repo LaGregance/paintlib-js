@@ -1,11 +1,13 @@
 import { Component } from '../component';
 import { View } from '../view';
+import { PaintLib } from '../../paintlib';
 
 export abstract class MenuButton extends Component<'div'> {
   protected button: HTMLButtonElement;
   protected menu: View;
 
   constructor(
+    protected paintlib: PaintLib,
     private image: string,
     private padding: string,
     private bgColor: string = '#ffffffB4',
@@ -20,7 +22,8 @@ export abstract class MenuButton extends Component<'div'> {
     this.button.className = 'paintlib-menu-button';
     this.button.innerHTML = this.image;
 
-    this.menu = new View('option-floating-menu display-none');
+    this.menu = new View('paintlib-picker-floating-menu');
+    this.menu.setVisible(false);
     this.menu.element.style.padding = this.padding;
     this.menu.element.style.backgroundColor = this.bgColor;
     this.buildMenu(this.menu);
@@ -31,10 +34,10 @@ export abstract class MenuButton extends Component<'div'> {
     };
 
     this.button.onclick = (event) => {
-      if (this.menu.element.classList.contains('display-none')) {
+      if (this.menu.isVisible()) {
         const anchor = this.button.getBoundingClientRect();
         this.menu.element.style.top = anchor.bottom + 'px';
-        this.menu.element.classList.remove('display-none');
+        this.menu.setVisible(true);
 
         requestAnimationFrame(() => {
           // If we don't requestAnimationFrame, the cancelEvent is triggered directly
@@ -52,7 +55,7 @@ export abstract class MenuButton extends Component<'div'> {
 
   hideMenu = (event?: MouseEvent) => {
     // Arrow function to bind this
-    this.menu.element.classList.add('display-none');
+    this.menu.setVisible(false);
     document.removeEventListener('click', this.hideMenu);
     event?.stopPropagation();
     this.button.classList.remove('selected');

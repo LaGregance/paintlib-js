@@ -1,3 +1,4 @@
+/* TODO: Should not be in this file */
 body {
     padding: 0;
     margin: 0;
@@ -10,9 +11,21 @@ body {
     width: 100%;
     height: 100%;
 }
+/* ******************************** */
+
+:root {
+    /* Note: effective default are in paintlib constructor */
+    --paintlib-background-color: #c0c0c0;
+    --paintlib-menu-color: #222831;
+    --paintlib-icon-color: #c0c0c0;
+    --paintlib-icon-size: 24px;
+    --paintlib-button-size: 40px;
+    --paintlib-button-gap: 6px;
+    --paintlib-group-gap: 20px;
+}
 
 .paintlib-root {
-    background-color: silver;
+    background-color: var(--paintlib-background-color);
     height: 100%;
     width: 100%;
     display: flex;
@@ -20,13 +33,20 @@ body {
     position: relative;
 }
 
+.paintlib-canvas-container {
+    flex: 1 1 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .paintlib-menu {
-    background-color: #222831;
+    background-color: var(--paintlib-menu-color);
+    color: var(--paintlib-icon-color);
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    color: #c0c0c0;
     position: absolute;
     top: 0;
     right: 0;
@@ -34,25 +54,16 @@ body {
 }
 
 .paintlib-menu-line {
-    height: 40px; /* TODO: SHOULD BE DYNAMIC (related to paintlib-canvas-container margin-top) */
+    gap: var(--paintlib-group-gap);
     width: 100%;
     display: flex;
     flex: 1;
     justify-content: space-between;
-    gap: 20px;
 }
 
 .paintlib-menu-group {
+    gap: var(--paintlib-button-gap);
     display: flex;
-    gap: 5px;
-}
-
-.paintlib-canvas-container {
-    margin-top: 90px; /* TODO: SHOULD BE DYNAMIC (related to paintlib-menu-line height) */
-    flex: 1 1 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .paintlib-menu-button {
@@ -66,57 +77,47 @@ body {
     padding: 0;
     font: inherit;
     cursor: pointer;
-    height: 40px;
-    width: 40px;
+    height: var(--paintlib-button-size);
+    width: var(--paintlib-button-size);
+}
+
+.paintlib-menu-button svg {
+    height: var(--paintlib-icon-size);
+    width: var(--paintlib-icon-size);
 }
 
 .paintlib-menu-button.selected {
-    background-image: linear-gradient(to top, #c0c0c0 0%, transparent 30%);
+    background-image: linear-gradient(to top, var(--paintlib-icon-color) 0%, transparent 30%);
 }
 
 .paintlib-menu-button.disable {
-    color: #5f6368 !important;
+    opacity: 40% !important;
     cursor: not-allowed !important;
 }
 
 .paintlib-menu-button.disable:hover {
     background-image: none !important;
-    opacity: 100% !important;
 }
 
 .paintlib-menu-button:hover {
-    /*background-color: silver;*/
-    background-image: linear-gradient(to top, #c0c0c0 0%, transparent 30%);
+    background-image: linear-gradient(to top, var(--paintlib-icon-color) 0%, transparent 30%);
     opacity: 80%;
 }
 
-.display-none {
-    display: none !important;
-}
-
-.option-floating-menu {
+.paintlib-picker-floating-menu {
     position: absolute;
     left: 0;
     right: 0;
     z-index: 1000;
-
-    /*display: flex;
-    column-gap: 10px;
-    row-gap: 5px;*/
 }
 
-.color-picker {
-    display: flex;
-    gap: 6px;
-}
-
-.tickness-picker {
+.paintlib-tickness-picker {
     display: flex;
     gap: 15px;
     flex-wrap: wrap;
 }
 
-.tickness-item {
+.paintlib-tickness-item {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -125,6 +126,11 @@ body {
     border-radius: 5px;
 }
 
-.hoverable {
-    cursor: pointer;
+.paintlib-color-picker {
+    display: flex;
+    gap: 6px;
+}
+
+.paintlib-icon {
+    height: var(--paintlib-icon-size);
 }

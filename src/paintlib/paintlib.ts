@@ -8,6 +8,7 @@ import { useState } from './utils/use-state';
 import { DrawAction } from './actions/draw-action';
 import { PaintObject } from './objects/abstract/paint-object';
 import { UIActionType } from './config/ui-action-type';
+import { setCssProperty, px } from './utils/utils';
 
 export class PaintLib {
   public readonly element: HTMLDivElement;
@@ -22,8 +23,19 @@ export class PaintLib {
 
   constructor(
     public readonly container: HTMLElement,
-    public readonly options?: PaintLibOptions,
+    public readonly options: PaintLibOptions = {},
   ) {
+    // default style
+    options.style ??= {};
+    setCssProperty(options.style, 'backgroundColor', '--paintlib-background-color', '#c0c0c0');
+    setCssProperty(options.style, 'menuColor', '--paintlib-menu-color', '#222831');
+    setCssProperty(options.style, 'iconColor', '--paintlib-icon-color', '#c0c0c0');
+    setCssProperty(options.style, 'iconSize', '--paintlib-icon-size', 24);
+    setCssProperty(options.style, 'buttonSize', '--paintlib-button-size', 40);
+    setCssProperty(options.style, 'buttonGap', '--paintlib-button-gap', 6);
+    setCssProperty(options.style, 'groupGap', '--paintlib-group-gap', 20);
+    // -------------
+
     this.element = document.createElement('div');
     this.uiStore = createUIStore(this);
 
@@ -45,6 +57,10 @@ export class PaintLib {
 
     this.canvasContainer = document.createElement('div');
     this.canvasContainer.className = 'paintlib-canvas-container';
+    this.canvasContainer.style.marginTop = px(
+      this.options.proactivelyShowOptions ? this.options.style.buttonSize : 2 * this.options.style.buttonSize + 10,
+    );
+
     this.element.appendChild(this.canvasContainer);
 
     this.canvasEl.width = this.canvasContainer.clientWidth;

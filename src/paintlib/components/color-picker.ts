@@ -14,7 +14,7 @@ export class ColorPicker extends Component<'div'> {
   }
 
   init() {
-    this.element.className = 'color-picker';
+    this.element.className = 'paintlib-color-picker';
     const colorComponents = new Map<string, SVGSVGElement>();
 
     if (this.allowTransparent) {
@@ -23,7 +23,7 @@ export class ColorPicker extends Component<'div'> {
       svg.setAttribute('height', '34px');
       svg.setAttribute('width', '34px');
 
-      svg.classList.add('hoverable');
+      svg.style.cursor = 'pointer';
       svg.innerHTML = `
           <ellipse class="selector-circle" cx="17" cy="17" rx="16" ry="16" stroke-width="2" stroke-opacity="0" fill-opacity="0" stroke="#000000" />
           <ellipse cx="17" cy="17" rx="13" ry="13" stroke-width="0" fill="#ffffff" />
@@ -43,7 +43,7 @@ export class ColorPicker extends Component<'div'> {
       svg.setAttribute('height', '34px');
       svg.setAttribute('width', '34px');
 
-      svg.classList.add('hoverable');
+      svg.style.cursor = 'pointer';
       svg.innerHTML = `
           <ellipse class="selector-circle" cx="17" cy="17" rx="16" ry="16" stroke-width="2" stroke-opacity="0" fill-opacity="0" stroke="#000000" />
           <ellipse cx="17" cy="17" rx="13" ry="13" stroke-width="0" fill="${color}" />`;

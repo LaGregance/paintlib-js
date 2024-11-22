@@ -8,12 +8,12 @@ export class TicknessPicker extends Component<'div'> {
   }
 
   init() {
-    this.element.className = 'tickness-picker';
+    this.element.className = 'paintlib-tickness-picker';
     const ticknessComponents = new Map<number, HTMLElement>();
 
     for (const tickness of this.paintlib.getAvailableTickness()) {
       const btn = document.createElement('div');
-      btn.className = 'tickness-item';
+      btn.className = 'paintlib-tickness-item';
       btn.innerHTML = `<span>${tickness}</span><div style="background-color: black; height: ${tickness}px; width: 100px;"></div>`;
       btn.onclick = () => {
         this.paintlib.uiStore.setState((old) => ({ options: { ...old.options, tickness } }));

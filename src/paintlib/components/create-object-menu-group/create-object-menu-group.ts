@@ -12,9 +12,6 @@ import { ObjectRegistry } from '../../config/object-registry';
  * His role is to adapt the menu regarding of the width of the container and add "..." extension if relevant.
  */
 export class CreateObjectMenuGroup extends Component<'div'> {
-  private readonly ITEM_WIDTH = 40;
-  private readonly ITEM_GAP = 6;
-  private readonly GROUP_GAP = 6;
   private readonly MIN_WIDTH: number;
 
   private availableActions: UIActionType[];
@@ -31,12 +28,13 @@ export class CreateObjectMenuGroup extends Component<'div'> {
     super('div');
     this.availableActions = ObjectRegistry.getAllObjectActions();
 
-    let minWidth = 580;
-    if (this.paintlib.options?.allowRotate) {
-      minWidth += (this.ITEM_WIDTH + this.ITEM_GAP) * 2 + this.GROUP_GAP;
-    }
-
-    this.MIN_WIDTH = minWidth;
+    const style = this.paintlib.options.style;
+    const countButtons = Object.values(UIActionType).length - (this.paintlib.options.allowRotate ? 0 : 2);
+    const countGroup = 3 + (this.paintlib.options.allowRotate ? 1 : 0);
+    this.MIN_WIDTH =
+      style.groupGap * (countGroup - 1) +
+      (style.buttonSize + style.buttonGap) * countButtons -
+      style.buttonGap * countGroup;
 
     this.calcAvailableBtnCount();
     this.userActionSlots = [];
@@ -46,8 +44,12 @@ export class CreateObjectMenuGroup extends Component<'div'> {
     if (!this.container || this.container.clientWidth > this.MIN_WIDTH) {
       this.availableBtnCount = this.availableActions.length;
     } else {
-      const availableWidth = this.container.clientWidth - (this.MIN_WIDTH - this.availableActions.length * (this.ITEM_WIDTH + this.ITEM_GAP));
-      this.availableBtnCount = Math.max(Math.trunc(availableWidth / (this.ITEM_WIDTH + this.ITEM_GAP)), 2) - 1;
+      const style = this.paintlib.options.style;
+
+      const availableWidth =
+        this.container.clientWidth -
+        (this.MIN_WIDTH - this.availableActions.length * (style.buttonSize + style.buttonGap));
+      this.availableBtnCount = Math.max(Math.trunc(availableWidth / (style.buttonSize + style.buttonGap)), 2) - 1;
     }
   }
 
@@ -99,7 +101,7 @@ export class CreateObjectMenuGroup extends Component<'div'> {
       this.menuButtonsMap.set(action, menuBtn);
     }
 
-    this.moreBtn = new ShowMoreActionButton((menu) => {
+    this.moreBtn = new ShowMoreActionButton(this.paintlib, (menu) => {
       menu.add(new ActionGroup(this.availableActions.map((action) => this.menuButtonsMap.get(action))));
     });
     this.moreBtn.element.style.order = (this.availableActions.length + 2).toString();

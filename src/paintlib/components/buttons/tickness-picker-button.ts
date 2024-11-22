@@ -4,11 +4,8 @@ import { MenuButton } from './menu-button';
 import { TicknessPicker } from '../tickness-picker';
 
 export class TicknessPickerButton extends MenuButton {
-  constructor(
-    private paintlib: PaintLib,
-    image: string,
-  ) {
-    super(image, '5px');
+  constructor(paintlib: PaintLib, image: string) {
+    super(paintlib, image, '5px');
   }
 
   protected buildMenu(menu: View) {
