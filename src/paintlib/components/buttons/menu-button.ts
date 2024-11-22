@@ -34,7 +34,7 @@ export abstract class MenuButton extends Component<'div'> {
     };
 
     this.button.onclick = (event) => {
-      if (this.menu.isVisible()) {
+      if (!this.menu.isVisible()) {
         const anchor = this.button.getBoundingClientRect();
         this.menu.element.style.top = anchor.bottom + 'px';
         this.menu.setVisible(true);
