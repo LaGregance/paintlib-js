@@ -125,38 +125,7 @@ export class PaintLib {
     useState(this.uiStore, (store) => store.options.bgColor, updateFactory('fill'));
     useState(this.uiStore, (store) => store.options.tickness, updateFactory('strokeWidth'));
 
-    // this.canvas.selection = false;
-    /*this.canvas.on('object:scaling', (event) => {
-      const fabricObj = event.target;
-      const paintObj = this.objects.find((x) => x['fabricObject'] === fabricObj);
-
-      if (!paintObj) {
-        console.warn('Try to scale a non-paintlib object');
-        return;
-      }
-
-      // Calculate new radius while preserving aspect ratio
-      const scaleX = fabricObj.scaleX;
-      const scaleY = fabricObj.scaleY;
-
-      // TODO: Calc layout
-      const transform = event.transform;
-      console.log('signX = ', (transform as any).signX);
-      // paintObj.updateLayout({
-      //   x: })
-
-      fabricObj.set({
-        scaleX: 1, // Reset scaleX
-        scaleY: 1, // Reset scaleY
-      });
-      fabricObj.setCoords();
-      this.canvas.renderAll();
-    });*/
-
-    /*new ResizeObserver(() => {
-      console.log('Resize: ', container.clientWidth, container.clientHeight);
-      this.canvas.setDimensions({ width: container.clientWidth, height: container.clientHeight });
-    }).observe(container);*/
+    new ResizeObserver(this.fitViewport).observe(this.container);
   }
 
   async loadImage() {
@@ -254,11 +223,49 @@ export class PaintLib {
     const translation = new Point(direction === 'right' ? imgWidth : 0, direction === 'right' ? 0 : imgHeight);
 
     for (const obj of this.objects) {
-      obj.rotateWithCanvas(direction, objScale, objRotation, translation);
+      obj.rotateWithCanvas(objScale, objRotation, translation);
     }
 
     this.canvas.renderAll();
   }
+
+  fitViewport = () => {
+    if (!this.image) {
+      return;
+    }
+
+    const containerWidth = this.canvasContainer.clientWidth;
+    const containerHeight = this.canvasContainer.clientHeight;
+
+    const actualWidth = this.canvas.width;
+    const actualRotation = this.image.angle;
+
+    this.canvas.discardActiveObject();
+
+    const {
+      width: imgWidth,
+      height: imgHeight,
+      scale: imgScale,
+    } = calculateImageScaleToFitViewport(
+      { width: containerWidth, height: containerHeight },
+      {
+        width: actualRotation % 180 === 0 ? this.image.width : this.image.height,
+        height: actualRotation % 180 === 0 ? this.image.height : this.image.width,
+      },
+    );
+
+    this.canvas.setDimensions({ width: imgWidth, height: imgHeight });
+    this.image.scale(imgScale);
+    this.canvas.centerObject(this.image);
+
+    const objScale = imgWidth / actualWidth;
+
+    for (const obj of this.objects) {
+      obj.rotateWithCanvas(objScale, 0, new Point(0, 0));
+    }
+
+    this.canvas.renderAll();
+  };
 
   getAvailableTickness() {
     if (!this.options?.tickness) {

@@ -4,7 +4,7 @@ import { PaintObject } from './abstract/paint-object';
 export class PaintDraw extends PaintObject<Path> {
   instantiate(point: Point) {}
 
-  rotateWithCanvas(direction: 'left' | 'right', scale: number, rotation: number, translation: Point) {
+  rotateWithCanvas(scale: number, rotation: number, translation: Point) {
     const start = this.getStart().scalarMultiply(scale).rotate(rotation).add(translation);
 
     this.fabricObject.set({

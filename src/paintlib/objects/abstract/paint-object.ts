@@ -79,7 +79,13 @@ export abstract class PaintObject<T extends Object> {
     return new Point(layout.left + layout.width, layout.top + layout.height);
   }
 
-  rotateWithCanvas(direction: 'left' | 'right', scale: number, rotation: number, translation: Point) {
+  /**
+   * This function is used to rotate or resize the canvas
+   * @param scale
+   * @param rotation
+   * @param translation
+   */
+  rotateWithCanvas(scale: number, rotation: number, translation: Point) {
     const start = this.getStart().scalarMultiply(scale).rotate(rotation).add(translation);
     const end = this.getEnd().scalarMultiply(scale).rotate(rotation).add(translation);
 
