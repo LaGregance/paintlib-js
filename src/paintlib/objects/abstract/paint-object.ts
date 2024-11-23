@@ -138,9 +138,9 @@ export abstract class PaintObject<T extends FabricObject> {
     this.vector = data.vector;
     this.set(data.fields);
     this.fabricObject.set({
-      angle: this.fabricObject.angle,
-      scaleX: this.fabricObject.scaleX,
-      scaleY: this.fabricObject.scaleY,
+      angle: data.angle,
+      scaleX: data.scaleX,
+      scaleY: data.scaleY,
     });
     this.restoreExtras(data);
     this.updateLayout(data.layout, this.vector);

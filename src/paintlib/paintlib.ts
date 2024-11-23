@@ -288,7 +288,6 @@ export class PaintLib {
   add(object: PaintObject<any>) {
     this.objects.push(object);
     if (!this.canvas.contains(object['fabricObject'])) {
-      console.log('Object: ', object);
       this.canvas.add(object['fabricObject']);
     }
   }

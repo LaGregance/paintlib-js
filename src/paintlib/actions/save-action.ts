@@ -11,6 +11,7 @@ export class SaveAction extends BaseClickableAction {
     // TODO: Trigger event on paintlib
     const result = this.paintlib.serialize();
     const data = btoa(JSON.stringify(result));
+    console.log('TODO: Save: ', result);
     console.log('TODO: Save: ', data);
     console.log('TODO: Restore: ', JSON.parse(atob(data)));
   }
