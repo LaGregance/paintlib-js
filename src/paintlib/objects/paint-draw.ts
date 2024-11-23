@@ -1,7 +1,6 @@
-import { Point, Path, util, TBBox } from 'fabric';
+import { Path, Point, TBBox } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 import { PaintObjectFields } from '../models/paint-object-fields';
-import { getStartPoint } from '../utils/vector-utils';
 import { PaintObjectJson } from '../models/paint-object-json';
 
 export class PaintDraw extends PaintObject<Path> {
@@ -28,19 +27,6 @@ export class PaintDraw extends PaintObject<Path> {
       left: layout.left,
       top: layout.top,
     });
-  }
-
-  rotateWithCanvas(scale: number, rotation: number, translation: Point) {
-    const start = getStartPoint(this.getLayout(), this.vector).scalarMultiply(scale).rotate(rotation).add(translation);
-
-    this.fabricObject.set({
-      left: start.x,
-      top: start.y,
-      angle: this.fabricObject.angle + util.radiansToDegrees(rotation),
-      scaleX: this.fabricObject.scaleX * scale,
-      scaleY: this.fabricObject.scaleY * scale,
-    });
-    this.fabricObject.setCoords();
   }
 
   set(fields: Partial<PaintObjectFields>) {

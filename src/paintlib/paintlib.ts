@@ -229,7 +229,7 @@ export class PaintLib {
     const translation = new Point(direction === 'right' ? newWidth : 0, direction === 'right' ? 0 : newHeight);
 
     for (const obj of this.objects) {
-      obj.rotateWithCanvas(objScale, objRotation, translation);
+      obj.applyTransforms(objScale, objRotation, translation);
     }
 
     this.canvas.renderAll();
@@ -267,7 +267,7 @@ export class PaintLib {
     const objScale = imgWidth / actualWidth;
 
     for (const obj of this.objects) {
-      obj.rotateWithCanvas(objScale, 0, new Point(0, 0));
+      obj.applyTransforms(objScale, 0, new Point(0, 0));
     }
 
     this.canvas.renderAll();
@@ -306,9 +306,20 @@ export class PaintLib {
     if (data.image?.angle) {
       this.rotateImgAndCanvas(data.image?.angle);
     }
+    const objScale = this.canvas.width / data.width;
 
     for (const objData of data.objects) {
-      ObjectRegistry.restoreObject(this, objData);
+      const obj = ObjectRegistry.restoreObject(this, objData);
+      if (obj && objScale !== 1) {
+        const fabObj = obj['fabricObject'];
+        fabObj.set({
+          top: fabObj.top * objScale,
+          left: fabObj.left * objScale,
+          scaleX: fabObj.scaleX * objScale,
+          scaleY: fabObj.scaleY * objScale,
+        });
+        fabObj.setCoords();
+      }
     }
   }
 

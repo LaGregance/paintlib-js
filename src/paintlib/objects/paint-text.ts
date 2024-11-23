@@ -1,7 +1,6 @@
-import { Point, TBBox, Textbox, util } from 'fabric';
+import { Point, TBBox, Textbox } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 import { PaintObjectFields } from '../models/paint-object-fields';
-import { getStartPoint } from '../utils/vector-utils';
 
 export class PaintText extends PaintObject<Textbox> {
   instantiate(point: Point) {
@@ -35,18 +34,5 @@ export class PaintText extends PaintObject<Textbox> {
       fields.fill = fields.stroke;
     }
     this.fabricObject.set(fields);
-  }
-
-  rotateWithCanvas(scale: number, rotation: number, translation: Point) {
-    const start = getStartPoint(this.getLayout(), this.vector).scalarMultiply(scale).rotate(rotation).add(translation);
-
-    this.fabricObject.set({
-      left: start.x,
-      top: start.y,
-      angle: this.fabricObject.angle + util.radiansToDegrees(rotation),
-      scaleX: this.fabricObject.scaleX * scale,
-      scaleY: this.fabricObject.scaleY * scale,
-    });
-    this.fabricObject.setCoords();
   }
 }

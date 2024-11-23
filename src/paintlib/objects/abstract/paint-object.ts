@@ -1,4 +1,4 @@
-import { Object as FabricObject, Point, TBBox } from 'fabric';
+import { Object as FabricObject, Point, TBBox, util } from 'fabric';
 import { PaintObjectFields } from '../../models/paint-object-fields';
 import { PaintObjectJson } from '../../models/paint-object-json';
 import { getEndPoint, getStartPoint } from '../../utils/vector-utils';
@@ -78,24 +78,33 @@ export abstract class PaintObject<T extends FabricObject> {
   }
 
   /**
-   * This function is used to rotate or resize the canvas
+   * This function is used to rotate or resize the canvas.
+   *
    * @param scale
    * @param rotation
    * @param translation
    */
-  rotateWithCanvas(scale: number, rotation: number, translation: Point) {
-    const start = getStartPoint(this.getLayout(), this.vector).scalarMultiply(scale).rotate(rotation).add(translation);
-    const end = getEndPoint(this.getLayout(), this.vector).scalarMultiply(scale).rotate(rotation).add(translation);
+  applyTransforms(scale: number, rotation: number, translation?: Point) {
+    let start = new Point(this.fabricObject.left, this.fabricObject.top);
 
-    this.updateLayout(
-      {
-        left: Math.min(start.x, end.x),
-        top: Math.min(start.y, end.y),
-        width: Math.abs(start.x - end.x),
-        height: Math.abs(start.y - end.y),
-      },
-      end.subtract(start),
-    );
+    if (scale !== 1) {
+      start = start.scalarMultiply(scale);
+    }
+    if (rotation !== 0) {
+      start = start.rotate(rotation);
+    }
+    if (translation) {
+      start = start.add(translation);
+    }
+
+    this.fabricObject.set({
+      angle: this.fabricObject.angle + util.radiansToDegrees(rotation),
+      scaleX: this.fabricObject.scaleX * scale,
+      scaleY: this.fabricObject.scaleY * scale,
+      left: start.x,
+      top: start.y,
+    });
+    this.fabricObject.setCoords();
   }
 
   /**
@@ -133,7 +142,6 @@ export abstract class PaintObject<T extends FabricObject> {
    * @param data
    */
   restoreObject(data: PaintObjectJson) {
-    // TODO: Scale regarding to the export canvas size & the actual size
     this.create(new Point(data.layout.left, data.layout.top), data);
     this.vector = data.vector;
     this.set(data.fields);
