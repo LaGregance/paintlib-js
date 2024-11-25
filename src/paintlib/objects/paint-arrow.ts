@@ -32,10 +32,10 @@ export class PaintArrow extends PaintObject<Group> {
     const arrowWidth = ARROW_WIDTH_BASE + ARROW_WIDTH_FACTOR * this.line.strokeWidth;
     const arrowHeight = ARROW_HEIGHT_BASE + ARROW_HEIGHT_FACTOR * this.line.strokeWidth;
 
-    // In group object are positioned relative to center, that's why we use width/2 & height/2
-    let start = getStartPoint(layout, this.vector);
-    let end = getEndPoint(layout, this.vector);
+    let start = getStartPoint(layout, vector);
+    let end = getEndPoint(layout, vector);
 
+    // In group object are positioned relative to center, that's why we use width/2 & height/2
     start = new Point(start.x - layout.left - layout.width / 2, start.y - layout.top - layout.height / 2);
     end = new Point(end.x - layout.left - layout.width / 2, end.y - layout.top - layout.height / 2);
 

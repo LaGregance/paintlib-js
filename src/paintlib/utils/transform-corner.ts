@@ -20,15 +20,15 @@ export class TransformCorner {
     public readonly horizontal: HorizontalPlace,
   ) {}
 
-  getTransformOffset(angle: number, deltaX: number, deltaY: number): TBBox {
+  getTransformOffset(angle: number, deltaX: number, deltaY: number, scaleX: number, scaleY: number): TBBox {
     const transform: TBBox = { left: 0, top: 0, width: 0, height: 0 };
 
     if (this.horizontal === 'l') {
       // We move the left point: adjust x,y & width
       transform.width -= deltaX;
 
-      transform.left += Math.cos(angle) * deltaX;
-      transform.top += Math.sin(angle) * deltaX;
+      transform.left += Math.cos(angle) * deltaX * scaleX;
+      transform.top += Math.sin(angle) * deltaX * scaleY;
     } else if (this.horizontal === 'r') {
       // We move the right point: adjust width
       transform.width += deltaX;
@@ -38,8 +38,8 @@ export class TransformCorner {
       // We move the top point: adjust x,y & height
       transform.height -= deltaY;
 
-      transform.left += Math.cos(angle + Math.PI / 2) * deltaY;
-      transform.top += Math.sin(angle + Math.PI / 2) * deltaY;
+      transform.left += Math.cos(angle + Math.PI / 2) * deltaY * scaleX;
+      transform.top += Math.sin(angle + Math.PI / 2) * deltaY * scaleY;
     } else if (this.vertical === 'b') {
       // We move the bottom point: adjust height
       transform.height += deltaY;

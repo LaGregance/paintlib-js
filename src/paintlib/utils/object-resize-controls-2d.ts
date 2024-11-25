@@ -35,7 +35,9 @@ export const createResizeControls2D = (obj: PaintObject<any>) => {
       const deltaY = eventPoint.y - originalEventInfo.point.y;
 
       const angle = util.degreesToRadians(target.getTotalAngle());
-      const offset = corner.getTransformOffset(angle, deltaX, deltaY);
+      const scaleX = target.scaleX;
+      const scaleY = target.scaleY;
+      const offset = corner.getTransformOffset(angle, deltaX, deltaY, scaleX, scaleY);
       const newBox: TBBox = {
         left: originalEventInfo.layout.left + offset.left,
         top: originalEventInfo.layout.top + offset.top,
@@ -46,13 +48,13 @@ export const createResizeControls2D = (obj: PaintObject<any>) => {
       if (newBox.width < 0) {
         newBox.width = -newBox.width;
 
-        newBox.left -= Math.cos(angle) * newBox.width;
-        newBox.top -= Math.sin(angle) * newBox.width;
+        newBox.left -= Math.cos(angle) * newBox.width * scaleX;
+        newBox.top -= Math.sin(angle) * newBox.width * scaleY;
       }
       if (newBox.height < 0) {
         newBox.height = -newBox.height;
-        newBox.left -= Math.cos(angle + Math.PI / 2) * newBox.height;
-        newBox.top -= Math.sin(angle + Math.PI / 2) * newBox.height;
+        newBox.left -= Math.cos(angle + Math.PI / 2) * newBox.height * scaleX;
+        newBox.top -= Math.sin(angle + Math.PI / 2) * newBox.height * scaleY;
       }
 
       obj.updateLayout(newBox, new Point(newBox.width, newBox.height));

@@ -104,6 +104,7 @@ export abstract class PaintObject<T extends FabricObject> {
       left: start.x,
       top: start.y,
     });
+    this.updateLayout(this.getLayout(), this.vector);
     this.fabricObject.setCoords();
   }
 

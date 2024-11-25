@@ -1,21 +1,38 @@
-import { Control, Point, TPointerEvent, Transform } from 'fabric';
+import { Control, Point, TBBox, TPointerEvent, Transform, util } from 'fabric';
 import { PaintObject } from '../objects/abstract/paint-object';
 
 export const createResizeControlsVector = (obj: PaintObject<any>): Record<string, Control> => {
-  const changePoint = (eventData: TPointerEvent, transform: Transform, x: number, y: number) => {
+  let originalEventInfo: { point: Point; start: Point; end: Point; layout: TBBox } = undefined;
+  let lastTransform: Transform = undefined;
+
+  const changePoint = (eventData: TPointerEvent, transform: Transform, eventX: number, eventY: number) => {
     const target = transform.target;
 
     // Calculate new coordinates based on control movement
     if (transform.action === 'movePoint') {
+      if (lastTransform !== transform) {
+        originalEventInfo = {
+          point: new Point(eventX, eventY),
+          start: obj.getStart(),
+          end: obj.getEnd(),
+          layout: obj.getLayout(),
+        };
+      }
+      lastTransform = transform;
+
+      const angle = util.degreesToRadians(target.getTotalAngle());
+      const delta = new Point(eventX - originalEventInfo.point.x, eventY - originalEventInfo.point.y);
+      const deltaTransformed = delta.scalarMultiply(1 / target.scaleX).rotate(-angle);
+
       let start: Point;
       let end: Point;
 
       if (transform.corner === 'p1') {
-        start = new Point(x, y);
-        end = obj.getEnd();
+        start = originalEventInfo.start.add(deltaTransformed);
+        end = originalEventInfo.end;
       } else if (transform.corner === 'p2') {
-        start = obj.getStart();
-        end = new Point(x, y);
+        start = originalEventInfo.start;
+        end = originalEventInfo.end.add(deltaTransformed);
       }
 
       obj.updateLayout(

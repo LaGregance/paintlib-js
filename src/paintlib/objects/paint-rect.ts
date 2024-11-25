@@ -16,12 +16,13 @@ export class PaintRect extends PaintObject<Rect> {
   updateLayout(layout: TBBox, vector: Point) {
     super.updateLayout(layout, vector);
 
-    const strokeWidth = Math.min(layout.width - 1, layout.height - 1, this.fields.strokeWidth);
+    const strokeWidth = Math.min(Math.trunc(layout.width / 2), Math.trunc(layout.height / 2), this.fields.strokeWidth);
     this.fabricObject.set({
       left: layout.left,
       top: layout.top,
       width: layout.width - strokeWidth,
       height: layout.height - strokeWidth,
+      strokeWidth: strokeWidth,
     });
   }
 
