@@ -1,13 +1,9 @@
-import { Control, Point, TPointerEvent, Transform, util } from 'fabric';
+import { Control, Point, TBBox, TMat2D, TPointerEvent, Transform, util } from 'fabric';
 import { PaintObject } from '../objects/abstract/paint-object';
+import { TransformCorner } from './transform-corner';
 
 export const createResizeControlsVector = (obj: PaintObject<any>): Record<string, Control> => {
-  let originalEventInfo: {
-    point: Point;
-    start: Point;
-    end: Point;
-  } = undefined;
-
+  let originalEventInfo: { point: Point; vector: Point; invertMatrix: TMat2D; layout: TBBox } = undefined;
   let lastTransform: Transform = undefined;
 
   const changePoint = (eventData: TPointerEvent, transform: Transform, eventX: number, eventY: number) => {
@@ -15,45 +11,63 @@ export const createResizeControlsVector = (obj: PaintObject<any>): Record<string
 
     // Calculate new coordinates based on control movement
     if (transform.action === 'movePoint') {
-      const angle = util.degreesToRadians(target.getTotalAngle());
-      const scale = target.scaleX;
-
       if (lastTransform !== transform) {
-        const start = obj.getStart();
-        const end = obj.getEnd();
+        const objectMatrix = target.calcTransformMatrix();
+        const invertMatrix = util.invertTransform(objectMatrix);
 
         originalEventInfo = {
-          point: new Point(eventX, eventY),
-          start,
-          end: start.add(end.subtract(start).rotate(angle).scalarMultiply(scale)),
+          point: new Point(eventX, eventY).transform(invertMatrix),
+          vector: obj.getVector(),
+          layout: obj.getLayout(),
+          invertMatrix,
         };
       }
       lastTransform = transform;
 
-      const delta = new Point(eventX - originalEventInfo.point.x, eventY - originalEventInfo.point.y);
+      /**
+       * Note object x, y (or top/left) are including transformation.
+       * That's why we use cos/sin & invertTransform to calculate good offset
+       */
 
-      let start: Point;
-      let end: Point;
+      let vector = originalEventInfo.vector;
+      const corner = TransformCorner.parseFromVector(
+        originalEventInfo.vector,
+        transform.corner === 'p1' ? 'start' : 'end',
+      );
+      const eventPoint = new Point(eventX, eventY).transform(originalEventInfo.invertMatrix);
+      const deltaX = eventPoint.x - originalEventInfo.point.x;
+      const deltaY = eventPoint.y - originalEventInfo.point.y;
 
-      if (transform.corner === 'p1') {
-        start = originalEventInfo.start.add(delta);
-        end = originalEventInfo.end;
-      } else if (transform.corner === 'p2') {
-        start = originalEventInfo.start;
-        end = originalEventInfo.end.add(delta);
+      const angle = util.degreesToRadians(target.getTotalAngle());
+      const scaleX = target.scaleX;
+      const scaleY = target.scaleY;
+      const offset = corner.getTransformOffset(angle, deltaX, deltaY, scaleX, scaleY);
+      const newBox: TBBox = {
+        left: originalEventInfo.layout.left + offset.left,
+        top: originalEventInfo.layout.top + offset.top,
+        width: originalEventInfo.layout.width + offset.width,
+        height: originalEventInfo.layout.height + offset.height,
+      };
+
+      if (newBox.width < 0) {
+        vector = vector.multiply(new Point(-1, 1));
+        newBox.width = -newBox.width;
+        newBox.left -= Math.cos(angle) * newBox.width * scaleX;
+        newBox.top -= Math.sin(angle) * newBox.width * scaleY;
+      }
+      if (newBox.height < 0) {
+        vector = vector.multiply(new Point(1, -1));
+        newBox.height = -newBox.height;
+        newBox.left -= Math.cos(angle + Math.PI / 2) * newBox.height * scaleX;
+        newBox.top -= Math.sin(angle + Math.PI / 2) * newBox.height * scaleY;
       }
 
-      obj['fabricObject'].set({ angle: 0 });
       obj.updateLayout(
-        {
-          left: Math.min(start.x, end.x),
-          top: Math.min(start.y, end.y),
-          width: Math.abs(start.x - end.x) / scale,
-          height: Math.abs(start.y - end.y) / scale,
-        },
-        end.subtract(start).scalarDivide(scale),
+        newBox,
+        vector
+          .divide(new Point(Math.abs(vector.x), Math.abs(vector.y)))
+          .multiply(new Point(newBox.width, newBox.height)),
       );
-
       target.setCoords();
       return true;
     }

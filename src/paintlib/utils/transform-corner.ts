@@ -1,4 +1,4 @@
-import { TBBox } from 'fabric';
+import { Point, TBBox } from 'fabric';
 
 export type VerticalPlace = 't' | 'm' | 'b';
 export type HorizontalPlace = 'l' | 'm' | 'r';
@@ -13,6 +13,21 @@ export class TransformCorner {
     }
 
     return new TransformCorner(corner.charAt(0) as any, corner.charAt(1) as any);
+  }
+
+  static parseFromVector(vector: Point, point: 'start' | 'end'): TransformCorner {
+    let vertical: VerticalPlace;
+    let horizontal: HorizontalPlace;
+
+    if (point === 'start') {
+      vertical = vector.y > 0 ? 't' : 'b';
+      horizontal = vector.x > 0 ? 'l' : 'r';
+    } else {
+      vertical = vector.y > 0 ? 'b' : 't';
+      horizontal = vector.x > 0 ? 'r' : 'l';
+    }
+
+    return new TransformCorner(vertical, horizontal);
   }
 
   constructor(
