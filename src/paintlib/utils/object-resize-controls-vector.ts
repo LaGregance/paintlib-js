@@ -1,4 +1,4 @@
-import { Control, Point, TBBox, TPointerEvent, Transform, util } from 'fabric';
+import { Control, Point, TPointerEvent, Transform, util } from 'fabric';
 import { PaintObject } from '../objects/abstract/paint-object';
 
 export const createResizeControlsVector = (obj: PaintObject<any>): Record<string, Control> => {
@@ -6,7 +6,6 @@ export const createResizeControlsVector = (obj: PaintObject<any>): Record<string
     point: Point;
     start: Point;
     end: Point;
-    layout: TBBox;
   } = undefined;
 
   let lastTransform: Transform = undefined;
@@ -20,11 +19,13 @@ export const createResizeControlsVector = (obj: PaintObject<any>): Record<string
       const scale = target.scaleX;
 
       if (lastTransform !== transform) {
+        const start = obj.getStart();
+        const end = obj.getEnd();
+
         originalEventInfo = {
           point: new Point(eventX, eventY),
-          start: obj.getStart(),
-          end: obj.getStart().add(obj.getVector().rotate(angle).scalarMultiply(scale)),
-          layout: obj.getLayout(),
+          start,
+          end: start.add(end.subtract(start).rotate(angle).scalarMultiply(scale)),
         };
       }
       lastTransform = transform;

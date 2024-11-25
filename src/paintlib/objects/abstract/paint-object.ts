@@ -70,7 +70,8 @@ export abstract class PaintObject<T extends FabricObject> {
   }
 
   getStart() {
-    return getStartPoint(this.getLayout(), this.vector);
+    // TODO: Check scale
+    return getStartPoint(this.getLayout(), this.vector, this.fabricObject.scaleX);
   }
 
   getEnd() {
