@@ -47,7 +47,6 @@ export const createResizeControls2D = (obj: PaintObject<any>) => {
 
       if (newBox.width < 0) {
         newBox.width = -newBox.width;
-
         newBox.left -= Math.cos(angle) * newBox.width * scaleX;
         newBox.top -= Math.sin(angle) * newBox.width * scaleY;
       }

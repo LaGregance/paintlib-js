@@ -77,6 +77,10 @@ export abstract class PaintObject<T extends FabricObject> {
     return getEndPoint(this.getLayout(), this.vector);
   }
 
+  getVector() {
+    return this.vector.clone();
+  }
+
   /**
    * This function is used to rotate or resize the canvas.
    *
