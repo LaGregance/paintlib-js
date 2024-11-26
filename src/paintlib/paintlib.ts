@@ -8,7 +8,7 @@ import { useState } from './utils/use-state';
 import { DrawAction } from './actions/draw-action';
 import { PaintObject } from './objects/abstract/paint-object';
 import { UIActionType } from './config/ui-action-type';
-import { px, setCssProperty } from './utils/utils';
+import { getUrlExtension, px, setCssProperty } from './utils/utils';
 import { CanvasSerializedJson } from './models/canvas-serialized-json';
 import { PaintlibLoadOptions } from './models/paintlib-load-options';
 import { ObjectRegistry } from './config/object-registry';
@@ -22,6 +22,7 @@ export class PaintLib {
   private canvasEl: HTMLCanvasElement;
   private canvasContainer: HTMLDivElement;
   private image?: FabricImage;
+  private format?: 'png' | 'jpeg';
   private objects: PaintObject<any>[] = [];
 
   constructor(
@@ -146,6 +147,19 @@ export class PaintLib {
     this.image.lockMovementY = true;
     this.image.moveCursor = 'pointer';
     this.image.hoverCursor = 'pointer';
+
+    // Auto-detect format if possible (else fallback png)
+    if (options.format) {
+      this.format = options.format;
+    } else {
+      const ext = getUrlExtension(options.image).toLowerCase();
+      if (ext === 'jpg' || ext === 'jped') {
+        this.format = 'jpeg';
+      } else {
+        this.format = 'png';
+      }
+    }
+    // --------------------------------------------------
 
     const { width, height, scale } = calculateImageScaleToFitViewport(
       { width: this.canvas.width, height: this.canvas.height },
@@ -308,12 +322,9 @@ export class PaintLib {
     this.canvas.remove(object['fabricObject']);
   }
 
-  getDataURL() {
-    // TODO: Format should depends of initial format
-    return this.canvas.toDataURL({ format: 'jpeg', multiplier: 1 });
-  }
+  private restore(data: CanvasSerializedJson) {
+    this.format = data.format;
 
-  restore(data: CanvasSerializedJson) {
     if (data.image?.angle) {
       this.rotateImgAndCanvas(data.image?.angle);
     }
@@ -335,10 +346,25 @@ export class PaintLib {
     }
   }
 
+  getFormat() {
+    return this.format;
+  }
+
+  getDataURL() {
+    let scale = 1;
+
+    if (this.image) {
+      scale /= this.image.scaleX;
+    }
+
+    return this.canvas.toDataURL({ format: this.format, multiplier: scale });
+  }
+
   serialize(): CanvasSerializedJson {
     return {
       width: this.canvas.width,
       height: this.canvas.height,
+      format: this.format,
       globalScale: this.uiStore.getState().globalScale,
       image: {
         angle: this.image.angle,

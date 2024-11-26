@@ -122,6 +122,7 @@ export abstract class PaintObject<T extends FabricObject> {
   /**
    * Override this function to restore extras
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   restoreExtras(data: PaintObjectJson): any {
     return undefined;
   }

@@ -24,3 +24,14 @@ export const setCssProperty = (style: any, field: string, property: string, defa
     throw new Error(`Invalid style property value: ${rawValue}`);
   }
 };
+
+export const getUrlExtension = (url: string) => {
+  try {
+    const parsedUrl = new URL(url);
+    const pathname = parsedUrl.pathname;
+    const match = pathname.match(/\.([a-zA-Z0-9]+)$/);
+    return match ? match[1] : undefined;
+  } catch {
+    return undefined;
+  }
+};
