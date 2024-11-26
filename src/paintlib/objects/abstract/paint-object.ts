@@ -148,7 +148,7 @@ export abstract class PaintObject<T extends FabricObject> {
    */
   restoreObject(data: PaintObjectJson) {
     this.create(new Point(data.layout.left, data.layout.top), data);
-    this.vector = data.vector;
+    this.vector = new Point(data.vector.x, data.vector.y);
     this.set(data.fields);
     this.fabricObject.set({
       angle: data.angle,

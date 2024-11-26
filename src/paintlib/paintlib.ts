@@ -318,7 +318,7 @@ export class PaintLib {
       this.rotateImgAndCanvas(data.image?.angle);
     }
     const objScale = this.canvas.width / data.width;
-    this.uiStore.setState((old) => ({ globalScale: old.globalScale * objScale }));
+    this.uiStore.setState({ globalScale: data.globalScale * objScale });
 
     for (const objData of data.objects) {
       const obj = ObjectRegistry.restoreObject(this, objData);
@@ -339,6 +339,7 @@ export class PaintLib {
     return {
       width: this.canvas.width,
       height: this.canvas.height,
+      globalScale: this.uiStore.getState().globalScale,
       image: {
         angle: this.image.angle,
       },

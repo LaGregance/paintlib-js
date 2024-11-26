@@ -1,10 +1,10 @@
 import { PaintObjectFields } from './paint-object-fields';
-import { Point, TBBox } from 'fabric';
+import { TBBox } from 'fabric';
 
 export type PaintObjectJson = {
   type: string;
   layout: TBBox;
-  vector: Point;
+  vector: { x: number; y: number };
   angle: number;
   scaleX: number;
   scaleY: number;
