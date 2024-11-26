@@ -5,7 +5,7 @@ import { PaintObjectFields } from '../models/paint-object-fields';
 
 export class PaintRect extends PaintObject<Rect> {
   instantiate(point: Point) {
-    this.fabricObject = new Rect({ left: point.x, top: point.y, width: 1, height: 1 });
+    this.fabricObject = new Rect({ left: point.x, top: point.y, width: 1, height: 1, objectCaching: false });
     this.fabricObject.controls = {
       // Keep only existing resize control
       mtr: this.fabricObject.controls.mtr,

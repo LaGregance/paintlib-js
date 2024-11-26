@@ -78,8 +78,8 @@ export const createResizeControlsVector = (obj: PaintObject<any>): Record<string
   return {
     p1: new Control({
       positionHandler: (dim, finalMatrix, fabricObj) => {
-        const vector = obj.getVector().scalarDivide(2).scalarMultiply(fabricObj.scaleX);
-        return vector.scalarMultiply(-1).transform(finalMatrix);
+        const vector = obj.getVector().scalarDivide(-2).scalarMultiply(fabricObj.scaleX);
+        return vector.transform(finalMatrix);
       },
       actionHandler: changePoint,
       cursorStyle: 'pointer',

@@ -1,4 +1,4 @@
-import { Canvas, FabricImage, Point, util } from 'fabric';
+import { Canvas, FabricImage, FabricObject, Point, util } from 'fabric';
 import { calculateImageScaleToFitViewport } from './utils/size-utils';
 import { MainMenu } from './components/main-menu';
 import { createUIStore, UIStore } from './store/ui-store';
@@ -184,6 +184,8 @@ export class PaintLib {
     if (options.restoreData) {
       this.restore(JSON.parse(atob(options.restoreData)));
     }
+
+    this.enableSelection(true);
   }
 
   enableSelection(enable: boolean) {
@@ -321,6 +323,7 @@ export class PaintLib {
   add(object: PaintObject<any>) {
     this.objects.push(object);
     if (!this.canvas.contains(object['fabricObject'])) {
+      // Can be already on canvas in the case of PaintDraw
       this.canvas.add(object['fabricObject']);
     }
   }
@@ -341,17 +344,18 @@ export class PaintLib {
 
     for (const objData of data.objects) {
       const obj = ObjectRegistry.restoreObject(this, objData);
+      const fabObj: FabricObject = obj['fabricObject'];
       if (obj && objScale !== 1) {
-        const fabObj = obj['fabricObject'];
         fabObj.set({
           top: fabObj.top * objScale,
           left: fabObj.left * objScale,
           scaleX: fabObj.scaleX * objScale,
           scaleY: fabObj.scaleY * objScale,
         });
-        fabObj.setCoords();
       }
+      fabObj.setCoords();
     }
+    this.canvas.renderAll();
   }
 
   getFormat() {

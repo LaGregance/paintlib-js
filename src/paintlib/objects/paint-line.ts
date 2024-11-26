@@ -9,6 +9,7 @@ export class PaintLine extends PaintObject<Line> {
     this.fabricObject = new Line([point.x, point.y, point.x + 1, point.y + 1], {
       hasBorders: false,
       perPixelTargetFind: true,
+      objectCaching: false,
     });
     this.fabricObject.controls = createResizeControlsVector(this);
   }

@@ -4,7 +4,7 @@ import { PaintObjectFields } from '../models/paint-object-fields';
 
 export class PaintText extends PaintObject<Textbox> {
   instantiate(point: Point) {
-    this.fabricObject = new Textbox('Text', { top: point.y, left: point.x });
+    this.fabricObject = new Textbox('Text', { top: point.y, left: point.x, objectCaching: false });
     this.fabricObject.editable = true;
 
     delete this.fabricObject.controls.ml;

@@ -14,12 +14,13 @@ export class PaintArrow extends PaintObject<Group> {
   private arrow: Triangle;
 
   instantiate(point: Point) {
-    this.line = new Line(undefined);
-    this.arrow = new Triangle();
+    this.line = new Line(undefined, { objectCaching: false });
+    this.arrow = new Triangle({ objectCaching: false });
     this.fabricObject = new Group([this.line, this.arrow], {
       hasControls: false,
       hasBorders: false,
       perPixelTargetFind: true,
+      objectCaching: false,
     });
     this.updateLayout({ left: point.x, top: point.y, width: 1, height: 1 }, new Point(1, 1));
     this.fabricObject.controls = createResizeControlsVector(this);
