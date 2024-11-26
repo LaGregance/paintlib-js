@@ -62,12 +62,7 @@ export const createResizeControlsVector = (obj: PaintObject<any>): Record<string
         newBox.top -= Math.sin(angle + Math.PI / 2) * newBox.height * scaleY;
       }
 
-      obj.updateLayout(
-        newBox,
-        vector
-          .divide(new Point(Math.abs(vector.x), Math.abs(vector.y)))
-          .multiply(new Point(newBox.width, newBox.height)),
-      );
+      obj.updateLayout(newBox, vector);
       target.setCoords();
       return true;
     }
@@ -78,7 +73,11 @@ export const createResizeControlsVector = (obj: PaintObject<any>): Record<string
   return {
     p1: new Control({
       positionHandler: (dim, finalMatrix, fabricObj) => {
-        const vector = obj.getVector().scalarDivide(-2).scalarMultiply(fabricObj.scaleX);
+        const vector = obj
+          .getVector()
+          .multiply(new Point(fabricObj.width, fabricObj.height))
+          .scalarDivide(-2)
+          .scalarMultiply(fabricObj.scaleX);
         return vector.transform(finalMatrix);
       },
       actionHandler: changePoint,
@@ -87,7 +86,11 @@ export const createResizeControlsVector = (obj: PaintObject<any>): Record<string
     }),
     p2: new Control({
       positionHandler: (dim, finalMatrix, fabricObj) => {
-        const vector = obj.getVector().scalarDivide(2).scalarMultiply(fabricObj.scaleX);
+        const vector = obj
+          .getVector()
+          .multiply(new Point(fabricObj.width, fabricObj.height))
+          .scalarDivide(2)
+          .scalarMultiply(fabricObj.scaleX);
         return vector.transform(finalMatrix);
       },
       actionHandler: changePoint,

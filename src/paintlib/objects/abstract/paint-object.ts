@@ -1,7 +1,6 @@
 import { Object as FabricObject, Point, TBBox, util } from 'fabric';
 import { PaintObjectFields } from '../../models/paint-object-fields';
 import { PaintObjectJson } from '../../models/paint-object-json';
-import { getEndPoint, getStartPoint } from '../../utils/vector-utils';
 
 export abstract class PaintObject<T extends FabricObject> {
   protected vector: Point;
@@ -39,7 +38,7 @@ export abstract class PaintObject<T extends FabricObject> {
    * @protected
    */
   updateLayout(layout: TBBox, vector: Point) {
-    this.vector = vector;
+    this.vector = vector.divide(new Point(Math.abs(vector.x), Math.abs(vector.y)));
   }
 
   /**
@@ -78,15 +77,9 @@ export abstract class PaintObject<T extends FabricObject> {
     };
   }
 
-  getStart() {
-    // TODO: Check scale
-    return getStartPoint(this.getLayout(), this.vector, this.fabricObject.scaleX);
-  }
-
-  getEnd() {
-    return getEndPoint(this.getLayout(), this.vector);
-  }
-
+  /**
+   * A vector indicate the direction of the inner object, each component can be either -1 or 1
+   */
   getVector() {
     return this.vector.clone();
   }
