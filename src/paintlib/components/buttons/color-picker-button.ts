@@ -8,6 +8,13 @@ import { useState } from '../../utils/use-state';
 export class ColorPickerButton extends MenuButton {
   constructor(
     paintlib: PaintLib,
+    /**
+     * Represent the color of the active object
+     */
+    private activeColor: (store: UIStore) => string,
+    /**
+     * Represent the actual color of the option field
+     */
     private getColor: (store: UIStore) => string,
     private setColor: (color: string) => void,
     private allowTransparent: boolean,
@@ -22,6 +29,12 @@ export class ColorPickerButton extends MenuButton {
 
   init() {
     super.init();
+
+    useState(this.paintlib.uiStore, this.activeColor, (activeColor) => {
+      const color = activeColor || this.getColor(this.paintlib.uiStore.getState());
+      this.element.querySelector('rect').setAttribute('opacity', color === 'transparent' ? '0%' : '100%');
+      this.element.style.color = color;
+    });
 
     useState(this.paintlib.uiStore, this.getColor, (activeColor) => {
       this.element.querySelector('rect').setAttribute('opacity', activeColor === 'transparent' ? '0%' : '100%');

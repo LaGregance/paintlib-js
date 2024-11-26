@@ -32,7 +32,6 @@ import { DrawingOption } from '../config/drawing-option';
 import { ObjectRegistry, PaintObjectClass } from '../config/object-registry';
 
 export class MainMenu extends Component<'div'> {
-  private trash: ActionButton;
   private optionsMenu: View;
 
   private options: {
@@ -49,14 +48,14 @@ export class MainMenu extends Component<'div'> {
     const actionsView = new View('paintlib-menu-line');
 
     const select = new ActionButton(this.paintlib, () => new SelectAction(this.paintlib), CursorSVG);
-    this.trash = new ActionButton(this.paintlib, () => new TrashAction(this.paintlib), TrashSVG);
+    const trash = new ActionButton(this.paintlib, () => new TrashAction(this.paintlib), TrashSVG);
     const undo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'undo'), UndoSVG);
     const redo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'redo'), RedoSVG);
 
     const cancel = new ActionButton(this.paintlib, () => new CancelAction(this.paintlib), CancelSVG);
     const save = new ActionButton(this.paintlib, () => new SaveAction(this.paintlib), SaveSVG);
 
-    actionsView.add(new ActionGroup([select, this.trash, undo, redo]));
+    actionsView.add(new ActionGroup([select, trash, undo, redo]));
     actionsView.add(new CreateObjectMenuGroup(this.paintlib));
     if (this.paintlib.options?.allowRotate) {
       const rotateLeft = new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'left'), RotateLeftSVG);
@@ -72,8 +71,10 @@ export class MainMenu extends Component<'div'> {
 
     this.optionsMenu = new View('paintlib-menu-line');
 
+    // Update options value on option bar
     const fgColor = new ColorPickerButton(
       this.paintlib,
+      (state) => state.selectedObject?.get()?.stroke,
       (state) => state.options.fgColor,
       (color) => {
         this.paintlib.uiStore.setState((old) => ({
@@ -85,6 +86,7 @@ export class MainMenu extends Component<'div'> {
     );
     const bgColor = new ColorPickerButton(
       this.paintlib,
+      (state) => state.selectedObject?.get()?.fill,
       (state) => state.options.bgColor,
       (color) => {
         this.paintlib.uiStore.setState((old) => ({
@@ -97,11 +99,10 @@ export class MainMenu extends Component<'div'> {
     const tickness = new TicknessPickerButton(this.paintlib, ThicknessSVG);
 
     this.options = { fgColor, bgColor, tickness };
-
     this.optionsMenu.add(new ActionGroup([fgColor, bgColor, tickness]));
     this.add(this.optionsMenu);
 
-    // Set options bar depending of selected tool & proactivelyShowOptions options
+    // Set options bar depending on selected tool & proactivelyShowOptions options
     useState(
       this.paintlib.uiStore,
       (store) => store.activeAction,
@@ -109,6 +110,33 @@ export class MainMenu extends Component<'div'> {
         this.updateOptions(action);
       },
     );
+
+    useState(
+      this.paintlib.uiStore,
+      (store) => store.selectedObject,
+      (selected) => {
+        trash.setDisable(!selected);
+        this.updateOptions(selected ? (selected.constructor as any) : UIActionType.SELECT);
+      },
+    );
+
+    // Action shortcut
+    document.addEventListener('keydown', (event) => {
+      const ctrl = xor(event.ctrlKey, event.metaKey);
+      const key = event.key.toLowerCase();
+
+      if (ctrl && key === 'z') {
+        if (event.shiftKey) {
+          this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'redo'));
+        } else {
+          this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'undo'));
+        }
+      }
+
+      if (key === 'delete' || key === 'backspace') {
+        this.paintlib.uiStore.getState().setAction(new TrashAction(this.paintlib));
+      }
+    });
   }
 
   updateOptions = (actionOrClazz: UIActionType | PaintObjectClass) => {
@@ -128,36 +156,4 @@ export class MainMenu extends Component<'div'> {
 
     this.options.fgColor.setImage(action === UIActionType.TEXT ? TextColorSVG : ForegroundColorSVG);
   };
-
-  setupEvent() {
-    // Event for enable / disable trash
-    const selectionEvent = () => {
-      const selected = this.paintlib.getSelectedObject();
-      this.trash.setDisable(!selected);
-      this.updateOptions(selected ? (selected.constructor as any) : UIActionType.SELECT);
-    };
-
-    this.paintlib.canvas.on('selection:created', selectionEvent);
-    this.paintlib.canvas.on('selection:updated', selectionEvent);
-    this.paintlib.canvas.on('selection:cleared', selectionEvent);
-
-    this.trash.setDisable(!this.paintlib.canvas.getActiveObject());
-
-    document.addEventListener('keydown', (event) => {
-      const ctrl = xor(event.ctrlKey, event.metaKey);
-      const key = event.key.toLowerCase();
-
-      if (ctrl && key === 'z') {
-        if (event.shiftKey) {
-          this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'redo'));
-        } else {
-          this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'undo'));
-        }
-      }
-
-      if (key === 'delete' || key === 'backspace') {
-        this.paintlib.uiStore.getState().setAction(new TrashAction(this.paintlib));
-      }
-    });
-  }
 }

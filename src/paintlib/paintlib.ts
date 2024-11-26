@@ -105,7 +105,15 @@ export class PaintLib {
         }
       }
     });
-    mainMenu.setupEvent();
+
+    const selectionEvent = () => {
+      const selected = this.getSelectedObject();
+      this.uiStore.setState({ selectedObject: selected });
+    };
+
+    this.canvas.on('selection:created', selectionEvent);
+    this.canvas.on('selection:updated', selectionEvent);
+    this.canvas.on('selection:cleared', selectionEvent);
 
     // 5. Update selected object with option on change
     const updateFactory = (field: string) => {

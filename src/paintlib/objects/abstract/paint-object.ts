@@ -52,6 +52,10 @@ export abstract class PaintObject<T extends FabricObject> {
     this.fields = Object.assign(this.fields, fields);
   }
 
+  get() {
+    return this.fields;
+  }
+
   /**
    * Return true if the current object is valid for creation.
    * In general it should return false when the object is too small.
@@ -123,7 +127,7 @@ export abstract class PaintObject<T extends FabricObject> {
    * Override this function to restore extras
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  restoreExtras(data: PaintObjectJson): any {
+  restoreExtras(_data: PaintObjectJson): any {
     return undefined;
   }
 
