@@ -278,7 +278,7 @@ export class PaintLib {
     this.uiStore.setState((old) => ({ globalScale: old.globalScale * objScale }));
 
     for (const obj of this.objects) {
-      obj.applyTransforms(objScale, 0, new Point(0, 0));
+      obj.applyTransforms(objScale);
     }
 
     this.canvas.renderAll();

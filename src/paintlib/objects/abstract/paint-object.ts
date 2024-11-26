@@ -89,13 +89,13 @@ export abstract class PaintObject<T extends FabricObject> {
    * @param rotation
    * @param translation
    */
-  applyTransforms(scale: number, rotation: number, translation?: Point) {
+  applyTransforms(scale: number, rotation?: number, translation?: Point) {
     let start = new Point(this.fabricObject.left, this.fabricObject.top);
 
     if (scale !== 1) {
       start = start.scalarMultiply(scale);
     }
-    if (rotation !== 0) {
+    if (rotation) {
       start = start.rotate(rotation);
     }
     if (translation) {
@@ -103,13 +103,12 @@ export abstract class PaintObject<T extends FabricObject> {
     }
 
     this.fabricObject.set({
-      angle: this.fabricObject.angle + util.radiansToDegrees(rotation),
+      angle: this.fabricObject.angle + util.radiansToDegrees(rotation || 0),
       scaleX: this.fabricObject.scaleX * scale,
       scaleY: this.fabricObject.scaleY * scale,
       left: start.x,
       top: start.y,
     });
-    this.updateLayout(this.getLayout(), this.vector);
     this.fabricObject.setCoords();
   }
 
