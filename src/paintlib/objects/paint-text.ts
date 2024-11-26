@@ -11,11 +11,6 @@ export class PaintText extends PaintObject<Textbox> {
     delete this.fabricObject.controls.mr;
     delete this.fabricObject.controls.mb;
     delete this.fabricObject.controls.mt;
-    /*this.fabricObject.controls = {
-      // Keep only existing resize control
-      mtr: this.fabricObject.controls.mtr,
-      ...createResizeControls(this),
-    };*/
   }
 
   updateLayout(layout: TBBox, vector: Point) {
@@ -27,6 +22,11 @@ export class PaintText extends PaintObject<Textbox> {
       height: layout.height,
       width: layout.width,
     });
+  }
+
+  onCreated() {
+    this.fabricObject.enterEditing();
+    this.fabricObject.selectAll();
   }
 
   set(fields: PaintObjectFields) {

@@ -43,6 +43,11 @@ export abstract class PaintObject<T extends FabricObject> {
   }
 
   /**
+   * Called once the creation process using editor is finish
+   */
+  onCreated(): void {}
+
+  /**
    * Update fields of the underlying fabric object.
    * This method should be overridden to effectively set fields.
    *
