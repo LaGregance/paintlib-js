@@ -1,10 +1,16 @@
 import { Point, TBBox, Textbox } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 import { PaintObjectFields } from '../models/paint-object-fields';
+import { PaintObjectJson } from '../models/paint-object-json';
 
 export class PaintText extends PaintObject<Textbox> {
-  instantiate(point: Point) {
-    this.fabricObject = new Textbox('Text', { top: point.y, left: point.x, objectCaching: false });
+  instantiate(point: Point, restoreData?: PaintObjectJson) {
+    this.fabricObject = new Textbox('Text', {
+      top: point.y,
+      left: point.x,
+      objectCaching: false,
+      fontSize: restoreData?.extras?.fontSize ?? 5,
+    });
     this.fabricObject.editable = true;
 
     delete this.fabricObject.controls.ml;
@@ -39,5 +45,11 @@ export class PaintText extends PaintObject<Textbox> {
       fields.fill = fields.stroke;
     }
     this.fabricObject.set(fields);
+  }
+
+  serializeExtras(): any {
+    return {
+      fontSize: this.fabricObject.fontSize,
+    };
   }
 }

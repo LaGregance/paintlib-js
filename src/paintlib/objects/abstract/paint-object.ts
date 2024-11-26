@@ -1,6 +1,7 @@
 import { Object as FabricObject, Point, TBBox, util } from 'fabric';
 import { PaintObjectFields } from '../../models/paint-object-fields';
 import { PaintObjectJson } from '../../models/paint-object-json';
+import { ObjectRegistry } from '../../config/object-registry';
 
 export abstract class PaintObject<T extends FabricObject> {
   protected vector: Point;
@@ -37,7 +38,17 @@ export abstract class PaintObject<T extends FabricObject> {
    * @param vector The vector that represent the direction of the object
    * @protected
    */
-  updateLayout(layout: TBBox, vector: Point) {
+  updateLayout(layout: TBBox, vector?: Point) {
+    if (!vector) {
+      vector = new Point(1, 1);
+    } else {
+      if (vector.x === 0) {
+        vector.x = 1;
+      }
+      if (vector.y === 0) {
+        vector.y = 1;
+      }
+    }
     this.vector = vector.divide(new Point(Math.abs(vector.x), Math.abs(vector.y)));
   }
 
@@ -158,6 +169,10 @@ export abstract class PaintObject<T extends FabricObject> {
       scaleY: data.scaleY,
     });
     this.restoreExtras(data);
-    this.updateLayout(data.layout, this.vector);
+
+    const meta = ObjectRegistry.getObjectMeta(data.type);
+    if (!meta.avoidLayoutOnRestore) {
+      this.updateLayout(data.layout, this.vector);
+    }
   }
 }
