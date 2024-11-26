@@ -1,4 +1,4 @@
-import { Canvas, FabricImage, FabricObject, Point, util } from 'fabric';
+import { Canvas, FabricImage, Point, util } from 'fabric';
 import { calculateImageScaleToFitViewport } from './utils/size-utils';
 import { MainMenu } from './components/main-menu';
 import { createUIStore, UIStore } from './store/ui-store';
@@ -11,7 +11,7 @@ import { UIActionType } from './config/ui-action-type';
 import { getUrlExtension, px, setCssProperty } from './utils/utils';
 import { CanvasSerializedJson } from './models/canvas-serialized-json';
 import { PaintlibLoadOptions } from './models/paintlib-load-options';
-import { ObjectRegistry } from './config/object-registry';
+import { TransformProps } from './models/transform-props';
 
 export class PaintLib {
   public readonly element: HTMLDivElement;
@@ -24,6 +24,8 @@ export class PaintLib {
   private image?: FabricImage;
   private format?: 'png' | 'jpeg';
   private objects: PaintObject<any>[] = [];
+
+  private transform: TransformProps = { scale: 1, rotation: 0 };
 
   constructor(
     public readonly container: HTMLElement,
@@ -124,7 +126,7 @@ export class PaintLib {
         const activeFabricObj = this.canvas.getActiveObject();
         const activePaintObj = this.objects.find((x) => x['fabricObject'] === activeFabricObj);
         if (activePaintObj) {
-          activePaintObj.set({ [field]: newValue });
+          activePaintObj.setOptions({ [field]: newValue });
           this.canvas.renderAll();
         }
       };
@@ -133,7 +135,7 @@ export class PaintLib {
     useState(this.uiStore, (store) => store.options.fgColor, updateFactory('stroke'));
     useState(this.uiStore, (store) => store.options.bgColor, updateFactory('fill'));
     useState(this.uiStore, (store) => store.options.tickness, updateFactory('strokeWidth'));
-    useState(
+    /*useState(
       this.uiStore,
       (store) => store.globalScale,
       () => {
@@ -141,12 +143,17 @@ export class PaintLib {
           (this.uiStore.getState().allActions[UIActionType.DRAW] as DrawAction).update();
         }
       },
-    );
+    );*/
 
     new ResizeObserver(this.fitViewport).observe(this.container);
   }
 
+  /* ************************************ */
+  /* ********** LOAD CANVAS ********** */
+  /* ************************************ */
+
   async load(options: PaintlibLoadOptions) {
+    // TODO: Why not included in constructor ?
     this.image = await FabricImage.fromURL(options.image, { crossOrigin: 'anonymous' });
 
     this.image.hasControls = false;
@@ -188,6 +195,101 @@ export class PaintLib {
     this.enableSelection(true);
   }
 
+  /* ******************************************* */
+  /* ********** GLOBAL TRANSFORMATION ********** */
+  /* ******************************************* */
+
+  setRotation(rotation: number) {
+    this.canvas.discardActiveObject();
+
+    // 1. Convert rotation to be between 0 and 360
+    if (rotation % 90 !== 0) {
+      throw new Error(`PaintLib.setRotation only work with multiple of 90`);
+    }
+    rotation = rotation % 360;
+    if (rotation < 0) {
+      rotation = rotation + 360;
+    }
+
+    // 2. Calculate new canvas dimension
+    const oldWidth = this.transform.rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
+    const containerWidth = this.canvasContainer.clientWidth;
+    const containerHeight = this.canvasContainer.clientHeight;
+
+    const {
+      width: canvasWidth,
+      height: canvasHeight,
+      scale: imgScale,
+    } = calculateImageScaleToFitViewport(
+      { width: containerWidth, height: containerHeight },
+      {
+        width: rotation % 180 === 0 ? this.image.width : this.image.height,
+        height: rotation % 180 === 0 ? this.image.height : this.image.width,
+      },
+    );
+
+    this.canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
+    this.image.scale(imgScale);
+    this.image.rotate(rotation);
+    this.canvas.centerObject(this.image);
+
+    // 3. Apply new global scale to objects
+    const newWidth = rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
+    const newScale = newWidth / oldWidth;
+    this.setTransformProps({
+      scale: this.transform.scale * newScale,
+      rotation,
+    });
+  }
+
+  private fitViewport = () => {
+    if (!this.image) {
+      return;
+    }
+    this.canvas.discardActiveObject();
+
+    const containerWidth = this.canvasContainer.clientWidth;
+    const containerHeight = this.canvasContainer.clientHeight;
+
+    const oldWidth = this.canvas.width;
+
+    const {
+      width: canvasWidth,
+      height: canvasHeight,
+      scale: imgScale,
+    } = calculateImageScaleToFitViewport(
+      { width: containerWidth, height: containerHeight },
+      {
+        width: this.transform.rotation % 180 === 0 ? this.image.width : this.image.height,
+        height: this.transform.rotation % 180 === 0 ? this.image.height : this.image.width,
+      },
+    );
+
+    this.canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
+    this.image.scale(imgScale);
+    this.canvas.centerObject(this.image);
+
+    const newScale = canvasWidth / oldWidth;
+    this.setTransformProps({ scale: this.transform.scale * newScale });
+  };
+
+  private setTransformProps(props: Partial<TransformProps>) {
+    this.transform = Object.assign(this.transform, props);
+    for (const obj of this.objects) {
+      obj.update(this.transform);
+    }
+    this.canvas.renderAll();
+  }
+
+  /* ************************************** */
+  /* ********** OBJECT SELECTION ********** */
+  /* ************************************** */
+
+  getSelectedObject() {
+    const selected = this.canvas.getActiveObject();
+    return this.objects.find((x) => x['fabricObject'] === selected);
+  }
+
   enableSelection(enable: boolean) {
     this.canvas.forEachObject((object) => {
       if (!(object instanceof FabricImage)) {
@@ -205,120 +307,12 @@ export class PaintLib {
     });
 
     this.canvas.discardActiveObject();
-    this.canvas.requestRenderAll();
-  }
-
-  getPalette() {
-    if (!this.options?.palette) {
-      return [
-        '#FF0000', // Red
-        '#FFA500', // Orange
-        '#FFD700', // Yellow (gold)
-        '#008000', // Green
-        '#4169E1', // Blue (royal)
-        '#808080', // Gray
-        '#FFFFFF', // White
-        '#000000', // Dark
-      ];
-    }
-    return this.options.palette;
-  }
-
-  private rotateImgAndCanvas(rotation: number) {
-    const containerWidth = this.canvasContainer.clientWidth;
-    const containerHeight = this.canvasContainer.clientHeight;
-
-    const actualRotation = this.image.angle;
-    const newRotation = actualRotation + rotation;
-
-    const {
-      width: imgWidth,
-      height: imgHeight,
-      scale: imgScale,
-    } = calculateImageScaleToFitViewport(
-      { width: containerWidth, height: containerHeight },
-      {
-        width: newRotation % 180 === 0 ? this.image.width : this.image.height,
-        height: newRotation % 180 === 0 ? this.image.height : this.image.width,
-      },
-    );
-
-    this.canvas.setDimensions({ width: imgWidth, height: imgHeight });
-    this.image.scale(imgScale);
-    this.image.rotate(newRotation);
-    this.canvas.centerObject(this.image);
-  }
-
-  rotate(direction: 'left' | 'right') {
-    this.canvas.discardActiveObject();
-
-    const actualWidth = this.canvas.width;
-    this.rotateImgAndCanvas(direction === 'left' ? -90 : 90);
-    const newWidth = this.canvas.width;
-    const newHeight = this.canvas.height;
-
-    const objRotation = util.degreesToRadians(direction === 'left' ? -90 : 90);
-    const objScale = newHeight / actualWidth;
-    this.uiStore.setState((old) => ({ globalScale: old.globalScale * objScale }));
-    const translation = new Point(direction === 'right' ? newWidth : 0, direction === 'right' ? 0 : newHeight);
-
-    for (const obj of this.objects) {
-      obj.applyTransforms(objScale, objRotation, translation);
-    }
-
     this.canvas.renderAll();
   }
 
-  private fitViewport = () => {
-    if (!this.image) {
-      return;
-    }
-
-    const containerWidth = this.canvasContainer.clientWidth;
-    const containerHeight = this.canvasContainer.clientHeight;
-
-    const actualWidth = this.canvas.width;
-    const actualRotation = this.image.angle;
-
-    this.canvas.discardActiveObject();
-
-    const {
-      width: imgWidth,
-      height: imgHeight,
-      scale: imgScale,
-    } = calculateImageScaleToFitViewport(
-      { width: containerWidth, height: containerHeight },
-      {
-        width: actualRotation % 180 === 0 ? this.image.width : this.image.height,
-        height: actualRotation % 180 === 0 ? this.image.height : this.image.width,
-      },
-    );
-
-    this.canvas.setDimensions({ width: imgWidth, height: imgHeight });
-    this.image.scale(imgScale);
-    this.canvas.centerObject(this.image);
-
-    const objScale = imgWidth / actualWidth;
-    this.uiStore.setState((old) => ({ globalScale: old.globalScale * objScale }));
-
-    for (const obj of this.objects) {
-      obj.applyTransforms(objScale);
-    }
-
-    this.canvas.renderAll();
-  };
-
-  getAvailableTickness() {
-    if (!this.options?.tickness) {
-      return [1, 2, 3, 5, 10];
-    }
-    return this.options.tickness;
-  }
-
-  getSelectedObject() {
-    const selected = this.canvas.getActiveObject();
-    return this.objects.find((x) => x['fabricObject'] === selected);
-  }
+  /* ****************************************** */
+  /* ********** ADD & REMOVE objects ********** */
+  /* ****************************************** */
 
   add(object: PaintObject<any>) {
     this.objects.push(object);
@@ -326,6 +320,7 @@ export class PaintLib {
       // Can be already on canvas in the case of PaintDraw
       this.canvas.add(object['fabricObject']);
     }
+    object.update(this.transform);
   }
 
   remove(object: PaintObject<any>) {
@@ -333,9 +328,14 @@ export class PaintLib {
     this.canvas.remove(object['fabricObject']);
   }
 
+  /* ************************************ */
+  /* ********** SAVE & RESTORE ********** */
+  /* ************************************ */
+
   private restore(data: CanvasSerializedJson) {
     this.format = data.format;
-
+    // TODO
+    /*
     if (data.image?.angle) {
       this.rotateImgAndCanvas(data.image?.angle);
     }
@@ -343,18 +343,9 @@ export class PaintLib {
     this.uiStore.setState({ globalScale: data.globalScale * objScale });
 
     for (const objData of data.objects) {
-      const obj = ObjectRegistry.restoreObject(this, objData);
-      const fabObj: FabricObject = obj['fabricObject'];
-      if (obj && objScale !== 1) {
-        fabObj.set({
-          top: fabObj.top * objScale,
-          left: fabObj.left * objScale,
-          scaleX: fabObj.scaleX * objScale,
-          scaleY: fabObj.scaleY * objScale,
-        });
-      }
-      fabObj.setCoords();
-    }
+      const obj = ObjectRegistry.restoreObject(objData);
+      this.add(obj);
+    }*/
     this.canvas.renderAll();
   }
 
@@ -374,14 +365,83 @@ export class PaintLib {
 
   serialize(): CanvasSerializedJson {
     return {
+      format: this.format,
       width: this.canvas.width,
       height: this.canvas.height,
-      format: this.format,
-      globalScale: this.uiStore.getState().globalScale,
-      image: {
-        angle: this.image.angle,
-      },
+      transform: this.transform,
       objects: this.objects.map((x) => x.serialize()),
     };
+  }
+
+  /* ************************************ */
+  /* ********** POSITION UTILS ********** */
+  /* ************************************ */
+
+  /**
+   * Return the reference from which object are positioned, relative to canvas
+   * @private
+   */
+  private getReferencePoint() {
+    let x = 0;
+    let y = 0;
+
+    if (this.transform.rotation === 90) {
+      x = this.canvas.width;
+    } else if (this.transform.rotation === 180) {
+      x = this.canvas.width;
+      y = this.canvas.height;
+    } else if (this.transform.rotation === 270) {
+      y = this.canvas.height;
+    }
+
+    return new Point(x, y);
+  }
+
+  /**
+   * Convert real position to canvas position.
+   */
+  getCanvasPosFromReal(realPos: Point) {
+    // TODO: Take global scale into account
+    const reference = this.getReferencePoint();
+    return realPos.rotate(util.degreesToRadians(this.transform.rotation)).add(reference);
+  }
+
+  /**
+   * Convert canvas position to real position.
+   */
+  getRealPositionFromCanvas(canvasPos: Point) {
+    // TODO: Take global scale into account
+    const reference = this.getReferencePoint();
+    return canvasPos.subtract(reference).rotate(-util.degreesToRadians(this.transform.rotation));
+  }
+
+  /* ************************************ */
+  /* ********** RANDOM GETTERS ********** */
+  /* ************************************ */
+  getPalette() {
+    if (!this.options?.palette) {
+      return [
+        '#FF0000', // Red
+        '#FFA500', // Orange
+        '#FFD700', // Yellow (gold)
+        '#008000', // Green
+        '#4169E1', // Blue (royal)
+        '#808080', // Gray
+        '#FFFFFF', // White
+        '#000000', // Dark
+      ];
+    }
+    return this.options.palette;
+  }
+
+  getAvailableTickness() {
+    if (!this.options?.tickness) {
+      return [1, 2, 3, 5, 10];
+    }
+    return this.options.tickness;
+  }
+
+  getTransform() {
+    return { ...this.transform };
   }
 }

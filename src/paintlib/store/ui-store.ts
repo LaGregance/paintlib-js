@@ -4,6 +4,7 @@ import { PaintLib } from '../paintlib';
 import { SelectAction } from '../actions/select-action';
 import { PaintObject } from '../objects/abstract/paint-object';
 import { UIActionType } from '../config/ui-action-type';
+import { PaintObjectOptions } from '../models/paint-object-options';
 
 export type UIStore = {
   allActions: {
@@ -12,12 +13,7 @@ export type UIStore = {
   activeAction?: UIActionType;
   setAction: (action: BaseAction) => void;
   selectedObject?: PaintObject<any>;
-  globalScale: number;
-  options: {
-    fgColor: string;
-    bgColor: string;
-    tickness: number;
-  };
+  options: PaintObjectOptions;
 };
 
 export const createUIStore = (paintlib: PaintLib) => {

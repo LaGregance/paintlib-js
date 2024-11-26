@@ -1,7 +1,6 @@
-import { Point, Rect, TBBox } from 'fabric';
+import { Point, Rect } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 import { createResizeControls2D } from '../utils/object-resize-controls-2d';
-import { PaintObjectFields } from '../models/paint-object-fields';
 
 export class PaintRect extends PaintObject<Rect> {
   instantiate(point: Point) {
@@ -13,34 +12,20 @@ export class PaintRect extends PaintObject<Rect> {
     };
   }
 
-  updateLayout(layout: TBBox, vector: Point) {
-    super.updateLayout(layout, vector);
-
-    const strokeWidth = Math.min(Math.trunc(layout.width / 2), Math.trunc(layout.height / 2), this.fields.strokeWidth);
+  render() {
+    const strokeWidth = Math.min(
+      Math.trunc(this.layout.width / 2),
+      Math.trunc(this.layout.height / 2),
+      this.options.tickness,
+    );
     this.fabricObject.set({
-      left: layout.left,
-      top: layout.top,
-      width: layout.width - strokeWidth,
-      height: layout.height - strokeWidth,
+      left: this.layout.left,
+      top: this.layout.top,
+      width: this.layout.width - strokeWidth,
+      height: this.layout.height - strokeWidth,
       strokeWidth: strokeWidth,
+      fill: this.options.bgColor,
+      stroke: this.options.fgColor,
     });
-  }
-
-  getLayout(): TBBox {
-    return {
-      top: this.fabricObject.top,
-      left: this.fabricObject.left,
-      width: this.fabricObject.width + this.fabricObject.strokeWidth,
-      height: this.fabricObject.height + this.fabricObject.strokeWidth,
-    };
-  }
-
-  set(fields: Partial<PaintObjectFields>) {
-    super.set(fields);
-
-    if (fields.strokeWidth) {
-      this.updateLayout(this.getLayout(), this.vector);
-    }
-    this.fabricObject.set(fields);
   }
 }

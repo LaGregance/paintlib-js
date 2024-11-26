@@ -1,6 +1,5 @@
-import { Path, Point, TBBox } from 'fabric';
+import { Path, Point } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
-import { PaintObjectFields } from '../models/paint-object-fields';
 import { PaintObjectJson } from '../models/paint-object-json';
 
 export class PaintDraw extends PaintObject<Path> {
@@ -12,26 +11,20 @@ export class PaintDraw extends PaintObject<Path> {
     this.fabricObject = obj;
 
     const layout = this.getLayout();
-    this.fields = {
-      stroke: obj.stroke as string,
-      fill: obj.fill as string,
-      strokeWidth: obj.strokeWidth,
+    this.options = {
+      fgColor: obj.stroke as string,
+      bgColor: obj.fill as string,
+      tickness: obj.strokeWidth,
     };
     this.updateLayout(layout, new Point(layout.width, layout.height));
   }
 
-  updateLayout(layout: TBBox, vector: Point) {
-    super.updateLayout(layout, vector);
-
+  render() {
     this.fabricObject.set({
-      left: layout.left,
-      top: layout.top,
+      stroke: this.options.fgColor,
+      fill: this.options.bgColor,
+      strokeWidth: this.options.tickness,
     });
-  }
-
-  set(fields: Partial<PaintObjectFields>) {
-    super.set(fields);
-    this.fabricObject.set(fields);
   }
 
   serializeExtras(): any {

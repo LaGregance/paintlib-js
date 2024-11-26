@@ -28,10 +28,10 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
     this.object.create(event.scenePoint);
 
     const options = this.paintlib.uiStore.getState().options;
-    this.object.set({
-      strokeWidth: options.tickness,
-      stroke: options.fgColor,
-      fill: options.bgColor,
+    this.object.setOptions({
+      tickness: options.tickness,
+      fgColor: options.fgColor,
+      bgColor: options.bgColor,
     });
 
     const scale = this.paintlib.uiStore.getState().globalScale;
@@ -39,6 +39,8 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
       selectable: false,
       lockMovementX: false,
       lockMovementY: false,
+
+      // TODO: Not good scale
       scaleX: scale,
       scaleY: scale,
     });

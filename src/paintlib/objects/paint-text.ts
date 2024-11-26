@@ -1,6 +1,5 @@
-import { Point, TBBox, Textbox } from 'fabric';
+import { Point, Textbox } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
-import { PaintObjectFields } from '../models/paint-object-fields';
 import { PaintObjectJson } from '../models/paint-object-json';
 
 export class PaintText extends PaintObject<Textbox> {
@@ -19,32 +18,20 @@ export class PaintText extends PaintObject<Textbox> {
     delete this.fabricObject.controls.mt;
   }
 
-  updateLayout(layout: TBBox, vector: Point) {
-    super.updateLayout(layout, vector);
+  render() {
     this.fabricObject.set({
-      top: layout.top,
-      left: layout.left,
-      fontSize: layout.height,
-      height: layout.height,
-      width: layout.width,
+      top: this.layout.top,
+      left: this.layout.left,
+      fontSize: this.layout.height,
+      height: this.layout.height,
+      width: this.layout.width,
+      fill: this.options.fgColor,
     });
   }
 
   onCreated() {
     this.fabricObject.enterEditing();
     this.fabricObject.selectAll();
-  }
-
-  set(fields: PaintObjectFields) {
-    super.set(fields);
-
-    delete fields.strokeWidth;
-    delete fields.fill;
-
-    if (fields.stroke) {
-      fields.fill = fields.stroke;
-    }
-    this.fabricObject.set(fields);
   }
 
   serializeExtras(): any {

@@ -74,7 +74,7 @@ export class MainMenu extends Component<'div'> {
     // Update options value on option bar
     const fgColor = new ColorPickerButton(
       this.paintlib,
-      (state) => state.selectedObject?.get()?.stroke,
+      (state) => state.selectedObject?.getOptions()?.fgColor,
       (state) => state.options.fgColor,
       (color) => {
         this.paintlib.uiStore.setState((old) => ({
@@ -86,7 +86,7 @@ export class MainMenu extends Component<'div'> {
     );
     const bgColor = new ColorPickerButton(
       this.paintlib,
-      (state) => state.selectedObject?.get()?.fill,
+      (state) => state.selectedObject?.getOptions()?.bgColor,
       (state) => state.options.bgColor,
       (color) => {
         this.paintlib.uiStore.setState((old) => ({

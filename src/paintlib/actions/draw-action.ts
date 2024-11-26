@@ -39,9 +39,10 @@ export class DrawAction extends BaseSelectableAction {
     this.paintlib.canvas.renderAll();
   }
 
+  // TODO: Update options with global scaling
   update() {
     const state = this.paintlib.uiStore.getState();
-    this.pencil.width = state.options.tickness * state.globalScale;
+    this.pencil.width = state.options.tickness;
     this.pencil.color = state.options.fgColor;
     this.paintlib.canvas.renderAll();
   }
