@@ -14,9 +14,7 @@ export class DrawAction extends BaseSelectableAction {
   onSelected() {
     this.pencil = new PencilBrush(this.paintlib.canvas);
 
-    const options = this.paintlib.uiStore.getState().options;
-    this.pencil.width = options.tickness;
-    this.pencil.color = options.fgColor;
+    this.update();
 
     // Assign the brush to the canvas & Enable free drawing mode
     this.paintlib.canvas.freeDrawingBrush = this.pencil;
@@ -42,9 +40,9 @@ export class DrawAction extends BaseSelectableAction {
   }
 
   update() {
-    const options = this.paintlib.uiStore.getState().options;
-    this.pencil.width = options.tickness;
-    this.pencil.color = options.fgColor;
+    const state = this.paintlib.uiStore.getState();
+    this.pencil.width = state.options.tickness * state.globalScale;
+    this.pencil.color = state.options.fgColor;
     this.paintlib.canvas.renderAll();
   }
 

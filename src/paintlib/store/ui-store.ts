@@ -12,6 +12,7 @@ export type UIStore = {
   activeAction?: UIActionType;
   setAction: (action: BaseAction) => void;
   selectedObject?: PaintObject<any>;
+  globalScale: number;
   options: {
     fgColor: string;
     bgColor: string;
@@ -32,8 +33,8 @@ export const createUIStore = (paintlib: PaintLib) => {
         }
 
         set((oldStore) => ({
-          activeAction: action.type,
           allActions: { ...oldStore.allActions, [action.type]: action },
+          activeAction: action.type,
         }));
 
         action.onSelected();
@@ -46,6 +47,7 @@ export const createUIStore = (paintlib: PaintLib) => {
         [UIActionType.SELECT]: new SelectAction(paintlib),
       },
       setAction,
+      globalScale: 1,
       options: {
         fgColor: paintlib.getPalette()[0],
         bgColor: 'transparent',

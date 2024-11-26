@@ -33,10 +33,14 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
       stroke: options.fgColor,
       fill: options.bgColor,
     });
+
+    const scale = this.paintlib.uiStore.getState().globalScale;
     this.object['fabricObject'].set({
       selectable: false,
       lockMovementX: false,
       lockMovementY: false,
+      scaleX: scale,
+      scaleY: scale,
     });
 
     this.object.updateLayout(
@@ -48,22 +52,36 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
   }
 
   onMouseMove(event: TPointerEventInfo<TPointerEvent>): void {
+    const scale = this.object['fabricObject'].scaleX;
+
     let x = this.originalXY.x;
     let y = this.originalXY.y;
     let width = event.scenePoint.x - this.originalXY.x;
     let height = event.scenePoint.y - this.originalXY.y;
 
     if (width < 0) {
-      width = -width;
-      x = this.originalXY.x - width;
+      x = this.originalXY.x + width;
+      width = -width / scale;
+    } else {
+      width /= scale;
     }
 
     if (height < 0) {
-      height = -height;
-      y = this.originalXY.y - height;
+      y = this.originalXY.y + height;
+      height = -height / scale;
+    } else {
+      height /= scale;
     }
 
-    this.object.updateLayout({ left: x, top: y, width, height }, event.scenePoint.subtract(this.originalXY));
+    this.object.updateLayout(
+      {
+        left: x,
+        top: y,
+        width,
+        height,
+      },
+      event.scenePoint.subtract(this.originalXY),
+    );
     this.paintlib.canvas.renderAll();
   }
 

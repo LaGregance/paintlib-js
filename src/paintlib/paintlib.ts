@@ -124,6 +124,15 @@ export class PaintLib {
     useState(this.uiStore, (store) => store.options.fgColor, updateFactory('stroke'));
     useState(this.uiStore, (store) => store.options.bgColor, updateFactory('fill'));
     useState(this.uiStore, (store) => store.options.tickness, updateFactory('strokeWidth'));
+    useState(
+      this.uiStore,
+      (store) => store.globalScale,
+      () => {
+        if (this.uiStore.getState().activeAction === UIActionType.DRAW) {
+          (this.uiStore.getState().allActions[UIActionType.DRAW] as DrawAction).update();
+        }
+      },
+    );
 
     new ResizeObserver(this.fitViewport).observe(this.container);
   }
@@ -226,6 +235,7 @@ export class PaintLib {
 
     const objRotation = util.degreesToRadians(direction === 'left' ? -90 : 90);
     const objScale = newHeight / actualWidth;
+    this.uiStore.setState((old) => ({ globalScale: old.globalScale * objScale }));
     const translation = new Point(direction === 'right' ? newWidth : 0, direction === 'right' ? 0 : newHeight);
 
     for (const obj of this.objects) {
@@ -265,6 +275,7 @@ export class PaintLib {
     this.canvas.centerObject(this.image);
 
     const objScale = imgWidth / actualWidth;
+    this.uiStore.setState((old) => ({ globalScale: old.globalScale * objScale }));
 
     for (const obj of this.objects) {
       obj.applyTransforms(objScale, 0, new Point(0, 0));
@@ -307,6 +318,7 @@ export class PaintLib {
       this.rotateImgAndCanvas(data.image?.angle);
     }
     const objScale = this.canvas.width / data.width;
+    this.uiStore.setState((old) => ({ globalScale: old.globalScale * objScale }));
 
     for (const objData of data.objects) {
       const obj = ObjectRegistry.restoreObject(this, objData);
