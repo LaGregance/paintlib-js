@@ -392,6 +392,10 @@ export class PaintLib {
   /* ****************************************** */
   /* ************** UNDO / REDO  ************** */
   /* ****************************************** */
+  private updateCanUndoRedoState() {
+    this.uiStore.setState({ canRedo: this.redoStack.length > 0, canUndo: this.undoStack.length > 0 });
+  }
+
   private buildCheckpoint(object?: PaintObject<any>, creation?: boolean): Checkpoint {
     if (object) {
       const objExists = !!this.objects.find((x) => x === object);
@@ -444,6 +448,7 @@ export class PaintLib {
 
   discardLastCheckpoint() {
     this.undoStack.pop();
+    this.updateCanUndoRedoState();
   }
 
   saveCheckpoint(object?: PaintObject<any>, creation?: boolean) {
@@ -454,6 +459,7 @@ export class PaintLib {
     }
 
     this.redoStack = [];
+    this.updateCanUndoRedoState();
   }
 
   undo() {
@@ -467,6 +473,7 @@ export class PaintLib {
 
     // 2. Restore the object or canvas
     this.restoreCheckpoint(checkpoint);
+    this.updateCanUndoRedoState();
   }
 
   redo() {
@@ -480,6 +487,7 @@ export class PaintLib {
 
     // 2. Restore the object or canvas
     this.restoreCheckpoint(checkpoint);
+    this.updateCanUndoRedoState();
   }
 
   /* ************************************ */

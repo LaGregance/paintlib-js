@@ -50,6 +50,7 @@ export class MainMenu extends Component<'div'> {
 
     const select = new ActionButton(this.paintlib, () => new SelectAction(this.paintlib), CursorSVG);
     const trash = new ActionButton(this.paintlib, () => new TrashAction(this.paintlib), TrashSVG);
+
     const undo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'undo'), UndoSVG);
     const redo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'redo'), RedoSVG);
 
@@ -119,6 +120,20 @@ export class MainMenu extends Component<'div'> {
         trash.setDisable(!selected);
         this.updateOptions(selected ? (selected.constructor as any) : UIActionType.SELECT);
       },
+    );
+
+    // Set undo/redo enable
+    useState(
+      this.paintlib.uiStore,
+      (store) => store.canUndo,
+      (canUndo) => {
+        undo.setDisable(!canUndo);
+      },
+    );
+    useState(
+      this.paintlib.uiStore,
+      (store) => store.canRedo,
+      (canRedo) => redo.setDisable(!canRedo),
     );
 
     // Action shortcut

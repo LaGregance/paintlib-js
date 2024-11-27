@@ -14,6 +14,8 @@ export type UIStore = {
   setAction: (action: BaseAction) => void;
   selectedObject?: PaintObject<any>;
   options: PaintObjectOptions;
+  canUndo: boolean;
+  canRedo: boolean;
 };
 
 export const createUIStore = (paintlib: PaintLib) => {
@@ -49,6 +51,8 @@ export const createUIStore = (paintlib: PaintLib) => {
         bgColor: 'transparent',
         tickness: paintlib.getAvailableTickness()[4],
       },
+      canUndo: false,
+      canRedo: false,
     };
   });
 };
