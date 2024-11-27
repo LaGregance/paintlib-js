@@ -163,15 +163,6 @@ export class PaintLib {
     useState(this.uiStore, (store) => store.options.fgColor, updateFactory('stroke'));
     useState(this.uiStore, (store) => store.options.bgColor, updateFactory('fill'));
     useState(this.uiStore, (store) => store.options.tickness, updateFactory('strokeWidth'));
-    /*useState(
-      this.uiStore,
-      (store) => store.globalScale,
-      () => {
-        if (this.uiStore.getState().activeAction === UIActionType.DRAW) {
-          (this.uiStore.getState().allActions[UIActionType.DRAW] as DrawAction).update();
-        }
-      },
-    );*/
 
     new ResizeObserver(this.fitViewport).observe(this.container);
   }
@@ -302,6 +293,7 @@ export class PaintLib {
   };
 
   private setGlobalTransform(props: Partial<GlobalTransformProps>) {
+    (this.uiStore.getState().allActions[UIActionType.DRAW] as DrawAction).update();
     this.transform = Object.assign(this.transform, props);
     for (const obj of this.objects) {
       obj.update(this);
