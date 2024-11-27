@@ -57,7 +57,7 @@ export class MainMenu extends Component<'div'> {
 
     actionsView.add(new ActionGroup([select, trash, undo, redo]));
     actionsView.add(new CreateObjectMenuGroup(this.paintlib));
-    if (this.paintlib.options?.allowRotate) {
+    if (this.paintlib.customization?.allowRotate) {
       const rotateLeft = new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'left'), RotateLeftSVG);
       const rotateRight = new ActionButton(
         this.paintlib,
@@ -143,7 +143,7 @@ export class MainMenu extends Component<'div'> {
     const meta = ObjectRegistry.getObjectMeta(actionOrClazz);
     const action = (meta?.action || actionOrClazz) as UIActionType;
 
-    if (this.paintlib.options?.proactivelyShowOptions) {
+    if (this.paintlib.customization?.proactivelyShowOptions) {
       const available: DrawingOption[] = meta?.allowedOptions;
 
       for (const key of Object.values(DrawingOption)) {

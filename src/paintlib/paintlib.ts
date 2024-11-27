@@ -3,7 +3,7 @@ import { calculateImageScaleToFitViewport } from './utils/size-utils';
 import { MainMenu } from './components/main-menu';
 import { createUIStore, UIStore } from './store/ui-store';
 import { StoreApi } from 'zustand/vanilla';
-import { PaintlibGlobalOptions } from './models/paintlib-global-options';
+import { PaintlibCustomization } from './models/paintlib-customization';
 import { useState } from './utils/use-state';
 import { DrawAction } from './actions/draw-action';
 import { PaintObject } from './objects/abstract/paint-object';
@@ -13,6 +13,7 @@ import { CanvasSerializedJson } from './models/canvas-serialized-json';
 import { PaintlibLoadOptions } from './models/paintlib-load-options';
 import { GlobalTransformProps } from './models/global-transform-props';
 import { ObjectRegistry } from './config/object-registry';
+import { Size } from './models/size';
 
 export class PaintLib {
   public readonly element: HTMLDivElement;
@@ -23,24 +24,25 @@ export class PaintLib {
   private canvasEl: HTMLCanvasElement;
   private canvasContainer: HTMLDivElement;
   private image?: FabricImage;
-  private format?: 'png' | 'jpeg';
-  private objects: PaintObject<any>[] = [];
+  private options?: PaintlibLoadOptions;
+  private exportSize?: Size;
 
+  private objects: PaintObject<any>[] = [];
   private transform: GlobalTransformProps = { scale: 1, rotation: 0 };
 
   constructor(
     public readonly container: HTMLElement,
-    public readonly options: PaintlibGlobalOptions = {},
+    public readonly customization: PaintlibCustomization = {},
   ) {
     // default style
-    options.style ??= {};
-    setCssProperty(options.style, 'backgroundColor', '--paintlib-background-color', '#c0c0c0');
-    setCssProperty(options.style, 'menuColor', '--paintlib-menu-color', '#222831');
-    setCssProperty(options.style, 'iconColor', '--paintlib-icon-color', '#c0c0c0');
-    setCssProperty(options.style, 'iconSize', '--paintlib-icon-size', 24);
-    setCssProperty(options.style, 'buttonSize', '--paintlib-button-size', 40);
-    setCssProperty(options.style, 'buttonGap', '--paintlib-button-gap', 6);
-    setCssProperty(options.style, 'groupGap', '--paintlib-group-gap', 20);
+    customization.style ??= {};
+    setCssProperty(customization.style, 'backgroundColor', '--paintlib-background-color', '#c0c0c0');
+    setCssProperty(customization.style, 'menuColor', '--paintlib-menu-color', '#222831');
+    setCssProperty(customization.style, 'iconColor', '--paintlib-icon-color', '#c0c0c0');
+    setCssProperty(customization.style, 'iconSize', '--paintlib-icon-size', 24);
+    setCssProperty(customization.style, 'buttonSize', '--paintlib-button-size', 40);
+    setCssProperty(customization.style, 'buttonGap', '--paintlib-button-gap', 6);
+    setCssProperty(customization.style, 'groupGap', '--paintlib-group-gap', 20);
     // -------------
 
     this.element = document.createElement('div');
@@ -57,16 +59,17 @@ export class PaintLib {
     this.element.appendChild(mainMenu.element);
 
     // 3. Create & Populate canvas
-    this.canvasEl = document.createElement('canvas');
-
     this.canvasContainer = document.createElement('div');
     this.canvasContainer.className = 'paintlib-canvas-container';
     this.canvasContainer.style.marginTop = px(
-      this.options.proactivelyShowOptions ? this.options.style.buttonSize : 2 * this.options.style.buttonSize + 10,
+      this.customization.proactivelyShowOptions
+        ? this.customization.style.buttonSize
+        : 2 * this.customization.style.buttonSize + 10,
     );
 
     this.element.appendChild(this.canvasContainer);
 
+    this.canvasEl = document.createElement('canvas');
     this.canvasEl.width = this.canvasContainer.clientWidth;
     this.canvasEl.height = this.canvasContainer.clientHeight;
     this.canvasContainer.appendChild(this.canvasEl);
@@ -74,7 +77,6 @@ export class PaintLib {
     this.canvas = new Canvas(this.canvasEl);
     this.canvas.selection = false;
     this.canvas.defaultCursor = 'pointer';
-    this.canvas.backgroundColor = '#ffffff';
 
     // 4. Manage event
     let isDragging = false;
@@ -173,8 +175,13 @@ export class PaintLib {
   /* ********** LOAD CANVAS ********** */
   /* ************************************ */
 
+  /**
+   * Load the canvas with image or freedrawing.
+   * @param options
+   */
   async load(options: PaintlibLoadOptions) {
     // TODO: Why not included in constructor ?
+    this.options = options;
     this.image = await FabricImage.fromURL(options.image, { crossOrigin: 'anonymous' });
 
     this.image.hasControls = false;
@@ -185,14 +192,12 @@ export class PaintLib {
     this.image.hoverCursor = 'pointer';
 
     // Auto-detect format if possible (else fallback png)
-    if (options.format) {
-      this.format = options.format;
-    } else {
+    if (!options.format) {
       const ext = getUrlExtension(options.image).toLowerCase();
       if (ext === 'jpg' || ext === 'jped') {
-        this.format = 'jpeg';
+        this.options.format = 'jpeg';
       } else {
-        this.format = 'png';
+        this.options.format = 'png';
       }
     }
     // --------------------------------------------------
@@ -204,7 +209,12 @@ export class PaintLib {
 
     this.canvas.setDimensions({ width, height });
     this.image.scale(scale);
-    // this.canvas.backgroundImage = this.image;
+
+    if (this.options.imageSizeMode === 'real') {
+      this.exportSize = { width: this.image.width, height: this.image.height };
+    } else {
+      this.exportSize = { width, height };
+    }
 
     this.canvas.add(this.image);
     this.canvas.centerObject(this.image);
@@ -356,8 +366,6 @@ export class PaintLib {
   /* ************************************ */
 
   private restore(data: CanvasSerializedJson) {
-    this.format = data.format;
-
     for (const objData of data.objects) {
       const obj = ObjectRegistry.restoreObject(objData);
       this.add(obj);
@@ -370,10 +378,6 @@ export class PaintLib {
     }
   }
 
-  getFormat() {
-    return this.format;
-  }
-
   getDataURL() {
     let scale = 1;
 
@@ -381,7 +385,7 @@ export class PaintLib {
       scale /= this.image.scaleX;
     }
 
-    return this.canvas.toDataURL({ format: this.format, multiplier: scale });
+    return this.canvas.toDataURL({ format: this.options.format, multiplier: scale });
   }
 
   serialize(): CanvasSerializedJson {
@@ -389,10 +393,11 @@ export class PaintLib {
     const height = this.canvas.height / this.transform.scale;
 
     return {
-      format: this.format,
       // TODO: Use width & height set at load time (original sizes)
       width: this.transform.rotation % 180 === 0 ? width : height,
       height: this.transform.rotation % 180 === 0 ? height : width,
+      // width: this.transform.rotation % 180 === 0 ? this.exportSize.width : this.exportSize.height,
+      // height: this.transform.rotation % 180 === 0 ? this.exportSize.width : this.exportSize.width,
       transform: { rotation: this.transform.rotation },
       objects: this.objects.map((x) => x.serialize()),
     };
@@ -449,7 +454,7 @@ export class PaintLib {
   /* ********** RANDOM GETTERS ********** */
   /* ************************************ */
   getPalette() {
-    if (!this.options?.palette) {
+    if (!this.customization?.palette) {
       return [
         '#FF0000', // Red
         '#FFA500', // Orange
@@ -461,14 +466,14 @@ export class PaintLib {
         '#000000', // Dark
       ];
     }
-    return this.options.palette;
+    return this.customization.palette;
   }
 
   getAvailableTickness() {
-    if (!this.options?.tickness) {
+    if (!this.customization?.tickness) {
       return [1, 2, 3, 5, 10];
     }
-    return this.options.tickness;
+    return this.customization.tickness;
   }
 
   getTransform() {
