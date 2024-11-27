@@ -1,7 +1,7 @@
-import { Point, TBBox, Textbox } from 'fabric';
+import { Point, Textbox } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
-import { PaintObjectFields } from '../models/paint-object-fields';
 import { PaintObjectJson } from '../models/paint-object-json';
+import { PaintLib } from '../paintlib';
 
 export class PaintText extends PaintObject<Textbox> {
   instantiate(point: Point, restoreData?: PaintObjectJson) {
@@ -11,40 +11,42 @@ export class PaintText extends PaintObject<Textbox> {
       objectCaching: false,
       fontSize: restoreData?.extras?.fontSize ?? 5,
     });
-    this.fabricObject.editable = true;
 
-    delete this.fabricObject.controls.ml;
-    delete this.fabricObject.controls.mr;
-    delete this.fabricObject.controls.mb;
-    delete this.fabricObject.controls.mt;
+    this.fabricObject.editable = true;
   }
 
-  updateLayout(layout: TBBox, vector: Point) {
-    super.updateLayout(layout, vector);
-    this.fabricObject.set({
-      top: layout.top,
-      left: layout.left,
-      fontSize: layout.height,
-      height: layout.height,
-      width: layout.width,
+  bind(paintLib: PaintLib) {
+    this.fabricObject.on('editing:exited', () => {
+      if (this.fabricObject.text.length <= 0) {
+        paintLib.remove(this);
+      }
     });
+  }
+
+  render() {
+    this.fabricObject.set({
+      top: this.layout.top,
+      left: this.layout.left,
+      fontSize: this.layout.height * 0.9,
+      height: this.layout.height,
+      width: this.layout.width,
+      fill: this.options.fgColor,
+    });
+
+    // Adjust fontSize to fit precise height
+    const ratio = this.layout.height / this.fabricObject.calcTextHeight();
+    this.fabricObject.set({
+      fontSize: this.fabricObject.fontSize * ratio,
+    });
+
+    if (this.layout.width < this.fabricObject.width) {
+      this.layout.width = this.fabricObject.width;
+    }
   }
 
   onCreated() {
     this.fabricObject.enterEditing();
     this.fabricObject.selectAll();
-  }
-
-  set(fields: PaintObjectFields) {
-    super.set(fields);
-
-    delete fields.strokeWidth;
-    delete fields.fill;
-
-    if (fields.stroke) {
-      fields.fill = fields.stroke;
-    }
-    this.fabricObject.set(fields);
   }
 
   serializeExtras(): any {

@@ -1,49 +1,38 @@
-import { Ellipse, Point, TBBox } from 'fabric';
+import { Ellipse, Point } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
-import { createResizeControls2D } from '../utils/object-resize-controls-2d';
-import { PaintObjectFields } from '../models/paint-object-fields';
+import { createResizeControls } from '../utils/object-resize-controls';
+import { PaintLib } from '../paintlib';
 
 export class PaintEllipse extends PaintObject<Ellipse> {
   instantiate(point: Point) {
     this.fabricObject = new Ellipse({ x: point.x, y: point.y, rx: 1, ry: 1, objectCaching: false });
     this.fabricObject.controls = {
+      mtr: this.fabricObject.controls.mtr,
+    };
+  }
+
+  bind(paintlib: PaintLib) {
+    this.fabricObject.controls = {
       // Keep only existing resize control
       mtr: this.fabricObject.controls.mtr,
-      ...createResizeControls2D(this),
+      ...createResizeControls(paintlib, this, 'box'),
     };
+    paintlib.canvas.renderAll();
   }
 
-  updateLayout(layout: TBBox, vector: Point) {
-    super.updateLayout(layout, vector);
-
-    const rx = layout.width / 2;
-    const ry = layout.height / 2;
-    const strokeWidth = Math.min(rx, ry, this.fields.strokeWidth);
+  render() {
+    const rx = this.layout.width / 2;
+    const ry = this.layout.height / 2;
+    const strokeWidth = Math.min(rx, ry, this.options.tickness);
 
     this.fabricObject.set({
-      left: layout.left,
-      top: layout.top,
-      rx: layout.width / 2 - strokeWidth / 2,
-      ry: layout.height / 2 - strokeWidth / 2,
+      left: this.layout.left,
+      top: this.layout.top,
+      rx: this.layout.width / 2 - strokeWidth / 2,
+      ry: this.layout.height / 2 - strokeWidth / 2,
       strokeWidth: strokeWidth,
+      fill: this.options.bgColor,
+      stroke: this.options.fgColor,
     });
-  }
-
-  getLayout(): TBBox {
-    return {
-      top: this.fabricObject.top,
-      left: this.fabricObject.left,
-      width: this.fabricObject.width + this.fabricObject.strokeWidth,
-      height: this.fabricObject.height + this.fabricObject.strokeWidth,
-    };
-  }
-
-  set(fields: Partial<PaintObjectFields>) {
-    super.set(fields);
-
-    if (fields.strokeWidth) {
-      this.updateLayout(this.getLayout(), this.vector);
-    }
-    this.fabricObject.set(fields);
   }
 }

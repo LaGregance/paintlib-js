@@ -1,8 +1,8 @@
-import { Line, Point, TBBox } from 'fabric';
-import { PaintObjectFields } from '../models/paint-object-fields';
+import { Line, Point } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
-import { createResizeControlsVector } from '../utils/object-resize-controls-vector';
 import { getEndPoint, getStartPoint } from '../utils/vector-utils';
+import { PaintLib } from '../paintlib';
+import { createResizeControls } from '../utils/object-resize-controls';
 
 export class PaintLine extends PaintObject<Line> {
   instantiate(point: Point) {
@@ -11,34 +11,28 @@ export class PaintLine extends PaintObject<Line> {
       perPixelTargetFind: true,
       objectCaching: false,
     });
-    this.fabricObject.controls = createResizeControlsVector(this);
+    this.fabricObject.controls = {};
   }
 
-  updateLayout(layout: TBBox, vector: Point) {
-    super.updateLayout(layout, vector);
+  bind(paintLib: PaintLib) {
+    this.fabricObject.controls = createResizeControls(paintLib, this, 'vector');
+  }
 
-    const start = getStartPoint(layout, this.vector);
-    const end = getEndPoint(layout, this.vector);
+  isValidForCreation() {
+    return Math.sqrt(this.layout.width * this.layout.width + this.layout.height * this.layout.height) > 5;
+  }
+
+  render() {
+    const start = getStartPoint(this.layout, this.vector);
+    const end = getEndPoint(this.layout, this.vector);
 
     this.fabricObject.set({
       x1: start.x,
       y1: start.y,
       x2: end.x,
       y2: end.y,
+      stroke: this.options.fgColor,
+      strokeWidth: this.options.tickness,
     });
-  }
-
-  getLayout(): TBBox {
-    return {
-      top: Math.min(this.fabricObject.y1, this.fabricObject.y2),
-      left: Math.min(this.fabricObject.x1, this.fabricObject.x2),
-      width: Math.abs(this.fabricObject.x1 - this.fabricObject.x2),
-      height: Math.abs(this.fabricObject.y1 - this.fabricObject.y2),
-    };
-  }
-
-  set(fields: PaintObjectFields) {
-    super.set(fields);
-    this.fabricObject.set(fields);
   }
 }

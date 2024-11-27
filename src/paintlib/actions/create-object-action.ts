@@ -1,13 +1,15 @@
-import { Point, TPointerEvent, TPointerEventInfo } from 'fabric';
+import { Point, TBBox, TPointerEvent, TPointerEventInfo } from 'fabric';
 import { PaintLib } from '../paintlib';
 import { SelectAction } from './select-action';
 import { BaseSelectableAction } from './abstract/base-selectable-action';
 import { PaintObject } from '../objects/abstract/paint-object';
 import { UIActionType } from '../config/ui-action-type';
+import { ObjectRegistry } from '../config/object-registry';
 
 export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectableAction {
   protected object: T;
   protected originalXY: Point;
+  private alwaysHorizontal?: boolean;
 
   constructor(
     paintlib: PaintLib,
@@ -15,6 +17,7 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
     private objectConstructor: new () => T,
   ) {
     super(paintlib, type);
+    this.alwaysHorizontal = ObjectRegistry.getObjectMeta(type).creationAlwaysHorizontal;
   }
 
   onClick() {}
@@ -22,66 +25,91 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
   onDeselected() {}
 
   onMouseDown(event: TPointerEventInfo<TPointerEvent>): void {
-    this.originalXY = event.scenePoint;
+    this.originalXY = this.paintlib.getRealPosFromCanvas(event.scenePoint);
 
     this.object = new this.objectConstructor();
-    this.object.create(event.scenePoint);
+    this.object.create(this.originalXY);
 
     const options = this.paintlib.uiStore.getState().options;
-    this.object.set({
-      strokeWidth: options.tickness,
-      stroke: options.fgColor,
-      fill: options.bgColor,
+    this.object.setOptions({
+      tickness: options.tickness,
+      fgColor: options.fgColor,
+      bgColor: options.bgColor,
     });
 
-    const scale = this.paintlib.uiStore.getState().globalScale;
+    if (this.alwaysHorizontal) {
+      this.object.setTransform({ rotation: -this.paintlib.getTransform().rotation });
+    }
+
     this.object['fabricObject'].set({
       selectable: false,
       lockMovementX: false,
       lockMovementY: false,
-      scaleX: scale,
-      scaleY: scale,
     });
 
     this.object.updateLayout(
       { left: event.scenePoint.x, top: event.scenePoint.y, width: 1, height: 1 },
-      event.scenePoint.subtract(this.originalXY),
+      new Point(1, 1),
     );
 
     this.paintlib.add(this.object);
   }
 
   onMouseMove(event: TPointerEventInfo<TPointerEvent>): void {
-    const scale = this.object['fabricObject'].scaleX;
+    const eventPoint = this.paintlib.getRealPosFromCanvas(event.scenePoint);
 
     let x = this.originalXY.x;
     let y = this.originalXY.y;
-    let width = event.scenePoint.x - this.originalXY.x;
-    let height = event.scenePoint.y - this.originalXY.y;
+    let width = eventPoint.x - this.originalXY.x;
+    let height = eventPoint.y - this.originalXY.y;
 
     if (width < 0) {
       x = this.originalXY.x + width;
-      width = -width / scale;
-    } else {
-      width /= scale;
+      width = -width;
     }
-
     if (height < 0) {
       y = this.originalXY.y + height;
-      height = -height / scale;
-    } else {
-      height /= scale;
+      height = -height;
     }
 
-    this.object.updateLayout(
-      {
-        left: x,
-        top: y,
-        width,
-        height,
-      },
-      event.scenePoint.subtract(this.originalXY),
-    );
+    let layout: TBBox = {
+      left: x,
+      top: y,
+      width,
+      height,
+    };
+
+    // === Layout correction if alwaysHorizontal ===
+    const rotation = this.object.getTransform().rotation;
+    if (this.alwaysHorizontal && rotation !== 0) {
+      // Calculate correct layout when create with rotation
+      if (rotation === -90) {
+        layout = {
+          left: layout.left,
+          top: layout.top + layout.height,
+          width: layout.height,
+          height: layout.width,
+        };
+      } else if (rotation === -180) {
+        layout = {
+          left: layout.left + layout.width,
+          top: layout.top + layout.height,
+          width: layout.width,
+          height: layout.height,
+        };
+      } else if (rotation === -270) {
+        layout = {
+          left: layout.left + layout.width,
+          top: layout.top,
+          width: layout.height,
+          height: layout.width,
+        };
+      }
+    }
+    // =============================================
+
+    this.object.updateLayout(layout, eventPoint.subtract(this.originalXY));
+    this.object.update(this.paintlib);
     this.paintlib.canvas.renderAll();
   }
 

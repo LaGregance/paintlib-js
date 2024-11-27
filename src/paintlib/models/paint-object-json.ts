@@ -1,13 +1,12 @@
-import { PaintObjectFields } from './paint-object-fields';
+import { PaintObjectOptions } from './paint-object-options';
 import { TBBox } from 'fabric';
+import { PaintObjectTransformProps } from './global-transform-props';
 
 export type PaintObjectJson = {
   type: string;
   layout: TBBox;
   vector: { x: number; y: number };
-  angle: number;
-  scaleX: number;
-  scaleY: number;
-  fields: Partial<PaintObjectFields>;
+  options: Partial<PaintObjectOptions>;
+  transform: Partial<PaintObjectTransformProps>;
   extras?: any;
 };

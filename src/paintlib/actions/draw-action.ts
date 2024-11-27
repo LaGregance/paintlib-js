@@ -27,7 +27,7 @@ export class DrawAction extends BaseSelectableAction {
   private onObjectAdded = ({ target }: { target: FabricObject }) => {
     if (target instanceof Path) {
       const path = new PaintDraw();
-      path.attach(target);
+      path.attach(this.paintlib, target);
       this.paintlib.add(path);
     }
   };
@@ -41,7 +41,7 @@ export class DrawAction extends BaseSelectableAction {
 
   update() {
     const state = this.paintlib.uiStore.getState();
-    this.pencil.width = state.options.tickness * state.globalScale;
+    this.pencil.width = state.options.tickness * this.paintlib.getTransform().scale;
     this.pencil.color = state.options.fgColor;
     this.paintlib.canvas.renderAll();
   }

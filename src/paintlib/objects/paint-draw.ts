@@ -1,37 +1,48 @@
-import { Path, Point, TBBox } from 'fabric';
+import { Path, Point } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
-import { PaintObjectFields } from '../models/paint-object-fields';
 import { PaintObjectJson } from '../models/paint-object-json';
+import { PaintLib } from '../paintlib';
 
 export class PaintDraw extends PaintObject<Path> {
   instantiate(point: Point, data?: PaintObjectJson) {
     this.fabricObject = new Path(data.extras.path, data.extras);
   }
 
-  attach(obj: Path) {
+  attach(paintlib: PaintLib, obj: Path) {
     this.fabricObject = obj;
 
-    const layout = this.getLayout();
-    this.fields = {
-      stroke: obj.stroke as string,
-      fill: obj.fill as string,
-      strokeWidth: obj.strokeWidth,
+    this.options = {
+      fgColor: obj.stroke as string,
+      bgColor: obj.fill as string,
+      tickness: obj.strokeWidth,
     };
-    this.updateLayout(layout, new Point(layout.width, layout.height));
-  }
 
-  updateLayout(layout: TBBox, vector: Point) {
-    super.updateLayout(layout, vector);
-
-    this.fabricObject.set({
-      left: layout.left,
-      top: layout.top,
+    const pos = paintlib.getRealPosFromCanvas(new Point(this.fabricObject.left, this.fabricObject.top));
+    const globalTransform = paintlib.getTransform();
+    const scale = 1 / globalTransform.scale;
+    this.setTransform({
+      rotation: -globalTransform.rotation,
+      scaleX: scale,
+      scaleY: scale,
     });
+    this.updateLayout(
+      {
+        left: pos.x,
+        top: pos.y,
+        width: this.fabricObject.width,
+        height: this.fabricObject.height,
+      },
+      new Point(1, 1),
+    );
+    this.update(paintlib);
   }
 
-  set(fields: Partial<PaintObjectFields>) {
-    super.set(fields);
-    this.fabricObject.set(fields);
+  render() {
+    this.fabricObject.set({
+      stroke: this.options.fgColor,
+      fill: this.options.bgColor,
+      strokeWidth: this.options.tickness,
+    });
   }
 
   serializeExtras(): any {

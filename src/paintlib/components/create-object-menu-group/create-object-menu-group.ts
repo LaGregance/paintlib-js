@@ -28,9 +28,9 @@ export class CreateObjectMenuGroup extends Component<'div'> {
     super('div');
     this.availableActions = ObjectRegistry.getAllObjectActions();
 
-    const style = this.paintlib.options.style;
-    const countButtons = Object.values(UIActionType).length - (this.paintlib.options.allowRotate ? 0 : 2);
-    const countGroup = 3 + (this.paintlib.options.allowRotate ? 1 : 0);
+    const style = this.paintlib.customization.style;
+    const countButtons = Object.values(UIActionType).length - (this.paintlib.customization.allowRotate ? 0 : 2);
+    const countGroup = 3 + (this.paintlib.customization.allowRotate ? 1 : 0);
     this.MIN_WIDTH =
       style.groupGap * (countGroup - 1) +
       (style.buttonSize + style.buttonGap) * countButtons -
@@ -44,7 +44,7 @@ export class CreateObjectMenuGroup extends Component<'div'> {
     if (!this.container || this.container.clientWidth > this.MIN_WIDTH) {
       this.availableBtnCount = this.availableActions.length;
     } else {
-      const style = this.paintlib.options.style;
+      const style = this.paintlib.customization.style;
 
       const availableWidth =
         this.container.clientWidth -

@@ -24,8 +24,8 @@ export type PaintObjectMetadata = {
   action: UIActionType;
   clazz: PaintObjectClass;
   icon: string;
-  avoidLayoutOnRestore?: boolean;
   allowedOptions?: DrawingOption[];
+  creationAlwaysHorizontal?: boolean;
 };
 
 export abstract class ObjectRegistry {
@@ -63,7 +63,7 @@ export abstract class ObjectRegistry {
       clazz: PaintText,
       icon: TextSVG,
       allowedOptions: [DrawingOption.FG_COLOR],
-      avoidLayoutOnRestore: true,
+      creationAlwaysHorizontal: true,
     },
     {
       action: UIActionType.DRAW,
@@ -120,10 +120,9 @@ export abstract class ObjectRegistry {
 
   /**
    * Restore the object from a JSON object (obtained from serialize function)
-   * @param paintlib
    * @param data
    */
-  public static restoreObject(paintlib: PaintLib, data: PaintObjectJson) {
+  public static restoreObject(data: PaintObjectJson) {
     const meta = this.getObjectMeta(data.type);
 
     if (!meta) {
@@ -131,8 +130,7 @@ export abstract class ObjectRegistry {
     }
 
     const object = new meta.clazz();
-    object.restoreObject(data);
-    paintlib.add(object);
+    object.restore(data);
     return object;
   }
 }

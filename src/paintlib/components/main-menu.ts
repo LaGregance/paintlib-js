@@ -30,6 +30,7 @@ import { xor } from '../utils/utils';
 import { UIActionType } from '../config/ui-action-type';
 import { DrawingOption } from '../config/drawing-option';
 import { ObjectRegistry, PaintObjectClass } from '../config/object-registry';
+import { PaintText } from '../objects/paint-text';
 
 export class MainMenu extends Component<'div'> {
   private optionsMenu: View;
@@ -57,7 +58,7 @@ export class MainMenu extends Component<'div'> {
 
     actionsView.add(new ActionGroup([select, trash, undo, redo]));
     actionsView.add(new CreateObjectMenuGroup(this.paintlib));
-    if (this.paintlib.options?.allowRotate) {
+    if (this.paintlib.customization?.allowRotate) {
       const rotateLeft = new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'left'), RotateLeftSVG);
       const rotateRight = new ActionButton(
         this.paintlib,
@@ -74,7 +75,7 @@ export class MainMenu extends Component<'div'> {
     // Update options value on option bar
     const fgColor = new ColorPickerButton(
       this.paintlib,
-      (state) => state.selectedObject?.get()?.stroke,
+      (state) => state.selectedObject?.getOptions()?.fgColor,
       (state) => state.options.fgColor,
       (color) => {
         this.paintlib.uiStore.setState((old) => ({
@@ -86,7 +87,7 @@ export class MainMenu extends Component<'div'> {
     );
     const bgColor = new ColorPickerButton(
       this.paintlib,
-      (state) => state.selectedObject?.get()?.fill,
+      (state) => state.selectedObject?.getOptions()?.bgColor,
       (state) => state.options.bgColor,
       (color) => {
         this.paintlib.uiStore.setState((old) => ({
@@ -122,6 +123,13 @@ export class MainMenu extends Component<'div'> {
 
     // Action shortcut
     document.addEventListener('keydown', (event) => {
+      const selectedObj = this.paintlib.getSelectedObject();
+      if (selectedObj instanceof PaintText) {
+        if (selectedObj['fabricObject'].isEditing) {
+          return;
+        }
+      }
+
       const ctrl = xor(event.ctrlKey, event.metaKey);
       const key = event.key.toLowerCase();
 
@@ -143,7 +151,7 @@ export class MainMenu extends Component<'div'> {
     const meta = ObjectRegistry.getObjectMeta(actionOrClazz);
     const action = (meta?.action || actionOrClazz) as UIActionType;
 
-    if (this.paintlib.options?.proactivelyShowOptions) {
+    if (this.paintlib.customization?.proactivelyShowOptions) {
       const available: DrawingOption[] = meta?.allowedOptions;
 
       for (const key of Object.values(DrawingOption)) {

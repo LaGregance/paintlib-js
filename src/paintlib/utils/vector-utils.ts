@@ -1,25 +1,25 @@
 import { Point, TBBox } from 'fabric';
 
-export const getStartPoint = (layout: TBBox, vector: Point, scale = 1) => {
+export const getStartPoint = (layout: TBBox, vector: Point) => {
   if (vector.x >= 0 && vector.y >= 0) {
     return new Point(layout.left, layout.top);
   } else if (vector.x >= 0 && vector.y < 0) {
-    return new Point(layout.left, layout.top + layout.height * scale);
+    return new Point(layout.left, layout.top + layout.height);
   } else if (vector.x < 0 && vector.y >= 0) {
-    return new Point(layout.left + layout.width * scale, layout.top);
+    return new Point(layout.left + layout.width, layout.top);
   } else {
     // x < 0 && y < 0
-    return new Point(layout.left + layout.width * scale, layout.top + layout.height * scale);
+    return new Point(layout.left + layout.width, layout.top + layout.height);
   }
 };
 
-export const getEndPoint = (layout: TBBox, vector: Point, scale = 1) => {
+export const getEndPoint = (layout: TBBox, vector: Point) => {
   if (vector.x >= 0 && vector.y >= 0) {
-    return new Point(layout.left + layout.width * scale, layout.top + layout.height * scale);
+    return new Point(layout.left + layout.width, layout.top + layout.height);
   } else if (vector.x >= 0 && vector.y < 0) {
-    return new Point(layout.left + layout.width * scale, layout.top);
+    return new Point(layout.left + layout.width, layout.top);
   } else if (vector.x < 0 && vector.y >= 0) {
-    return new Point(layout.left, layout.top + layout.height * scale);
+    return new Point(layout.left, layout.top + layout.height);
   } else {
     // x < 0 && y < 0
     return new Point(layout.left, layout.top);
