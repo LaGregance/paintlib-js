@@ -14,13 +14,6 @@ export type PaintlibLoadOptions = {
   imageSizeMode?: 'real' | 'viewport';
 
   /**
-   * When saving an image, should we use the real size of the image or the viewport size.
-   *
-   * Default: real
-   */
-  imageSaveMode?: 'real' | 'viewport';
-
-  /**
    * Format to use when saving, default to png.
    */
   format?: 'png' | 'jpeg';

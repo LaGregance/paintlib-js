@@ -25,7 +25,7 @@ export class PaintLib {
   private canvasContainer: HTMLDivElement;
   private image?: FabricImage;
   private options?: PaintlibLoadOptions;
-  private exportSize?: Size;
+  private realSize?: Size;
 
   private objects: PaintObject<any>[] = [];
   private transform: GlobalTransformProps = { scale: 1, rotation: 0 };
@@ -211,13 +211,14 @@ export class PaintLib {
     this.image.scale(scale);
 
     if (this.options.imageSizeMode === 'real') {
-      this.exportSize = { width: this.image.width, height: this.image.height };
+      this.realSize = { width: this.image.width, height: this.image.height };
     } else {
-      this.exportSize = { width, height };
+      this.realSize = { width, height };
     }
 
     this.canvas.add(this.image);
     this.canvas.centerObject(this.image);
+    this.transform.scale = width / this.realSize.width;
 
     if (options.restoreData) {
       this.restore(JSON.parse(atob(options.restoreData)));
@@ -243,7 +244,6 @@ export class PaintLib {
     }
 
     // 2. Calculate new canvas dimension
-    const oldWidth = this.transform.rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
     const containerWidth = this.canvasContainer.clientWidth;
     const containerHeight = this.canvasContainer.clientHeight;
 
@@ -266,9 +266,9 @@ export class PaintLib {
 
     // 3. Apply new global scale to objects
     const newWidth = rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
-    const newScale = newWidth / oldWidth;
+    const objScale = newWidth / this.realSize.width;
     this.setGlobalTransform({
-      scale: this.transform.scale * newScale,
+      scale: objScale,
       rotation,
     });
   }
@@ -281,8 +281,6 @@ export class PaintLib {
 
     const containerWidth = this.canvasContainer.clientWidth;
     const containerHeight = this.canvasContainer.clientHeight;
-
-    const oldWidth = this.canvas.width;
 
     const {
       width: canvasWidth,
@@ -300,8 +298,7 @@ export class PaintLib {
     this.image.scale(imgScale);
     this.canvas.centerObject(this.image);
 
-    const newScale = canvasWidth / oldWidth;
-    this.setGlobalTransform({ scale: this.transform.scale * newScale });
+    this.setGlobalTransform({ scale: canvasWidth / this.realSize.width });
   };
 
   private setGlobalTransform(props: Partial<GlobalTransformProps>) {
@@ -379,25 +376,16 @@ export class PaintLib {
   }
 
   getDataURL() {
-    let scale = 1;
-
-    if (this.image) {
-      scale /= this.image.scaleX;
-    }
+    const canvasWidth = this.transform.rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
+    const scale = (this.image?.width ?? this.realSize.width) / canvasWidth;
 
     return this.canvas.toDataURL({ format: this.options.format, multiplier: scale });
   }
 
   serialize(): CanvasSerializedJson {
-    const width = this.canvas.width / this.transform.scale;
-    const height = this.canvas.height / this.transform.scale;
-
     return {
-      // TODO: Use width & height set at load time (original sizes)
-      width: this.transform.rotation % 180 === 0 ? width : height,
-      height: this.transform.rotation % 180 === 0 ? height : width,
-      // width: this.transform.rotation % 180 === 0 ? this.exportSize.width : this.exportSize.height,
-      // height: this.transform.rotation % 180 === 0 ? this.exportSize.width : this.exportSize.width,
+      width: this.transform.rotation % 180 === 0 ? this.realSize.width : this.realSize.height,
+      height: this.transform.rotation % 180 === 0 ? this.realSize.width : this.realSize.width,
       transform: { rotation: this.transform.rotation },
       objects: this.objects.map((x) => x.serialize()),
     };
@@ -412,17 +400,18 @@ export class PaintLib {
    * @private
    */
   private getReferencePoint() {
-    // TODO: Use width & height set at load time (original sizes)
     let x = 0;
     let y = 0;
 
     if (this.transform.rotation === 90) {
-      x = this.canvas.width / this.transform.scale;
+      // height because realSize is fixed (so in case 90º rotation, realSize.height is actually width)
+      x = this.realSize.height;
     } else if (this.transform.rotation === 180) {
-      x = this.canvas.width / this.transform.scale;
-      y = this.canvas.height / this.transform.scale;
+      x = this.realSize.width;
+      y = this.realSize.height;
     } else if (this.transform.rotation === 270) {
-      y = this.canvas.height / this.transform.scale;
+      // width because realSize is fixed (so in case 270º rotation, realSize.width is actually height)
+      y = this.realSize.width;
     }
 
     return new Point(x, y);
@@ -476,7 +465,11 @@ export class PaintLib {
     return this.customization.tickness;
   }
 
-  getTransform() {
+  getTransform(): GlobalTransformProps {
     return { ...this.transform };
+  }
+
+  getOptions(): PaintlibLoadOptions {
+    return { ...this.options };
   }
 }
