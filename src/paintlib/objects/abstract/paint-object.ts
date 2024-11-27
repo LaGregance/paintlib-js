@@ -170,7 +170,7 @@ export abstract class PaintObject<T extends FabricObject> {
   serialize(): PaintObjectJson {
     return {
       type: this.constructor.name,
-      layout: this.getLayout(),
+      layout: this.layout,
       vector: this.vector,
       options: this.options,
       transform: this.transform,

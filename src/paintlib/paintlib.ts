@@ -12,6 +12,7 @@ import { getUrlExtension, px, setCssProperty } from './utils/utils';
 import { CanvasSerializedJson } from './models/canvas-serialized-json';
 import { PaintlibLoadOptions } from './models/paintlib-load-options';
 import { GlobalTransformProps } from './models/global-transform-props';
+import { ObjectRegistry } from './config/object-registry';
 
 export class PaintLib {
   public readonly element: HTMLDivElement;
@@ -155,14 +156,15 @@ export class PaintLib {
         const selectedObj = this.getSelectedObject();
         if (selectedObj) {
           selectedObj.setOptions({ [field]: newValue });
+          selectedObj.update(this);
           this.canvas.renderAll();
         }
       };
     };
 
-    useState(this.uiStore, (store) => store.options.fgColor, updateFactory('stroke'));
-    useState(this.uiStore, (store) => store.options.bgColor, updateFactory('fill'));
-    useState(this.uiStore, (store) => store.options.tickness, updateFactory('strokeWidth'));
+    useState(this.uiStore, (store) => store.options.fgColor, updateFactory('fgColor'));
+    useState(this.uiStore, (store) => store.options.bgColor, updateFactory('bgColor'));
+    useState(this.uiStore, (store) => store.options.tickness, updateFactory('tickness'));
 
     new ResizeObserver(this.fitViewport).observe(this.container);
   }
@@ -355,19 +357,17 @@ export class PaintLib {
 
   private restore(data: CanvasSerializedJson) {
     this.format = data.format;
-    // TODO
-    /*
-    if (data.image?.angle) {
-      this.rotateImgAndCanvas(data.image?.angle);
-    }
-    const objScale = this.canvas.width / data.width;
-    this.uiStore.setState({ globalScale: data.globalScale * objScale });
 
     for (const objData of data.objects) {
       const obj = ObjectRegistry.restoreObject(objData);
       this.add(obj);
-    }*/
-    this.canvas.renderAll();
+    }
+
+    const scale = this.canvas.width / data.width;
+    this.setGlobalTransform({ scale: scale * this.transform.scale });
+    if (data.transform.rotation) {
+      this.setRotation(data.transform.rotation);
+    }
   }
 
   getFormat() {
@@ -385,11 +385,15 @@ export class PaintLib {
   }
 
   serialize(): CanvasSerializedJson {
+    const width = this.canvas.width / this.transform.scale;
+    const height = this.canvas.height / this.transform.scale;
+
     return {
       format: this.format,
-      width: this.canvas.width,
-      height: this.canvas.height,
-      transform: this.transform,
+      // TODO: Use width & height set at load time (original sizes)
+      width: this.transform.rotation % 180 === 0 ? width : height,
+      height: this.transform.rotation % 180 === 0 ? height : width,
+      transform: { rotation: this.transform.rotation },
       objects: this.objects.map((x) => x.serialize()),
     };
   }
@@ -403,6 +407,7 @@ export class PaintLib {
    * @private
    */
   private getReferencePoint() {
+    // TODO: Use width & height set at load time (original sizes)
     let x = 0;
     let y = 0;
 

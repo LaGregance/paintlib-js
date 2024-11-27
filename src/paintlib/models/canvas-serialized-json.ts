@@ -5,6 +5,6 @@ export type CanvasSerializedJson = {
   width: number;
   height: number;
   format?: 'png' | 'jpeg';
-  transform: GlobalTransformProps;
+  transform: Omit<GlobalTransformProps, 'scale'>;
   objects: PaintObjectJson[];
 };
