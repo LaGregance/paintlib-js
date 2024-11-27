@@ -24,7 +24,6 @@ export type PaintObjectMetadata = {
   action: UIActionType;
   clazz: PaintObjectClass;
   icon: string;
-  avoidLayoutOnRestore?: boolean; // TODO: Not a good idea
   allowedOptions?: DrawingOption[];
 };
 
@@ -63,7 +62,6 @@ export abstract class ObjectRegistry {
       clazz: PaintText,
       icon: TextSVG,
       allowedOptions: [DrawingOption.FG_COLOR],
-      avoidLayoutOnRestore: true,
     },
     {
       action: UIActionType.DRAW,

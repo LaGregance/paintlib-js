@@ -25,7 +25,7 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
     this.originalXY = this.paintlib.getRealPosFromCanvas(event.scenePoint);
 
     this.object = new this.objectConstructor();
-    this.object.create(this.originalXY);
+    this.object.create(this.originalXY, this.paintlib.getTransform());
 
     const options = this.paintlib.uiStore.getState().options;
     this.object.setOptions({

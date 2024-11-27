@@ -1,14 +1,16 @@
 import { Point, Textbox } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 import { PaintObjectJson } from '../models/paint-object-json';
+import { GlobalTransformProps } from '../models/global-transform-props';
 
 export class PaintText extends PaintObject<Textbox> {
-  instantiate(point: Point, restoreData?: PaintObjectJson) {
+  instantiate(point: Point, globalTransform?: GlobalTransformProps, restoreData?: PaintObjectJson) {
     this.fabricObject = new Textbox('Text', {
       top: point.y,
       left: point.x,
       objectCaching: false,
       fontSize: restoreData?.extras?.fontSize ?? 5,
+      angle: globalTransform ? -globalTransform.rotation : 0, // When create from action, discard the global rotation
     });
     this.fabricObject.editable = true;
   }
