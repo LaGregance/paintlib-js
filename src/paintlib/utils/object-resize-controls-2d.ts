@@ -1,4 +1,4 @@
-import { Control, Point, TBBox, TPointerEvent, Transform } from 'fabric';
+import { Control, Point, TBBox, TPointerEvent, Transform, util } from 'fabric';
 import { TransformCorner } from './transform-corner';
 import { PaintObject } from '../objects/abstract/paint-object';
 import { PaintLib } from '../paintlib';
@@ -24,61 +24,52 @@ export const createResizeControls2D = (paintlib: PaintLib, obj: PaintObject<any>
        * That's why we use cos/sin & invertTransform to calculate good offset
        */
 
+      const objTransform = obj.getTransform();
+      const rotation = util.degreesToRadians(objTransform.rotation);
+
       const corner = TransformCorner.parse(transform.corner);
       const eventPoint = paintlib.getRealPosFromCanvas(new Point(eventX, eventY));
-      const deltaX = eventPoint.x - originalEventInfo.point.x;
-      const deltaY = eventPoint.y - originalEventInfo.point.y;
+      const delta = new Point(
+        eventPoint.x - originalEventInfo.point.x,
+        eventPoint.y - originalEventInfo.point.y,
+      ).rotate(-rotation);
 
       const newBox: TBBox = { ...originalEventInfo.layout };
 
       if (corner.horizontal === 'l') {
         // We move the left point: adjust x & width
-        newBox.width -= deltaX;
-        newBox.left += deltaX;
+        newBox.width -= delta.x;
+
+        newBox.left += Math.cos(rotation) * delta.x * objTransform.scaleX;
+        newBox.top += Math.sin(rotation) * delta.x * objTransform.scaleY;
       } else if (corner.horizontal === 'r') {
         // We move the right point: adjust width
-        newBox.width += deltaX;
+        newBox.width += delta.x;
       }
 
       if (corner.vertical === 't') {
         // We move the top point: adjust x,y & height
-        newBox.height -= deltaY;
-        newBox.top += deltaY;
+        newBox.height -= delta.y;
+
+        newBox.left += Math.cos(rotation + Math.PI / 2) * delta.y * objTransform.scaleX;
+        newBox.top += Math.sin(rotation + Math.PI / 2) * delta.y * objTransform.scaleY;
       } else if (corner.vertical === 'b') {
         // We move the bottom point: adjust height
-        newBox.height += deltaY;
+        newBox.height += delta.y;
       }
 
       if (newBox.width < 0) {
         newBox.width = -newBox.width;
-        newBox.left -= newBox.width;
+
+        newBox.left -= Math.cos(rotation) * newBox.width * objTransform.scaleX;
+        newBox.top -= Math.sin(rotation) * newBox.width * objTransform.scaleY;
       }
       if (newBox.height < 0) {
         newBox.height = -newBox.height;
-        newBox.top -= newBox.height;
-      }
 
-      /*const angle = util.degreesToRadians(target.getTotalAngle());
-      const scaleX = target.scaleX;
-      const scaleY = target.scaleY;
-      const offset = corner.getTransformOffset(angle, deltaX, deltaY, scaleX, scaleY);
-      const newBox: TBBox = {
-        left: originalEventInfo.layout.left + offset.left,
-        top: originalEventInfo.layout.top + offset.top,
-        width: originalEventInfo.layout.width + offset.width,
-        height: originalEventInfo.layout.height + offset.height,
-      };
-
-      if (newBox.width < 0) {
-        newBox.width = -newBox.width;
-        newBox.left -= Math.cos(angle) * newBox.width * scaleX;
-        newBox.top -= Math.sin(angle) * newBox.width * scaleY;
+        newBox.left -= Math.cos(rotation + Math.PI / 2) * newBox.height * objTransform.scaleX;
+        newBox.top -= Math.sin(rotation + Math.PI / 2) * newBox.height * objTransform.scaleY;
       }
-      if (newBox.height < 0) {
-        newBox.height = -newBox.height;
-        newBox.left -= Math.cos(angle + Math.PI / 2) * newBox.height * scaleX;
-        newBox.top -= Math.sin(angle + Math.PI / 2) * newBox.height * scaleY;
-      }*/
 
       obj.updateLayout(newBox, new Point(1, 1));
       obj.update(paintlib);
