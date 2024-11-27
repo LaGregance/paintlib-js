@@ -124,12 +124,15 @@ export class PaintLib {
       if (obj) {
         const realPos = this.getRealPosFromCanvas(new Point(target.left, target.top));
         const layout = obj.getLayout();
-        obj.updateLayout({
-          left: realPos.x,
-          top: realPos.y,
-          width: layout.width,
-          height: layout.height,
-        });
+        obj.updateLayout(
+          {
+            left: realPos.x,
+            top: realPos.y,
+            width: layout.width,
+            height: layout.height,
+          },
+          obj.getVector(),
+        );
 
         obj.setTransform({
           scaleX: target.scaleX * (target.flipX ? -1 : 1),
