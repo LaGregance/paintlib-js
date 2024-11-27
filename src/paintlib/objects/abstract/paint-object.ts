@@ -1,8 +1,8 @@
 import { Object as FabricObject, Point, TBBox } from 'fabric';
 import { PaintObjectOptions } from '../../models/paint-object-options';
 import { PaintObjectJson } from '../../models/paint-object-json';
-import { ObjectRegistry } from '../../config/object-registry';
 import { TransformProps } from '../../models/transform-props';
+import { PaintLib } from '../../paintlib';
 
 export abstract class PaintObject<T extends FabricObject> {
   protected layout: TBBox;
@@ -121,17 +121,19 @@ export abstract class PaintObject<T extends FabricObject> {
   }
 
   /**
-   * Update object render considering global transform. It's also responsive to update position.
+   * Update object render considering global transform. It's also responsible to update position.
    *
-   * @param globalTransform
+   * @param paintlib
    */
-  update(globalTransform: TransformProps) {
+  update(paintlib: PaintLib) {
     this.render();
+    const globalTransform = paintlib.getTransform();
     const scale = globalTransform.scale * this.transform.scale;
+    const pos = paintlib.getCanvasPosFromReal(new Point(this.layout.left, this.layout.top));
+
     this.fabricObject.set({
-      // TODO: Calculate real pos from globalTransform
-      left: this.layout.left * globalTransform.scale,
-      top: this.layout.top * globalTransform.scale,
+      left: pos.x,
+      top: pos.y,
       scaleX: scale,
       scaleY: scale,
       angle: globalTransform.rotation + this.transform.rotation,

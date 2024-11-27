@@ -27,7 +27,7 @@ export class DrawAction extends BaseSelectableAction {
   private onObjectAdded = ({ target }: { target: FabricObject }) => {
     if (target instanceof Path) {
       const path = new PaintDraw();
-      path.attach(target);
+      path.attach(this.paintlib, target);
       this.paintlib.add(path);
     }
   };

@@ -276,7 +276,7 @@ export class PaintLib {
   private setTransformProps(props: Partial<TransformProps>) {
     this.transform = Object.assign(this.transform, props);
     for (const obj of this.objects) {
-      obj.update(this.transform);
+      obj.update(this);
     }
     this.canvas.renderAll();
   }
@@ -320,7 +320,7 @@ export class PaintLib {
       // Can be already on canvas in the case of PaintDraw
       this.canvas.add(object['fabricObject']);
     }
-    object.update(this.transform);
+    object.update(this);
   }
 
   remove(object: PaintObject<any>) {
@@ -386,12 +386,12 @@ export class PaintLib {
     let y = 0;
 
     if (this.transform.rotation === 90) {
-      x = this.canvas.width;
+      x = this.canvas.width / this.transform.scale;
     } else if (this.transform.rotation === 180) {
-      x = this.canvas.width;
-      y = this.canvas.height;
+      x = this.canvas.width / this.transform.scale;
+      y = this.canvas.height / this.transform.scale;
     } else if (this.transform.rotation === 270) {
-      y = this.canvas.height;
+      y = this.canvas.height / this.transform.scale;
     }
 
     return new Point(x, y);
@@ -401,18 +401,22 @@ export class PaintLib {
    * Convert real position to canvas position.
    */
   getCanvasPosFromReal(realPos: Point) {
-    // TODO: Take global scale into account
     const reference = this.getReferencePoint();
-    return realPos.rotate(util.degreesToRadians(this.transform.rotation)).add(reference);
+    return realPos
+      .rotate(util.degreesToRadians(this.transform.rotation))
+      .add(reference)
+      .scalarMultiply(this.transform.scale);
   }
 
   /**
    * Convert canvas position to real position.
    */
-  getRealPositionFromCanvas(canvasPos: Point) {
-    // TODO: Take global scale into account
+  getRealPosFromCanvas(canvasPos: Point) {
     const reference = this.getReferencePoint();
-    return canvasPos.subtract(reference).rotate(-util.degreesToRadians(this.transform.rotation));
+    return canvasPos
+      .scalarDivide(this.transform.scale)
+      .subtract(reference)
+      .rotate(-util.degreesToRadians(this.transform.rotation));
   }
 
   /* ************************************ */

@@ -1,22 +1,33 @@
 import { Path, Point } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 import { PaintObjectJson } from '../models/paint-object-json';
+import { PaintLib } from '../paintlib';
 
 export class PaintDraw extends PaintObject<Path> {
   instantiate(point: Point, data?: PaintObjectJson) {
     this.fabricObject = new Path(data.extras.path, data.extras);
   }
 
-  attach(obj: Path) {
+  attach(paintlib: PaintLib, obj: Path) {
     this.fabricObject = obj;
 
-    const layout = this.getLayout();
     this.options = {
       fgColor: obj.stroke as string,
       bgColor: obj.fill as string,
       tickness: obj.strokeWidth,
     };
-    this.updateLayout(layout, new Point(layout.width, layout.height));
+
+    const pos = paintlib.getRealPosFromCanvas(new Point(this.fabricObject.left, this.fabricObject.top));
+    this.updateLayout(
+      {
+        left: pos.x,
+        top: pos.y,
+        width: this.fabricObject.width,
+        height: this.fabricObject.height,
+      },
+      new Point(1, 1),
+    );
+    this.update(paintlib);
   }
 
   render() {

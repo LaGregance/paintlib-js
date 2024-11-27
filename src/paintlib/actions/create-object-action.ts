@@ -22,10 +22,10 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
   onDeselected() {}
 
   onMouseDown(event: TPointerEventInfo<TPointerEvent>): void {
-    this.originalXY = event.scenePoint;
+    this.originalXY = this.paintlib.getRealPosFromCanvas(event.scenePoint);
 
     this.object = new this.objectConstructor();
-    this.object.create(event.scenePoint);
+    this.object.create(this.originalXY);
 
     const options = this.paintlib.uiStore.getState().options;
     this.object.setOptions({
@@ -34,27 +34,49 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
       bgColor: options.bgColor,
     });
 
-    const scale = this.paintlib.uiStore.getState().globalScale;
     this.object['fabricObject'].set({
       selectable: false,
       lockMovementX: false,
       lockMovementY: false,
-
-      // TODO: Not good scale
-      scaleX: scale,
-      scaleY: scale,
     });
 
     this.object.updateLayout(
       { left: event.scenePoint.x, top: event.scenePoint.y, width: 1, height: 1 },
-      event.scenePoint.subtract(this.originalXY),
+      new Point(1, 1),
     );
 
     this.paintlib.add(this.object);
   }
 
   onMouseMove(event: TPointerEventInfo<TPointerEvent>): void {
-    const scale = this.object['fabricObject'].scaleX;
+    const eventPoint = this.paintlib.getRealPosFromCanvas(event.scenePoint);
+
+    let x = this.originalXY.x;
+    let y = this.originalXY.y;
+    let width = eventPoint.x - this.originalXY.x;
+    let height = eventPoint.y - this.originalXY.y;
+
+    if (width < 0) {
+      x = this.originalXY.x + width;
+      width = -width;
+    }
+    if (height < 0) {
+      y = this.originalXY.y + height;
+      height = -height;
+    }
+
+    this.object.updateLayout(
+      {
+        left: x,
+        top: y,
+        width,
+        height,
+      },
+      eventPoint.subtract(this.originalXY),
+    );
+    this.object.update(this.paintlib);
+    this.paintlib.canvas.renderAll();
+    /*const scale = this.object['fabricObject'].scaleX;
 
     let x = this.originalXY.x;
     let y = this.originalXY.y;
@@ -84,7 +106,7 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
       },
       event.scenePoint.subtract(this.originalXY),
     );
-    this.paintlib.canvas.renderAll();
+    this.paintlib.canvas.renderAll();*/
   }
 
   onMouseUp(): void {
