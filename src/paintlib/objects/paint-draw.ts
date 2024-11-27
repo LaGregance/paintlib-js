@@ -7,6 +7,10 @@ export class PaintDraw extends PaintObject<Path> {
     this.fabricObject = new Path(extras.path, extras);
   }
 
+  restoreExtras(extras: any): void {
+    this.fabricObject.set(extras);
+  }
+
   attach(paintlib: PaintLib, obj: Path) {
     this.fabricObject = obj;
 

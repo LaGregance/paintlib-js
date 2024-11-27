@@ -32,13 +32,15 @@ export class ColorPickerButton extends MenuButton {
 
     useState(this.paintlib.uiStore, this.activeColor, (activeColor) => {
       const color = activeColor || this.getColor(this.paintlib.uiStore.getState());
-      this.element.querySelector('rect').setAttribute('opacity', color === 'transparent' ? '0%' : '100%');
-      this.element.style.color = color;
+      const el = this.element.querySelector('.paintlib-picker-color');
+      el.setAttribute('fill', color);
+      el.setAttribute('opacity', color === 'transparent' ? '0%' : '100%');
     });
 
     useState(this.paintlib.uiStore, this.getColor, (activeColor) => {
-      this.element.querySelector('rect').setAttribute('opacity', activeColor === 'transparent' ? '0%' : '100%');
-      this.element.style.color = activeColor;
+      const el = this.element.querySelector('.paintlib-picker-color');
+      el.setAttribute('fill', activeColor);
+      el.setAttribute('opacity', activeColor === 'transparent' ? '0%' : '100%');
     });
   }
 }

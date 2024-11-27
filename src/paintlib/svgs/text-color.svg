@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368">
-    <path fill="#c0c0c0" d="M80 0m140-280 210-560h100l210 560h-96l-50-144H368l-52 144h-96Zm176-224h168l-82-232h-4l-82 232Z"/>
-    <rect fill="currentColor" stroke="#ffffff" x="90" y="-160" width="780" height="150" stroke-width="10" />
+<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+    <path fill="currentColor" d="M80 0m140-280 210-560h100l210 560h-96l-50-144H368l-52 144h-96Zm176-224h168l-82-232h-4l-82 232Z"/>
+    <rect class="paintlib-picker-color" fill="#ffffff" stroke="#ffffff" x="90" y="-160" width="780" height="150" stroke-width="10" />
 </svg>
