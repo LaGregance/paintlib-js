@@ -18,6 +18,13 @@ export class PaintDraw extends PaintObject<Path> {
     };
 
     const pos = paintlib.getRealPosFromCanvas(new Point(this.fabricObject.left, this.fabricObject.top));
+    const globalTransform = paintlib.getTransform();
+    const scale = 1 / globalTransform.scale;
+    this.setTransform({
+      rotation: -globalTransform.rotation,
+      scaleX: scale,
+      scaleY: scale,
+    });
     this.updateLayout(
       {
         left: pos.x,

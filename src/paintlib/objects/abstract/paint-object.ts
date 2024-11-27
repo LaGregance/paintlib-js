@@ -1,21 +1,21 @@
 import { Object as FabricObject, Point, TBBox } from 'fabric';
 import { PaintObjectOptions } from '../../models/paint-object-options';
 import { PaintObjectJson } from '../../models/paint-object-json';
-import { TransformProps } from '../../models/transform-props';
+import { PaintObjectTransformProps } from '../../models/global-transform-props';
 import { PaintLib } from '../../paintlib';
 
 export abstract class PaintObject<T extends FabricObject> {
   protected layout: TBBox;
   protected vector: Point;
   protected options: Partial<PaintObjectOptions> = {};
-  protected transform: TransformProps = { scale: 1, rotation: 0 };
+  protected transform: PaintObjectTransformProps = { scaleX: 1, scaleY: 1, rotation: 0 };
 
   protected fabricObject: T;
 
   /**
    * Called once the creation process using editor is finish
    */
-  onCreated(): void {}
+  onCreated() {}
 
   /**
    * Internal function specific for each subclass to instantiate the object at specific position.
@@ -101,7 +101,7 @@ export abstract class PaintObject<T extends FabricObject> {
    *
    * @param props
    */
-  setTransform(props: Partial<TransformProps>) {
+  setTransform(props: Partial<PaintObjectTransformProps>) {
     this.transform = Object.assign(this.transform, props);
   }
 
@@ -128,14 +128,15 @@ export abstract class PaintObject<T extends FabricObject> {
   update(paintlib: PaintLib) {
     this.render();
     const globalTransform = paintlib.getTransform();
-    const scale = globalTransform.scale * this.transform.scale;
     const pos = paintlib.getCanvasPosFromReal(new Point(this.layout.left, this.layout.top));
 
     this.fabricObject.set({
       left: pos.x,
       top: pos.y,
-      scaleX: scale,
-      scaleY: scale,
+      scaleX: globalTransform.scale * Math.abs(this.transform.scaleX),
+      scaleY: globalTransform.scale * Math.abs(this.transform.scaleY),
+      flipX: this.transform.scaleX < 0,
+      flipY: this.transform.scaleY < 0,
       angle: globalTransform.rotation + this.transform.rotation,
     });
     this.fabricObject.setCoords();
@@ -180,6 +181,4 @@ export abstract class PaintObject<T extends FabricObject> {
     this.restoreExtras(data);
     this.updateLayout(data.layout);
   }
-
-  // TODO: Use event to bind fabric object props to paintlib object props
 }

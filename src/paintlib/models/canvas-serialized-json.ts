@@ -1,10 +1,10 @@
 import { PaintObjectJson } from './paint-object-json';
-import { TransformProps } from './transform-props';
+import { GlobalTransformProps } from './global-transform-props';
 
 export type CanvasSerializedJson = {
   width: number;
   height: number;
   format?: 'png' | 'jpeg';
-  transform: TransformProps;
+  transform: GlobalTransformProps;
   objects: PaintObjectJson[];
 };

@@ -11,7 +11,7 @@ import { UIActionType } from './config/ui-action-type';
 import { getUrlExtension, px, setCssProperty } from './utils/utils';
 import { CanvasSerializedJson } from './models/canvas-serialized-json';
 import { PaintlibLoadOptions } from './models/paintlib-load-options';
-import { TransformProps } from './models/transform-props';
+import { GlobalTransformProps } from './models/global-transform-props';
 
 export class PaintLib {
   public readonly element: HTMLDivElement;
@@ -25,7 +25,7 @@ export class PaintLib {
   private format?: 'png' | 'jpeg';
   private objects: PaintObject<any>[] = [];
 
-  private transform: TransformProps = { scale: 1, rotation: 0 };
+  private transform: GlobalTransformProps = { scale: 1, rotation: 0 };
 
   constructor(
     public readonly container: HTMLElement,
@@ -117,16 +117,51 @@ export class PaintLib {
     this.canvas.on('selection:updated', selectionEvent);
     this.canvas.on('selection:cleared', selectionEvent);
 
-    // 5. Update selected object with option on change
+    // 5. Bind change to PaintObject
+    this.canvas.on('object:moving', (event) => {
+      const target = event.target;
+      const obj = this.objects.find((x) => x['fabricObject'] === target);
+      if (obj) {
+        const realPos = this.getRealPosFromCanvas(new Point(target.left, target.top));
+        const layout = obj.getLayout();
+        obj.updateLayout({
+          left: realPos.x,
+          top: realPos.y,
+          width: layout.width,
+          height: layout.height,
+        });
+      }
+    });
+
+    this.canvas.on('object:scaling', (event) => {
+      const target = event.target;
+      const obj = this.objects.find((x) => x['fabricObject'] === target);
+      if (obj) {
+        const realPos = this.getRealPosFromCanvas(new Point(target.left, target.top));
+        const layout = obj.getLayout();
+        obj.updateLayout({
+          left: realPos.x,
+          top: realPos.y,
+          width: layout.width,
+          height: layout.height,
+        });
+
+        obj.setTransform({
+          scaleX: target.scaleX * (target.flipX ? -1 : 1),
+          scaleY: target.scaleY * (target.flipY ? -1 : 1),
+        });
+      }
+    });
+
+    // 6. Update selected object with option on change
     const updateFactory = (field: string) => {
       return (newValue: any) => {
         if (this.uiStore.getState().activeAction === UIActionType.DRAW) {
           (this.uiStore.getState().allActions[UIActionType.DRAW] as DrawAction).update();
         }
-        const activeFabricObj = this.canvas.getActiveObject();
-        const activePaintObj = this.objects.find((x) => x['fabricObject'] === activeFabricObj);
-        if (activePaintObj) {
-          activePaintObj.setOptions({ [field]: newValue });
+        const selectedObj = this.getSelectedObject();
+        if (selectedObj) {
+          selectedObj.setOptions({ [field]: newValue });
           this.canvas.renderAll();
         }
       };
@@ -236,7 +271,7 @@ export class PaintLib {
     // 3. Apply new global scale to objects
     const newWidth = rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
     const newScale = newWidth / oldWidth;
-    this.setTransformProps({
+    this.setGlobalTransform({
       scale: this.transform.scale * newScale,
       rotation,
     });
@@ -270,10 +305,10 @@ export class PaintLib {
     this.canvas.centerObject(this.image);
 
     const newScale = canvasWidth / oldWidth;
-    this.setTransformProps({ scale: this.transform.scale * newScale });
+    this.setGlobalTransform({ scale: this.transform.scale * newScale });
   };
 
-  private setTransformProps(props: Partial<TransformProps>) {
+  private setGlobalTransform(props: Partial<GlobalTransformProps>) {
     this.transform = Object.assign(this.transform, props);
     for (const obj of this.objects) {
       obj.update(this);
