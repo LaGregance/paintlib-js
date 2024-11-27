@@ -159,13 +159,6 @@ export abstract class PaintObject<T extends FabricObject> {
   }
 
   /**
-   * Override this function to restore extras
-   */
-  restoreExtras(_data: PaintObjectJson): any {
-    return undefined;
-  }
-
-  /**
    * Serialize the object in order to restore it later.
    */
   serialize(): PaintObjectJson {
@@ -185,19 +178,18 @@ export abstract class PaintObject<T extends FabricObject> {
    */
   restore(data: PaintObjectJson) {
     this.create(new Point(data.layout.left, data.layout.top), data.extras);
-    this.setOptions(data.options);
-    this.setTransform(data.transform);
-    this.restoreExtras(data);
-    this.updateLayout(data.layout);
+    this.setOptions({ ...data.options });
+    this.setTransform({ ...data.transform });
+    this.updateLayout({ ...data.layout });
   }
 
   saveCheckpoint(): PaintObjectCheckpoint {
     return {
       object: this,
-      layout: this.layout,
-      vector: this.vector,
-      options: this.options,
-      transform: this.transform,
+      layout: { ...this.layout },
+      vector: this.vector.clone(),
+      options: { ...this.options },
+      transform: { ...this.transform },
       extras: this.serializeExtras(),
     };
   }

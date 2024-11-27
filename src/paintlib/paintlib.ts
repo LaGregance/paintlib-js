@@ -1,4 +1,4 @@
-import { BasicTransformEvent, Canvas, FabricImage, FabricObject, Point, TPointerEvent, util } from 'fabric';
+import { BasicTransformEvent, Canvas, FabricImage, FabricObject, Point, TPointerEvent, Transform, util } from 'fabric';
 import { calculateImageScaleToFitViewport } from './utils/size-utils';
 import { MainMenu } from './components/main-menu';
 import { createUIStore, UIStore } from './store/ui-store';
@@ -125,10 +125,16 @@ export class PaintLib {
     this.canvas.on('selection:cleared', selectionEvent);
 
     // 5. Bind change to PaintObject
+    let currTransform: Transform = undefined;
     const bindFabricToPaintlibObject = (event: BasicTransformEvent<TPointerEvent> & { target: FabricObject }) => {
       const target = event.target;
       const obj = this.objects.find((x) => x['fabricObject'] === target);
       if (obj) {
+        if (currTransform !== event.transform) {
+          currTransform = event.transform;
+          this.saveCheckpoint(obj);
+        }
+
         const realPos = this.getRealPosFromCanvas(new Point(target.left, target.top));
         const layout = obj.getLayout();
         obj.updateLayout(
@@ -161,6 +167,9 @@ export class PaintLib {
         }
         const selectedObj = this.getSelectedObject();
         if (selectedObj) {
+          console.log('ICI: ', selectedObj.getOptions());
+          this.saveCheckpoint(selectedObj);
+          console.log('===');
           selectedObj.setOptions({ [field]: newValue });
           selectedObj.update(this);
           this.canvas.renderAll();

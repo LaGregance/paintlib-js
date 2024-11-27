@@ -11,6 +11,8 @@ export class RotateAction extends BaseClickableAction {
   }
 
   onClick() {
+    this.paintlib.saveCheckpoint();
+
     const actualRotation = this.paintlib.getTransform().rotation;
     this.paintlib.setRotation(actualRotation + (this.direction === 'left' ? -90 : 90));
   }

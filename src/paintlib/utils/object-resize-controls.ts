@@ -15,6 +15,7 @@ export const createResizeControls = (paintlib: PaintLib, obj: PaintObject<any>, 
           layout: obj.getLayout(),
           vector: obj.getVector(),
         };
+        paintlib.saveCheckpoint(obj);
       }
       lastTransform = transform;
 

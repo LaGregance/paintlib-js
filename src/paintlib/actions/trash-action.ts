@@ -10,6 +10,7 @@ export class TrashAction extends BaseClickableAction {
   onClick() {
     const target = this.paintlib.getSelectedObject();
     if (target) {
+      this.paintlib.saveCheckpoint(target);
       this.paintlib.remove(target);
     }
   }
