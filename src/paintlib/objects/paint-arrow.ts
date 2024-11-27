@@ -30,6 +30,10 @@ export class PaintArrow extends PaintObject<Group> {
     this.fabricObject.controls = createResizeControls(paintLib, this, 'vector');
   }
 
+  isValidForCreation() {
+    return Math.sqrt(this.layout.width * this.layout.width + this.layout.height * this.layout.height) > 5;
+  }
+
   render() {
     // Arrowhead size
     const arrowWidth = ARROW_WIDTH_BASE + ARROW_WIDTH_FACTOR * this.line.strokeWidth;

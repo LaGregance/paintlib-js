@@ -25,6 +25,7 @@ export type PaintObjectMetadata = {
   clazz: PaintObjectClass;
   icon: string;
   allowedOptions?: DrawingOption[];
+  creationAlwaysHorizontal?: boolean;
 };
 
 export abstract class ObjectRegistry {
@@ -62,6 +63,7 @@ export abstract class ObjectRegistry {
       clazz: PaintText,
       icon: TextSVG,
       allowedOptions: [DrawingOption.FG_COLOR],
+      creationAlwaysHorizontal: true,
     },
     {
       action: UIActionType.DRAW,

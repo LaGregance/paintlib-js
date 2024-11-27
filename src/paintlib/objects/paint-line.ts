@@ -18,6 +18,10 @@ export class PaintLine extends PaintObject<Line> {
     this.fabricObject.controls = createResizeControls(paintLib, this, 'vector');
   }
 
+  isValidForCreation() {
+    return Math.sqrt(this.layout.width * this.layout.width + this.layout.height * this.layout.height) > 5;
+  }
+
   render() {
     const start = getStartPoint(this.layout, this.vector);
     const end = getEndPoint(this.layout, this.vector);

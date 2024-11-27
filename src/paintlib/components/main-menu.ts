@@ -30,6 +30,7 @@ import { xor } from '../utils/utils';
 import { UIActionType } from '../config/ui-action-type';
 import { DrawingOption } from '../config/drawing-option';
 import { ObjectRegistry, PaintObjectClass } from '../config/object-registry';
+import { PaintText } from '../objects/paint-text';
 
 export class MainMenu extends Component<'div'> {
   private optionsMenu: View;
@@ -122,6 +123,13 @@ export class MainMenu extends Component<'div'> {
 
     // Action shortcut
     document.addEventListener('keydown', (event) => {
+      const selectedObj = this.paintlib.getSelectedObject();
+      if (selectedObj instanceof PaintText) {
+        if (selectedObj['fabricObject'].isEditing) {
+          return;
+        }
+      }
+
       const ctrl = xor(event.ctrlKey, event.metaKey);
       const key = event.key.toLowerCase();
 

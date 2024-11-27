@@ -125,7 +125,6 @@ export class PaintLib {
       const target = event.target;
       const obj = this.objects.find((x) => x['fabricObject'] === target);
       if (obj) {
-        console.log('bindFabricToPaintlibObject: ', target);
         const realPos = this.getRealPosFromCanvas(new Point(target.left, target.top));
         const layout = obj.getLayout();
         obj.updateLayout(

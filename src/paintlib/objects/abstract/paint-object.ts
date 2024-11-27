@@ -1,7 +1,7 @@
 import { Object as FabricObject, Point, TBBox } from 'fabric';
 import { PaintObjectOptions } from '../../models/paint-object-options';
 import { PaintObjectJson } from '../../models/paint-object-json';
-import { GlobalTransformProps, PaintObjectTransformProps } from '../../models/global-transform-props';
+import { PaintObjectTransformProps } from '../../models/global-transform-props';
 import { PaintLib } from '../../paintlib';
 
 export abstract class PaintObject<T extends FabricObject> {
@@ -30,15 +30,10 @@ export abstract class PaintObject<T extends FabricObject> {
    * `this.object` need to be defined after this function is called.
    *
    * @param point
-   * @param globalTransform only defined if we come from CreateObjectAction
    * @param restoreData
    * @protected
    */
-  protected abstract instantiate(
-    point: Point,
-    globalTransform?: GlobalTransformProps,
-    restoreData?: PaintObjectJson,
-  ): void;
+  protected abstract instantiate(point: Point, restoreData?: PaintObjectJson): void;
 
   /**
    * Custom function that render the object with layout/vector/options.
@@ -51,11 +46,10 @@ export abstract class PaintObject<T extends FabricObject> {
    * You should not override this function in subclass (use instantiate instead).
    *
    * @param point
-   * @param globalTransform
    * @param restoreData
    */
-  create(point: Point, globalTransform?: GlobalTransformProps, restoreData?: PaintObjectJson) {
-    this.instantiate(point, globalTransform, restoreData);
+  create(point: Point, restoreData?: PaintObjectJson) {
+    this.instantiate(point, restoreData);
   }
 
   /**
@@ -130,7 +124,7 @@ export abstract class PaintObject<T extends FabricObject> {
    * Return true if the current object is valid for creation.
    * In general it should return false when the object is too small.
    */
-  isValidForCreation(): boolean {
+  isValidForCreation() {
     return this.layout.width > 2 && this.layout.height > 2;
   }
 
@@ -189,7 +183,7 @@ export abstract class PaintObject<T extends FabricObject> {
    * @param data
    */
   restore(data: PaintObjectJson) {
-    this.create(new Point(data.layout.left, data.layout.top), null, data);
+    this.create(new Point(data.layout.left, data.layout.top), data);
     this.setOptions(data.options);
     this.setTransform(data.transform);
     this.restoreExtras(data);

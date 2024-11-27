@@ -2,10 +2,9 @@ import { Path, Point } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 import { PaintObjectJson } from '../models/paint-object-json';
 import { PaintLib } from '../paintlib';
-import { GlobalTransformProps } from '../models/global-transform-props';
 
 export class PaintDraw extends PaintObject<Path> {
-  instantiate(point: Point, globalTransform?: GlobalTransformProps, data?: PaintObjectJson) {
+  instantiate(point: Point, data?: PaintObjectJson) {
     this.fabricObject = new Path(data.extras.path, data.extras);
   }
 
