@@ -159,6 +159,11 @@ export abstract class PaintObject<T extends FabricObject> {
   }
 
   /**
+   * Override this function to add extras during serialization process
+   */
+  restoreExtras(_extras: any): void {}
+
+  /**
    * Serialize the object in order to restore it later.
    */
   serialize(): PaintObjectJson {
@@ -180,6 +185,7 @@ export abstract class PaintObject<T extends FabricObject> {
     this.create(new Point(data.layout.left, data.layout.top), data.extras);
     this.setOptions({ ...data.options });
     this.setTransform({ ...data.transform });
+    this.restoreExtras(data.extras);
     this.updateLayout({ ...data.layout });
   }
 

@@ -393,26 +393,22 @@ export class PaintLib {
   /* ************** UNDO / REDO  ************** */
   /* ****************************************** */
   private buildCheckpoint(object?: PaintObject<any>, creation?: boolean): Checkpoint {
-    let checkpoint: Checkpoint;
     if (object) {
       const objExists = !!this.objects.find((x) => x === object);
       if (objExists && !creation) {
-        checkpoint = { type: 'object', checkpoint: object.saveCheckpoint() };
+        return { type: 'object', checkpoint: object.saveCheckpoint() };
       } else {
-        checkpoint = {
+        return {
           type: 'object',
           checkpoint: { object, layout: null, vector: null, options: null, transform: null },
         };
       }
     } else {
-      checkpoint = { type: 'canvas', checkpoint: { transform: this.getTransform() } };
+      return { type: 'canvas', checkpoint: { transform: this.getTransform() } };
     }
-    console.log('buildCheckpoint: ', checkpoint);
-    return checkpoint;
   }
 
   private restoreCheckpoint(checkpoint: Checkpoint) {
-    console.log('restoreCheckpoint: ', checkpoint);
     if (checkpoint.type === 'canvas') {
       if (this.transform.rotation !== checkpoint.checkpoint.transform.rotation) {
         this.setRotation(checkpoint.checkpoint.transform.rotation);
@@ -432,6 +428,7 @@ export class PaintLib {
 
         obj.setTransform(checkpoint.checkpoint.transform);
         obj.setOptions(checkpoint.checkpoint.options);
+        obj.restoreExtras(checkpoint.checkpoint.extras);
         obj.updateLayout(checkpoint.checkpoint.layout, checkpoint.checkpoint.vector);
         obj.update(this);
 
@@ -443,6 +440,10 @@ export class PaintLib {
       }
       this.canvas.renderAll();
     }
+  }
+
+  discardLastCheckpoint() {
+    this.undoStack.pop();
   }
 
   saveCheckpoint(object?: PaintObject<any>, creation?: boolean) {

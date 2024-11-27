@@ -4,7 +4,7 @@ import { PaintLib } from '../paintlib';
 
 export class PaintText extends PaintObject<Textbox> {
   instantiate(point: Point, extras?: any) {
-    this.fabricObject = new Textbox('Text', {
+    this.fabricObject = new Textbox(extras?.text || 'Text', {
       top: point.y,
       left: point.x,
       objectCaching: false,
@@ -14,10 +14,34 @@ export class PaintText extends PaintObject<Textbox> {
     this.fabricObject.editable = true;
   }
 
-  bind(paintLib: PaintLib) {
+  restoreExtras(extras: any): void {
+    if (extras?.text) {
+      this.fabricObject.text = extras.text;
+    }
+  }
+
+  bind(paintlib: PaintLib) {
+    let enterText: string = undefined;
+    this.fabricObject.on('editing:entered', () => {
+      enterText = this.fabricObject.text;
+      paintlib.saveCheckpoint(this);
+    });
+
     this.fabricObject.on('editing:exited', () => {
       if (this.fabricObject.text.length <= 0) {
-        paintLib.remove(this);
+        paintlib.remove(this);
+      } else {
+        if (enterText === this.fabricObject.text) {
+          paintlib.discardLastCheckpoint();
+        } else {
+          this.updateLayout({
+            left: this.layout.left,
+            top: this.layout.top,
+            width: this.fabricObject.width,
+            height: this.fabricObject.height,
+          });
+          this.update(paintlib);
+        }
       }
     });
   }
@@ -26,7 +50,6 @@ export class PaintText extends PaintObject<Textbox> {
     this.fabricObject.set({
       top: this.layout.top,
       left: this.layout.left,
-      fontSize: this.layout.height * 0.9,
       height: this.layout.height,
       width: this.layout.width,
       fill: this.options.fgColor,
@@ -34,8 +57,15 @@ export class PaintText extends PaintObject<Textbox> {
 
     // Adjust fontSize to fit precise height
     const ratio = this.layout.height / this.fabricObject.calcTextHeight();
+    if (!ratio || !Number.isFinite(ratio) || Number.isNaN(ratio)) {
+      // Avoid divide by 0 and operation with NaN or Infinity
+      return;
+    }
+
     this.fabricObject.set({
       fontSize: this.fabricObject.fontSize * ratio,
+      height: this.layout.height,
+      width: this.layout.width,
     });
 
     if (this.layout.width < this.fabricObject.width) {
@@ -51,6 +81,7 @@ export class PaintText extends PaintObject<Textbox> {
   serializeExtras(): any {
     return {
       fontSize: this.fabricObject.fontSize,
+      text: this.fabricObject.text,
     };
   }
 }
