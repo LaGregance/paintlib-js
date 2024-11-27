@@ -1,6 +1,6 @@
 import { Point, Rect } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
-import { createResizeControls2D } from '../utils/object-resize-controls-2d';
+import { createResizeControls } from '../utils/object-resize-controls';
 import { PaintLib } from '../paintlib';
 
 export class PaintRect extends PaintObject<Rect> {
@@ -15,7 +15,7 @@ export class PaintRect extends PaintObject<Rect> {
     this.fabricObject.controls = {
       // Keep only existing resize control
       mtr: this.fabricObject.controls.mtr,
-      ...createResizeControls2D(paintlib, this),
+      ...createResizeControls(paintlib, this, 'box'),
     };
     paintlib.canvas.renderAll();
   }

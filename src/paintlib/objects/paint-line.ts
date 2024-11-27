@@ -1,7 +1,8 @@
 import { Line, Point } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
-import { createResizeControlsVector } from '../utils/object-resize-controls-vector';
 import { getEndPoint, getStartPoint } from '../utils/vector-utils';
+import { PaintLib } from '../paintlib';
+import { createResizeControls } from '../utils/object-resize-controls';
 
 export class PaintLine extends PaintObject<Line> {
   instantiate(point: Point) {
@@ -10,7 +11,11 @@ export class PaintLine extends PaintObject<Line> {
       perPixelTargetFind: true,
       objectCaching: false,
     });
-    this.fabricObject.controls = createResizeControlsVector(this);
+    this.fabricObject.controls = {};
+  }
+
+  bind(paintLib: PaintLib) {
+    this.fabricObject.controls = createResizeControls(paintLib, this, 'vector');
   }
 
   render() {

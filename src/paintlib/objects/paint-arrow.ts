@@ -1,7 +1,8 @@
 import { Group, Line, Point, Triangle } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
-import { createResizeControlsVector } from '../utils/object-resize-controls-vector';
 import { getEndPoint, getStartPoint } from '../utils/vector-utils';
+import { PaintLib } from '../paintlib';
+import { createResizeControls } from '../utils/object-resize-controls';
 
 const ARROW_WIDTH_BASE = 10;
 const ARROW_HEIGHT_BASE = 10;
@@ -22,7 +23,11 @@ export class PaintArrow extends PaintObject<Group> {
       objectCaching: false,
     });
     this.updateLayout({ left: point.x, top: point.y, width: 1, height: 1 }, new Point(1, 1));
-    this.fabricObject.controls = createResizeControlsVector(this);
+    this.fabricObject.controls = {};
+  }
+
+  bind(paintLib: PaintLib) {
+    this.fabricObject.controls = createResizeControls(paintLib, this, 'vector');
   }
 
   render() {
