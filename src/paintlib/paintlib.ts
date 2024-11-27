@@ -167,8 +167,6 @@ export class PaintLib {
     useState(this.uiStore, (store) => store.options.fgColor, updateFactory('fgColor'));
     useState(this.uiStore, (store) => store.options.bgColor, updateFactory('bgColor'));
     useState(this.uiStore, (store) => store.options.tickness, updateFactory('tickness'));
-
-    new ResizeObserver(this.fitViewport).observe(this.container);
   }
 
   /* ************************************ */
@@ -181,19 +179,26 @@ export class PaintLib {
    */
   async load(options: PaintlibLoadOptions) {
     // TODO: Why not included in constructor ?
-    this.options = options;
-    this.image = await FabricImage.fromURL(options.image, { crossOrigin: 'anonymous' });
+    if (options.image && (options.width || options.height)) {
+      throw new Error(`You cannot an image and specifying the size`);
+    }
 
-    this.image.hasControls = false;
-    this.image.selectable = false;
-    this.image.lockMovementX = true;
-    this.image.lockMovementY = true;
-    this.image.moveCursor = 'pointer';
-    this.image.hoverCursor = 'pointer';
+    this.options = options;
+    if (options.image) {
+      this.image = await FabricImage.fromURL(options.image, { crossOrigin: 'anonymous' });
+
+      this.image.hasControls = false;
+      this.image.selectable = false;
+      this.image.lockMovementX = true;
+      this.image.lockMovementY = true;
+      this.image.moveCursor = 'pointer';
+      this.image.hoverCursor = 'pointer';
+    }
+    this.canvas.backgroundColor = '#ffffff';
 
     // Auto-detect format if possible (else fallback png)
     if (!options.format) {
-      const ext = getUrlExtension(options.image).toLowerCase();
+      const ext = options.image ? getUrlExtension(options.image).toLowerCase() : null;
       if (ext === 'jpg' || ext === 'jped') {
         this.options.format = 'jpeg';
       } else {
@@ -202,29 +207,36 @@ export class PaintLib {
     }
     // --------------------------------------------------
 
+    const usedSize: Size = this.image ?? {
+      width: options.width ?? this.canvasContainer.clientWidth,
+      height: options.height ?? this.canvasContainer.clientHeight,
+    };
     const { width, height, scale } = calculateImageScaleToFitViewport(
       { width: this.canvas.width, height: this.canvas.height },
-      { width: this.image.width, height: this.image.height },
+      { width: usedSize.width, height: usedSize.height },
     );
 
     this.canvas.setDimensions({ width, height });
-    this.image.scale(scale);
 
     if (this.options.imageSizeMode === 'real') {
-      this.realSize = { width: this.image.width, height: this.image.height };
+      this.realSize = { width: usedSize.width, height: usedSize.height };
     } else {
       this.realSize = { width, height };
     }
-
-    this.canvas.add(this.image);
-    this.canvas.centerObject(this.image);
     this.transform.scale = width / this.realSize.width;
+
+    if (this.image) {
+      this.image.scale(scale);
+      this.canvas.add(this.image);
+      this.canvas.centerObject(this.image);
+    }
 
     if (options.restoreData) {
       this.restore(JSON.parse(atob(options.restoreData)));
     }
 
     this.enableSelection(true);
+    new ResizeObserver(this.fitViewport).observe(this.container);
   }
 
   /* ******************************************* */
@@ -246,6 +258,7 @@ export class PaintLib {
     // 2. Calculate new canvas dimension
     const containerWidth = this.canvasContainer.clientWidth;
     const containerHeight = this.canvasContainer.clientHeight;
+    const usedSize: Size = this.image ?? this.realSize;
 
     const {
       width: canvasWidth,
@@ -254,15 +267,18 @@ export class PaintLib {
     } = calculateImageScaleToFitViewport(
       { width: containerWidth, height: containerHeight },
       {
-        width: rotation % 180 === 0 ? this.image.width : this.image.height,
-        height: rotation % 180 === 0 ? this.image.height : this.image.width,
+        width: rotation % 180 === 0 ? usedSize.width : usedSize.height,
+        height: rotation % 180 === 0 ? usedSize.height : usedSize.width,
       },
     );
 
     this.canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
-    this.image.scale(imgScale);
-    this.image.rotate(rotation);
-    this.canvas.centerObject(this.image);
+
+    if (this.image) {
+      this.image.scale(imgScale);
+      this.image.rotate(rotation);
+      this.canvas.centerObject(this.image);
+    }
 
     // 3. Apply new global scale to objects
     const newWidth = rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
@@ -274,13 +290,12 @@ export class PaintLib {
   }
 
   private fitViewport = () => {
-    if (!this.image) {
-      return;
-    }
     this.canvas.discardActiveObject();
 
     const containerWidth = this.canvasContainer.clientWidth;
     const containerHeight = this.canvasContainer.clientHeight;
+
+    const usedSize: Size = this.image ?? this.realSize;
 
     const {
       width: canvasWidth,
@@ -289,14 +304,16 @@ export class PaintLib {
     } = calculateImageScaleToFitViewport(
       { width: containerWidth, height: containerHeight },
       {
-        width: this.transform.rotation % 180 === 0 ? this.image.width : this.image.height,
-        height: this.transform.rotation % 180 === 0 ? this.image.height : this.image.width,
+        width: this.transform.rotation % 180 === 0 ? usedSize.width : usedSize.height,
+        height: this.transform.rotation % 180 === 0 ? usedSize.height : usedSize.width,
       },
     );
 
     this.canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
-    this.image.scale(imgScale);
-    this.canvas.centerObject(this.image);
+    if (this.image) {
+      this.image.scale(imgScale);
+      this.canvas.centerObject(this.image);
+    }
 
     const newWidth = this.transform.rotation % 180 === 0 ? canvasWidth : canvasHeight;
     this.setGlobalTransform({ scale: newWidth / this.realSize.width });
