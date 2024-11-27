@@ -1,15 +1,23 @@
 import { Point, Rect } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 import { createResizeControls2D } from '../utils/object-resize-controls-2d';
+import { PaintLib } from '../paintlib';
 
 export class PaintRect extends PaintObject<Rect> {
   instantiate(point: Point) {
     this.fabricObject = new Rect({ left: point.x, top: point.y, width: 1, height: 1, objectCaching: false });
     this.fabricObject.controls = {
+      mtr: this.fabricObject.controls.mtr,
+    };
+  }
+
+  bind(paintlib: PaintLib) {
+    this.fabricObject.controls = {
       // Keep only existing resize control
       mtr: this.fabricObject.controls.mtr,
-      ...createResizeControls2D(this),
+      ...createResizeControls2D(paintlib, this),
     };
+    paintlib.canvas.renderAll();
   }
 
   render() {

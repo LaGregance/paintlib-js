@@ -1,4 +1,4 @@
-import { Canvas, FabricImage, Point, util } from 'fabric';
+import { BasicTransformEvent, Canvas, FabricImage, FabricObject, Point, TPointerEvent, util } from 'fabric';
 import { calculateImageScaleToFitViewport } from './utils/size-utils';
 import { MainMenu } from './components/main-menu';
 import { createUIStore, UIStore } from './store/ui-store';
@@ -118,22 +118,7 @@ export class PaintLib {
     this.canvas.on('selection:cleared', selectionEvent);
 
     // 5. Bind change to PaintObject
-    this.canvas.on('object:moving', (event) => {
-      const target = event.target;
-      const obj = this.objects.find((x) => x['fabricObject'] === target);
-      if (obj) {
-        const realPos = this.getRealPosFromCanvas(new Point(target.left, target.top));
-        const layout = obj.getLayout();
-        obj.updateLayout({
-          left: realPos.x,
-          top: realPos.y,
-          width: layout.width,
-          height: layout.height,
-        });
-      }
-    });
-
-    this.canvas.on('object:scaling', (event) => {
+    const bindFabricToPaintlibObject = (event: BasicTransformEvent<TPointerEvent> & { target: FabricObject }) => {
       const target = event.target;
       const obj = this.objects.find((x) => x['fabricObject'] === target);
       if (obj) {
@@ -149,9 +134,14 @@ export class PaintLib {
         obj.setTransform({
           scaleX: target.scaleX * (target.flipX ? -1 : 1),
           scaleY: target.scaleY * (target.flipY ? -1 : 1),
+          rotation: target.angle - this.transform.rotation,
         });
       }
-    });
+    };
+
+    this.canvas.on('object:moving', bindFabricToPaintlibObject);
+    this.canvas.on('object:scaling', bindFabricToPaintlibObject);
+    this.canvas.on('object:rotating', bindFabricToPaintlibObject);
 
     // 6. Update selected object with option on change
     const updateFactory = (field: string) => {
@@ -351,6 +341,7 @@ export class PaintLib {
 
   add(object: PaintObject<any>) {
     this.objects.push(object);
+    object.bind(this);
     if (!this.canvas.contains(object['fabricObject'])) {
       // Can be already on canvas in the case of PaintDraw
       this.canvas.add(object['fabricObject']);

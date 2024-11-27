@@ -13,6 +13,14 @@ export abstract class PaintObject<T extends FabricObject> {
   protected fabricObject: T;
 
   /**
+   * Called when the object is binded to paintlib, just before it was added to the canvas
+   *
+   * @param paintLib
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  bind(paintLib: PaintLib) {}
+
+  /**
    * Called once the creation process using editor is finish
    */
   onCreated() {}

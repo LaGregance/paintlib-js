@@ -1,25 +1,20 @@
-import { Control, Point, TBBox, TMat2D, TPointerEvent, Transform, util } from 'fabric';
+import { Control, Point, TBBox, TPointerEvent, Transform } from 'fabric';
 import { TransformCorner } from './transform-corner';
 import { PaintObject } from '../objects/abstract/paint-object';
+import { PaintLib } from '../paintlib';
 
-export const createResizeControls2D = (obj: PaintObject<any>) => {
+export const createResizeControls2D = (paintlib: PaintLib, obj: PaintObject<any>) => {
   const controls: Record<string, Control> = {};
 
-  let originalEventInfo: { point: Point; invertMatrix: TMat2D; layout: TBBox } = undefined;
+  let originalEventInfo: { point: Point; layout: TBBox } = undefined;
   let lastTransform: Transform = undefined;
   const resize = (eventData: TPointerEvent, transform: Transform, eventX: number, eventY: number) => {
-    const target = transform.target;
-
     // Calculate new coordinates based on control movement
     if (transform.action === 'resize') {
       if (lastTransform !== transform) {
-        const objectMatrix = target.calcTransformMatrix();
-        const invertMatrix = util.invertTransform(objectMatrix);
-
         originalEventInfo = {
-          point: new Point(eventX, eventY).transform(invertMatrix),
+          point: paintlib.getRealPosFromCanvas(new Point(eventX, eventY)),
           layout: obj.getLayout(),
-          invertMatrix,
         };
       }
       lastTransform = transform;
@@ -30,11 +25,40 @@ export const createResizeControls2D = (obj: PaintObject<any>) => {
        */
 
       const corner = TransformCorner.parse(transform.corner);
-      const eventPoint = new Point(eventX, eventY).transform(originalEventInfo.invertMatrix);
+      const eventPoint = paintlib.getRealPosFromCanvas(new Point(eventX, eventY));
       const deltaX = eventPoint.x - originalEventInfo.point.x;
       const deltaY = eventPoint.y - originalEventInfo.point.y;
 
-      const angle = util.degreesToRadians(target.getTotalAngle());
+      const newBox: TBBox = { ...originalEventInfo.layout };
+
+      if (corner.horizontal === 'l') {
+        // We move the left point: adjust x & width
+        newBox.width -= deltaX;
+        newBox.left += deltaX;
+      } else if (corner.horizontal === 'r') {
+        // We move the right point: adjust width
+        newBox.width += deltaX;
+      }
+
+      if (corner.vertical === 't') {
+        // We move the top point: adjust x,y & height
+        newBox.height -= deltaY;
+        newBox.top += deltaY;
+      } else if (corner.vertical === 'b') {
+        // We move the bottom point: adjust height
+        newBox.height += deltaY;
+      }
+
+      if (newBox.width < 0) {
+        newBox.width = -newBox.width;
+        newBox.left -= newBox.width;
+      }
+      if (newBox.height < 0) {
+        newBox.height = -newBox.height;
+        newBox.top -= newBox.height;
+      }
+
+      /*const angle = util.degreesToRadians(target.getTotalAngle());
       const scaleX = target.scaleX;
       const scaleY = target.scaleY;
       const offset = corner.getTransformOffset(angle, deltaX, deltaY, scaleX, scaleY);
@@ -54,10 +78,10 @@ export const createResizeControls2D = (obj: PaintObject<any>) => {
         newBox.height = -newBox.height;
         newBox.left -= Math.cos(angle + Math.PI / 2) * newBox.height * scaleX;
         newBox.top -= Math.sin(angle + Math.PI / 2) * newBox.height * scaleY;
-      }
+      }*/
 
-      obj.updateLayout(newBox, new Point(newBox.width, newBox.height));
-      target.setCoords();
+      obj.updateLayout(newBox, new Point(1, 1));
+      obj.update(paintlib);
       return true;
     }
 
@@ -84,8 +108,6 @@ export const createResizeControls2D = (obj: PaintObject<any>) => {
         actionHandler: resize,
         cursorStyle: 'pointer',
         actionName: 'resize',
-        offsetX: 0,
-        offsetY: 0,
       });
     }
   }
