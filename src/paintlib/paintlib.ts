@@ -14,6 +14,7 @@ import { PaintlibLoadOptions } from './models/paintlib-load-options';
 import { GlobalTransformProps } from './models/global-transform-props';
 import { ObjectRegistry } from './config/object-registry';
 import { Size } from './models/size';
+import { Checkpoint } from './models/checkpoint';
 
 export class PaintLib {
   public readonly element: HTMLDivElement;
@@ -29,6 +30,9 @@ export class PaintLib {
 
   private objects: PaintObject<any>[] = [];
   private transform: GlobalTransformProps = { scale: 1, rotation: 0 };
+
+  private undoStack: Checkpoint[] = [];
+  private redoStack: Checkpoint[] = [];
 
   constructor(
     public readonly container: HTMLElement,
@@ -376,6 +380,98 @@ export class PaintLib {
     this.canvas.remove(object['fabricObject']);
   }
 
+  /* ****************************************** */
+  /* ************** UNDO / REDO  ************** */
+  /* ****************************************** */
+  private buildCheckpoint(object?: PaintObject<any>, creation?: boolean): Checkpoint {
+    let checkpoint: Checkpoint;
+    if (object) {
+      const objExists = !!this.objects.find((x) => x === object);
+      if (objExists && !creation) {
+        checkpoint = { type: 'object', checkpoint: object.saveCheckpoint() };
+      } else {
+        checkpoint = {
+          type: 'object',
+          checkpoint: { object, layout: null, vector: null, options: null, transform: null },
+        };
+      }
+    } else {
+      checkpoint = { type: 'canvas', checkpoint: { transform: this.getTransform() } };
+    }
+    console.log('buildCheckpoint: ', checkpoint);
+    return checkpoint;
+  }
+
+  private restoreCheckpoint(checkpoint: Checkpoint) {
+    console.log('restoreCheckpoint: ', checkpoint);
+    if (checkpoint.type === 'canvas') {
+      if (this.transform.rotation !== checkpoint.checkpoint.transform.rotation) {
+        this.setRotation(checkpoint.checkpoint.transform.rotation);
+      }
+    } else {
+      const obj = checkpoint.checkpoint.object;
+
+      if (checkpoint.checkpoint.layout) {
+        const objExists = !!this.objects.find((x) => x === obj);
+        if (!objExists) {
+          // We don't find the object -> recreate it
+          obj.create(
+            new Point(checkpoint.checkpoint.layout.left, checkpoint.checkpoint.layout.top),
+            checkpoint.checkpoint.extras,
+          );
+        }
+
+        obj.setTransform(checkpoint.checkpoint.transform);
+        obj.setOptions(checkpoint.checkpoint.options);
+        obj.updateLayout(checkpoint.checkpoint.layout, checkpoint.checkpoint.vector);
+        obj.update(this);
+
+        if (!objExists) {
+          this.add(obj);
+        }
+      } else {
+        this.remove(obj);
+      }
+      this.canvas.renderAll();
+    }
+  }
+
+  saveCheckpoint(object?: PaintObject<any>, creation?: boolean) {
+    this.undoStack.push(this.buildCheckpoint(object, creation));
+
+    if (this.undoStack.length > 50) {
+      this.undoStack.shift();
+    }
+
+    this.redoStack = [];
+  }
+
+  undo() {
+    const checkpoint = this.undoStack.pop();
+    if (!checkpoint) {
+      return;
+    }
+
+    // 1. Save the current state to redo stack
+    this.redoStack.push(this.buildCheckpoint(checkpoint.type === 'object' ? checkpoint.checkpoint.object : undefined));
+
+    // 2. Restore the object or canvas
+    this.restoreCheckpoint(checkpoint);
+  }
+
+  redo() {
+    const checkpoint = this.redoStack.pop();
+    if (!checkpoint) {
+      return;
+    }
+
+    // 1. Save the current state to undo stack
+    this.undoStack.push(this.buildCheckpoint(checkpoint.type === 'object' ? checkpoint.checkpoint.object : undefined));
+
+    // 2. Restore the object or canvas
+    this.restoreCheckpoint(checkpoint);
+  }
+
   /* ************************************ */
   /* ********** SAVE & RESTORE ********** */
   /* ************************************ */
@@ -391,6 +487,9 @@ export class PaintLib {
     if (data.transform.rotation) {
       this.setRotation(data.transform.rotation);
     }
+
+    this.undoStack = [];
+    this.redoStack = [];
   }
 
   getDataURL() {

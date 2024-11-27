@@ -1,11 +1,10 @@
 import { Path, Point } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
-import { PaintObjectJson } from '../models/paint-object-json';
 import { PaintLib } from '../paintlib';
 
 export class PaintDraw extends PaintObject<Path> {
-  instantiate(point: Point, data?: PaintObjectJson) {
-    this.fabricObject = new Path(data.extras.path, data.extras);
+  instantiate(point: Point, extras?: any) {
+    this.fabricObject = new Path(extras.path, extras);
   }
 
   attach(paintlib: PaintLib, obj: Path) {
@@ -35,6 +34,8 @@ export class PaintDraw extends PaintObject<Path> {
       new Point(1, 1),
     );
     this.update(paintlib);
+
+    paintlib.saveCheckpoint(this, true);
   }
 
   render() {

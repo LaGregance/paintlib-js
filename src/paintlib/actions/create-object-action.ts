@@ -121,5 +121,6 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
 
     this.paintlib.uiStore.getState().setAction(new SelectAction(this.paintlib, this.object['fabricObject']));
     this.object.onCreated();
+    this.paintlib.saveCheckpoint(this.object, true);
   }
 }

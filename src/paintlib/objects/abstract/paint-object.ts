@@ -3,6 +3,7 @@ import { PaintObjectOptions } from '../../models/paint-object-options';
 import { PaintObjectJson } from '../../models/paint-object-json';
 import { PaintObjectTransformProps } from '../../models/global-transform-props';
 import { PaintLib } from '../../paintlib';
+import { PaintObjectCheckpoint } from '../../models/checkpoint';
 
 export abstract class PaintObject<T extends FabricObject> {
   protected layout: TBBox;
@@ -46,10 +47,10 @@ export abstract class PaintObject<T extends FabricObject> {
    * You should not override this function in subclass (use instantiate instead).
    *
    * @param point
-   * @param restoreData
+   * @param extras
    */
-  create(point: Point, restoreData?: PaintObjectJson) {
-    this.instantiate(point, restoreData);
+  create(point: Point, extras?: any) {
+    this.instantiate(point, extras);
   }
 
   /**
@@ -183,10 +184,21 @@ export abstract class PaintObject<T extends FabricObject> {
    * @param data
    */
   restore(data: PaintObjectJson) {
-    this.create(new Point(data.layout.left, data.layout.top), data);
+    this.create(new Point(data.layout.left, data.layout.top), data.extras);
     this.setOptions(data.options);
     this.setTransform(data.transform);
     this.restoreExtras(data);
     this.updateLayout(data.layout);
+  }
+
+  saveCheckpoint(): PaintObjectCheckpoint {
+    return {
+      object: this,
+      layout: this.layout,
+      vector: this.vector,
+      options: this.options,
+      transform: this.transform,
+      extras: this.serializeExtras(),
+    };
   }
 }

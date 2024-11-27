@@ -1,15 +1,14 @@
 import { Point, Textbox } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
-import { PaintObjectJson } from '../models/paint-object-json';
 import { PaintLib } from '../paintlib';
 
 export class PaintText extends PaintObject<Textbox> {
-  instantiate(point: Point, restoreData?: PaintObjectJson) {
+  instantiate(point: Point, extras?: any) {
     this.fabricObject = new Textbox('Text', {
       top: point.y,
       left: point.x,
       objectCaching: false,
-      fontSize: restoreData?.extras?.fontSize ?? 5,
+      fontSize: extras?.fontSize ?? 5,
     });
 
     this.fabricObject.editable = true;
