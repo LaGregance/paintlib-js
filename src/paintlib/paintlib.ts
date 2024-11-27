@@ -31,8 +31,8 @@ export class PaintLib {
   private objects: PaintObject<any>[] = [];
   private transform: GlobalTransformProps = { scale: 1, rotation: 0 };
 
-  private undoStack: Checkpoint[] = [];
-  private redoStack: Checkpoint[] = [];
+  private undoStack: Checkpoint[];
+  private redoStack: Checkpoint[];
 
   constructor(
     public readonly container: HTMLElement,
@@ -196,6 +196,11 @@ export class PaintLib {
       throw new Error(`You cannot an image and specifying the size`);
     }
 
+    if (this.realSize) {
+      // Already loaded, clear first
+      this.clear();
+    }
+
     this.options = options;
     if (options.image) {
       this.image = await FabricImage.fromURL(options.image, { crossOrigin: 'anonymous' });
@@ -249,6 +254,10 @@ export class PaintLib {
     }
 
     this.enableSelection(true);
+
+    this.undoStack = [];
+    this.redoStack = [];
+
     new ResizeObserver(this.fitViewport).observe(this.container);
   }
 
@@ -390,6 +399,17 @@ export class PaintLib {
   }
 
   /* ****************************************** */
+  /* ***************** CLEAR  ***************** */
+  /* ****************************************** */
+  public clear() {
+    this.canvas.clear();
+    this.canvas.backgroundColor = '#ffffff';
+    this.objects = [];
+    this.undoStack = [];
+    this.redoStack = [];
+  }
+
+  /* ****************************************** */
   /* ************** UNDO / REDO  ************** */
   /* ****************************************** */
   private updateCanUndoRedoState() {
@@ -510,11 +530,38 @@ export class PaintLib {
     this.redoStack = [];
   }
 
+  /**
+   * Return the base64 URL encoded image
+   */
   getDataURL() {
     const canvasWidth = this.transform.rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
     const scale = (this.image?.width ?? this.realSize.width) / canvasWidth;
 
     return this.canvas.toDataURL({ format: this.options.format, multiplier: scale });
+  }
+
+  /**
+   * Return the image in base64 format
+   */
+  getBase64() {
+    const dataURL = this.getDataURL();
+    const regex = /^data:.*?;base64,(.*)$/;
+    const match = dataURL.match(regex);
+    return match ? match[1] : undefined;
+  }
+
+  /**
+   * Start a download for the image
+   *
+   * @param filename
+   */
+  downloadImage(filename: string) {
+    const link = document.createElement('a');
+    link.href = this.getDataURL();
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   serialize(): CanvasSerializedJson {

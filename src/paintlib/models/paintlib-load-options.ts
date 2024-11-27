@@ -1,3 +1,5 @@
+import { PaintLib } from '../paintlib';
+
 export type PaintlibLoadOptions = {
   /**
    * Image URL or dataURL to load
@@ -35,4 +37,18 @@ export type PaintlibLoadOptions = {
    * Incompatible with image/imageSizeMode.
    */
   width?: number;
+
+  /**
+   * Fired when the used click on the save action
+   *
+   * @param paintlib
+   */
+  onSave?: (paintlib: PaintLib) => any;
+
+  /**
+   * Fired when the used click on the cancel action
+   *
+   * @param paintlib
+   */
+  onCancel?: (paintlib: PaintLib) => any;
 };

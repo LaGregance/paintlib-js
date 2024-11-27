@@ -7,8 +7,16 @@ export class CancelAction extends BaseClickableAction {
     super(paintlib, UIActionType.CANCEL);
   }
 
-  onClick() {
-    // TODO: Trigger event on paintlib
-    console.log('TODO: Cancel');
+  async onClick() {
+    const options = this.paintlib.getOptions();
+
+    if (!this.paintlib.customization.cancelOnlyCustom) {
+      // Clear
+      await this.paintlib.load(options);
+    }
+
+    if (options.onCancel) {
+      options.onCancel(this.paintlib);
+    }
   }
 }
