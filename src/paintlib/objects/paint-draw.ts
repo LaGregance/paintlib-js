@@ -1,10 +1,12 @@
 import { Path, Point } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 import { PaintLib } from '../paintlib';
+import { improveDefaultControl } from '../utils/improve-default-control';
 
 export class PaintDraw extends PaintObject<Path> {
   instantiate(point: Point, extras?: any) {
     this.fabricObject = new Path(extras.path, extras);
+    improveDefaultControl(this.fabricObject.controls);
   }
 
   restoreExtras(extras: any): void {
@@ -13,6 +15,7 @@ export class PaintDraw extends PaintObject<Path> {
 
   attach(paintlib: PaintLib, obj: Path) {
     this.fabricObject = obj;
+    improveDefaultControl(this.fabricObject.controls);
 
     this.options = {
       fgColor: obj.stroke as string,

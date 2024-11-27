@@ -2,19 +2,18 @@ import { Point, Rect } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 import { createResizeControls } from '../utils/object-resize-controls';
 import { PaintLib } from '../paintlib';
+import { createRotateControls } from '../utils/rotate-control';
 
 export class PaintRect extends PaintObject<Rect> {
   instantiate(point: Point) {
     this.fabricObject = new Rect({ left: point.x, top: point.y, width: 1, height: 1, objectCaching: false });
-    this.fabricObject.controls = {
-      mtr: this.fabricObject.controls.mtr,
-    };
+    this.fabricObject.controls = {};
   }
 
   bind(paintlib: PaintLib) {
     this.fabricObject.controls = {
       // Keep only existing resize control
-      mtr: this.fabricObject.controls.mtr,
+      rotate: createRotateControls(),
       ...createResizeControls(paintlib, this, 'box'),
     };
     paintlib.canvas.renderAll();

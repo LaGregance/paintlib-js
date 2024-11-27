@@ -2,6 +2,7 @@ import { Control, Point, TBBox, TPointerEvent, Transform, util } from 'fabric';
 import { TransformCorner } from './transform-corner';
 import { PaintObject } from '../objects/abstract/paint-object';
 import { PaintLib } from '../paintlib';
+import { renderControl } from './improve-default-control';
 
 export const createResizeControls = (paintlib: PaintLib, obj: PaintObject<any>, mode: 'box' | 'vector') => {
   let originalEventInfo: { point: Point; vector: Point; layout: TBBox } = undefined;
@@ -76,6 +77,7 @@ export const createResizeControls = (paintlib: PaintLib, obj: PaintObject<any>, 
           cursorStyle: 'pointer',
           actionHandler: resize,
           actionName: 'resize',
+          render: renderControl,
         });
       }
     }
@@ -94,6 +96,7 @@ export const createResizeControls = (paintlib: PaintLib, obj: PaintObject<any>, 
         cursorStyle: 'pointer',
         actionHandler: resize,
         actionName: 'resize',
+        render: renderControl,
       }),
       end: new Control({
         positionHandler: (dim, finalMatrix, fabricObj) => {
@@ -107,13 +110,7 @@ export const createResizeControls = (paintlib: PaintLib, obj: PaintObject<any>, 
         cursorStyle: 'pointer',
         actionHandler: resize,
         actionName: 'resize',
-        /*render: function (ctx, left, top, styleOverride, fabricObject) {
-          const size = 6;
-          ctx.fillStyle = 'lime';
-          ctx.beginPath();
-          ctx.arc(left, top, size, 0, Math.PI * 2, false);
-          ctx.fill();
-        },*/
+        render: renderControl,
       }),
     };
   }

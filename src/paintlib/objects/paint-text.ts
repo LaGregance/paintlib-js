@@ -1,6 +1,7 @@
 import { Point, Textbox } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 import { PaintLib } from '../paintlib';
+import { improveDefaultControl } from '../utils/improve-default-control';
 
 export class PaintText extends PaintObject<Textbox> {
   instantiate(point: Point, extras?: any) {
@@ -12,6 +13,7 @@ export class PaintText extends PaintObject<Textbox> {
     });
 
     this.fabricObject.editable = true;
+    improveDefaultControl(this.fabricObject.controls);
   }
 
   restoreExtras(extras: any): void {
