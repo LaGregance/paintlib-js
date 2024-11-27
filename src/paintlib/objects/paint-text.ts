@@ -11,22 +11,27 @@ export class PaintText extends PaintObject<Textbox> {
       fontSize: restoreData?.extras?.fontSize ?? 5,
     });
     this.fabricObject.editable = true;
-
-    delete this.fabricObject.controls.ml;
-    delete this.fabricObject.controls.mr;
-    delete this.fabricObject.controls.mb;
-    delete this.fabricObject.controls.mt;
   }
 
   render() {
     this.fabricObject.set({
       top: this.layout.top,
       left: this.layout.left,
-      fontSize: this.layout.height,
+      fontSize: this.layout.height * 0.9,
       height: this.layout.height,
       width: this.layout.width,
       fill: this.options.fgColor,
     });
+
+    // Adjust fontSize to fit precise height
+    const ratio = this.layout.height / this.fabricObject.calcTextHeight();
+    this.fabricObject.set({
+      fontSize: this.fabricObject.fontSize * ratio,
+    });
+
+    if (this.layout.width < this.fabricObject.width) {
+      this.layout.width = this.fabricObject.width;
+    }
   }
 
   onCreated() {

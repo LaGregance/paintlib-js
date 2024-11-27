@@ -293,7 +293,7 @@ export class PaintLib {
   };
 
   private setGlobalTransform(props: Partial<GlobalTransformProps>) {
-    (this.uiStore.getState().allActions[UIActionType.DRAW] as DrawAction).update();
+    (this.uiStore.getState().allActions[UIActionType.DRAW] as DrawAction)?.update();
     this.transform = Object.assign(this.transform, props);
     for (const obj of this.objects) {
       obj.update(this);
