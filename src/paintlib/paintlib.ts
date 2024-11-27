@@ -138,8 +138,8 @@ export class PaintLib {
         );
 
         obj.setTransform({
-          scaleX: target.scaleX * (target.flipX ? -1 : 1),
-          scaleY: target.scaleY * (target.flipY ? -1 : 1),
+          scaleX: (target.scaleX / this.transform.scale) * (target.flipX ? -1 : 1),
+          scaleY: (target.scaleY / this.transform.scale) * (target.flipY ? -1 : 1),
           rotation: target.angle - this.transform.rotation,
         });
       }
