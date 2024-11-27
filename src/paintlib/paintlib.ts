@@ -125,6 +125,7 @@ export class PaintLib {
       const target = event.target;
       const obj = this.objects.find((x) => x['fabricObject'] === target);
       if (obj) {
+        console.log('bindFabricToPaintlibObject: ', target);
         const realPos = this.getRealPosFromCanvas(new Point(target.left, target.top));
         const layout = obj.getLayout();
         obj.updateLayout(
@@ -298,7 +299,8 @@ export class PaintLib {
     this.image.scale(imgScale);
     this.canvas.centerObject(this.image);
 
-    this.setGlobalTransform({ scale: canvasWidth / this.realSize.width });
+    const newWidth = this.transform.rotation % 180 === 0 ? canvasWidth : canvasHeight;
+    this.setGlobalTransform({ scale: newWidth / this.realSize.width });
   };
 
   private setGlobalTransform(props: Partial<GlobalTransformProps>) {
