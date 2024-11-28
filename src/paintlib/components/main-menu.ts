@@ -137,29 +137,40 @@ export class MainMenu extends Component<'div'> {
     );
 
     // Action shortcut
-    document.addEventListener('keydown', (event) => {
-      const selectedObj = this.paintlib.getSelectedObject();
-      if (selectedObj instanceof PaintText) {
-        if (selectedObj['fabricObject'].isEditing) {
-          return;
-        }
-      }
+    document.addEventListener('keydown', this.keydownEvent);
+  }
 
-      const ctrl = xor(event.ctrlKey, event.metaKey);
-      const key = event.key.toLowerCase();
-
-      if (ctrl && key === 'z') {
-        if (event.shiftKey) {
-          this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'redo'));
-        } else {
-          this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'undo'));
-        }
+  private keydownEvent = (event: KeyboardEvent) => {
+    const selectedObj = this.paintlib.getSelectedObject();
+    if (selectedObj instanceof PaintText) {
+      if (selectedObj['fabricObject'].isEditing) {
+        return;
       }
+    }
 
-      if (key === 'delete' || key === 'backspace') {
-        this.paintlib.uiStore.getState().setAction(new TrashAction(this.paintlib));
+    const ctrl = xor(event.ctrlKey, event.metaKey);
+    const key = event.key.toLowerCase();
+
+    if (ctrl && key === 'z') {
+      if (event.shiftKey) {
+        this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'redo'));
+      } else {
+        this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'undo'));
       }
-    });
+    }
+
+    if (key === 'delete' || key === 'backspace') {
+      this.paintlib.uiStore.getState().setAction(new TrashAction(this.paintlib));
+    }
+  };
+
+  unmount() {
+    for (const child of this.children) {
+      if (child instanceof MenuButton) {
+        child.unmount();
+      }
+    }
+    document.removeEventListener('keydown', this.keydownEvent);
   }
 
   updateOptions = (actionOrClazz: UIActionType | PaintObjectClass) => {

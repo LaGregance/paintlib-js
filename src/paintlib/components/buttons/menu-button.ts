@@ -65,4 +65,8 @@ export abstract class MenuButton extends Component<'div'> {
     this.image = image;
     this.button.innerHTML = image;
   }
+
+  unmount() {
+    document.removeEventListener('click', this.hideMenu);
+  }
 }

@@ -1,14 +1,17 @@
 export abstract class Component<K extends keyof HTMLElementTagNameMap> {
   public readonly element: HTMLElementTagNameMap[K];
   private defaultVisibility: string;
+  protected children: Component<any>[];
 
   constructor(tagName: K) {
     this.element = document.createElement(tagName);
+    this.children = [];
   }
 
   abstract init(): void;
 
   add(child: Component<any>) {
+    this.children.push(child);
     this.element.appendChild(child.element);
     child.init();
   }

@@ -19,6 +19,7 @@ import { Checkpoint } from './models/checkpoint';
 export class PaintLib {
   public readonly element: HTMLDivElement;
 
+  private mainMenu: MainMenu;
   public canvas: Canvas;
   public readonly uiStore: StoreApi<UIStore>;
 
@@ -26,7 +27,9 @@ export class PaintLib {
   private canvasContainer: HTMLDivElement;
   private image?: FabricImage;
   private options?: PaintlibLoadOptions;
+
   private realSize?: Size;
+  private resizeObserver: ResizeObserver;
 
   private objects: PaintObject<any>[] = [];
   private transform: GlobalTransformProps = { scale: 1, rotation: 0 };
@@ -58,9 +61,9 @@ export class PaintLib {
     this.element.className = 'paintlib-root';
 
     // 2. Create menu
-    const mainMenu = new MainMenu(this);
-    mainMenu.init();
-    this.element.appendChild(mainMenu.element);
+    this.mainMenu = new MainMenu(this);
+    this.mainMenu.init();
+    this.element.appendChild(this.mainMenu.element);
 
     // 3. Create & Populate canvas
     this.canvasContainer = document.createElement('div');
@@ -77,6 +80,7 @@ export class PaintLib {
     this.canvasEl.width = this.canvasContainer.clientWidth;
     this.canvasEl.height = this.canvasContainer.clientHeight;
     this.canvasContainer.appendChild(this.canvasEl);
+    this.canvasContainer.style.visibility = 'hidden';
 
     this.canvas = new Canvas(this.canvasEl);
     this.canvas.selection = false;
@@ -167,9 +171,7 @@ export class PaintLib {
         }
         const selectedObj = this.getSelectedObject();
         if (selectedObj) {
-          console.log('ICI: ', selectedObj.getOptions());
           this.saveCheckpoint(selectedObj);
-          console.log('===');
           selectedObj.setOptions({ [field]: newValue });
           selectedObj.update(this);
           this.canvas.renderAll();
@@ -180,6 +182,21 @@ export class PaintLib {
     useState(this.uiStore, (store) => store.options.fgColor, updateFactory('fgColor'));
     useState(this.uiStore, (store) => store.options.bgColor, updateFactory('bgColor'));
     useState(this.uiStore, (store) => store.options.tickness, updateFactory('tickness'));
+
+    // Observe unmount
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'childList') {
+          mutation.removedNodes.forEach((node) => {
+            if (node === this.element) {
+              this.unmount();
+              observer.disconnect();
+            }
+          });
+        }
+      }
+    });
+    observer.observe(this.element.parentNode, { childList: true });
   }
 
   /* ************************************ */
@@ -191,7 +208,6 @@ export class PaintLib {
    * @param options
    */
   async load(options: PaintlibLoadOptions) {
-    // TODO: Why not included in constructor ?
     if (options.image && (options.width || options.height)) {
       throw new Error(`You cannot an image and specifying the size`);
     }
@@ -212,6 +228,7 @@ export class PaintLib {
       this.image.moveCursor = 'pointer';
       this.image.hoverCursor = 'pointer';
     }
+    this.canvasContainer.style.visibility = 'visible';
     this.canvas.backgroundColor = '#ffffff';
 
     // Auto-detect format if possible (else fallback png)
@@ -253,12 +270,13 @@ export class PaintLib {
       this.restore(JSON.parse(atob(options.restoreData)));
     }
 
-    this.enableSelection(true);
+    this.enableSelection(this.uiStore.getState().activeAction === UIActionType.SELECT);
 
     this.undoStack = [];
     this.redoStack = [];
 
-    new ResizeObserver(this.fitViewport).observe(this.container);
+    this.resizeObserver = new ResizeObserver(this.fitViewport);
+    this.resizeObserver.observe(this.container);
   }
 
   /* ******************************************* */
@@ -401,12 +419,27 @@ export class PaintLib {
   /* ****************************************** */
   /* ***************** CLEAR  ***************** */
   /* ****************************************** */
+
+  /**
+   * This method clear the canvas and unload all object & image
+   */
   public clear() {
     this.canvas.clear();
     this.canvas.backgroundColor = '#ffffff';
+    this.canvasContainer.style.visibility = 'hidden';
     this.objects = [];
     this.undoStack = [];
     this.redoStack = [];
+
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = undefined;
+    }
+  }
+
+  private unmount() {
+    this.clear();
+    this.mainMenu.unmount();
   }
 
   /* ****************************************** */
