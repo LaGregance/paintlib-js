@@ -12,11 +12,11 @@ export type PaintlibCustomization = {
   tickness?: number[];
 
   /**
-   * Define available actions. Pro tips: use UIActionType
+   * Define available actions. Pro tips: use PaintActionBuilder to build the array.
    *
    * Default: All
    */
-  actions: PaintActionType[];
+  actions?: PaintActionType[];
 
   /**
    * When false, the options bar (for color, tickness picker) is always visible

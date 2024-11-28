@@ -57,7 +57,7 @@ export class PaintLib {
     public readonly container: HTMLElement,
     public readonly customization: PaintlibCustomization = {},
   ) {
-    // default style
+    // default customization
     customization.style ??= {};
     setCssProperty(customization.style, 'backgroundColor', '--paintlib-background-color', '#c0c0c0');
     setCssProperty(customization.style, 'menuColor', '--paintlib-menu-color', '#222831');
@@ -66,6 +66,10 @@ export class PaintLib {
     setCssProperty(customization.style, 'buttonSize', '--paintlib-button-size', 40);
     setCssProperty(customization.style, 'buttonGap', '--paintlib-button-gap', 6);
     setCssProperty(customization.style, 'groupGap', '--paintlib-group-gap', 20);
+
+    if (!customization.actions) {
+      customization.actions = Object.values(PaintActionType);
+    }
     // -------------
 
     this.element = document.createElement('div');
@@ -721,5 +725,9 @@ export class PaintLib {
 
   getOptions(): PaintlibLoadOptions {
     return { ...this.options };
+  }
+
+  haveAction(action: PaintActionType) {
+    return this.customization.actions.includes(action);
   }
 }

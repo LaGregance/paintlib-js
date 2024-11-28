@@ -50,33 +50,75 @@ export class MainMenu extends Component<'div'> {
 
     const actionsView = new View('paintlib-menu-line');
 
-    const select = new ActionButton(this.paintlib, () => new SelectAction(this.paintlib), CursorSVG);
-    const trash = new ActionButton(this.paintlib, () => new TrashAction(this.paintlib), TrashSVG);
+    let trash: ActionButton = undefined;
+    let undo: ActionButton = undefined;
+    let redo: ActionButton = undefined;
 
-    const undo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'undo'), UndoSVG);
-    const redo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'redo'), RedoSVG);
-
-    const cancel = new ActionButton(this.paintlib, () => new CancelAction(this.paintlib), CancelSVG);
-    const save = new ActionButton(this.paintlib, () => new SaveAction(this.paintlib), SaveSVG);
-
-    actionsView.add(new ActionGroup([select, trash, undo, redo]));
-    actionsView.add(new CreateObjectMenuGroup(this.paintlib));
-
-    // TODO: Manage allowCrop
-    if (this.paintlib.customization?.allowRotate) {
-      const rotateLeft = new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'left'), RotateLeftSVG);
-      const rotateRight = new ActionButton(
-        this.paintlib,
-        () => new RotateAction(this.paintlib, 'right'),
-        RotateRightSVG,
-      );
-      const crop = new ActionButton(this.paintlib, () => new CropAction(this.paintlib), CropSVG);
-      actionsView.add(new ActionGroup([rotateLeft, rotateRight, crop]));
+    /* ************************************ */
+    /* *********** SELECT GROUP *********** */
+    /* ************************************ */
+    const selectGroup = new View('paintlib-menu-group');
+    if (this.paintlib.haveAction(PaintActionType.SELECT)) {
+      selectGroup.add(new ActionButton(this.paintlib, () => new SelectAction(this.paintlib), CursorSVG));
+    }
+    if (this.paintlib.haveAction(PaintActionType.TRASH)) {
+      trash = new ActionButton(this.paintlib, () => new TrashAction(this.paintlib), TrashSVG);
+      selectGroup.add(trash);
+    }
+    if (this.paintlib.haveAction(PaintActionType.UNDO)) {
+      undo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'undo'), UndoSVG);
+      selectGroup.add(undo);
+    }
+    if (this.paintlib.haveAction(PaintActionType.REDO)) {
+      redo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'redo'), RedoSVG);
+      selectGroup.add(redo);
+    }
+    if (selectGroup['children'].length > 0) {
+      actionsView.add(selectGroup);
     }
 
-    actionsView.add(new ActionGroup([cancel, save]));
+    /* ************************************ */
+    /* *********** OBJECT GROUP *********** */
+    /* ************************************ */
+    actionsView.add(new CreateObjectMenuGroup(this.paintlib));
+
+    /* ************************************ */
+    /* ********* ROTATE/CROP GROUP ******** */
+    /* ************************************ */
+    const rotateGroup = new View('paintlib-menu-group');
+    if (this.paintlib.haveAction(PaintActionType.ROTATE_LEFT)) {
+      rotateGroup.add(new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'left'), RotateLeftSVG));
+    }
+    if (this.paintlib.haveAction(PaintActionType.ROTATE_RIGHT)) {
+      rotateGroup.add(new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'right'), RotateRightSVG));
+    }
+    if (this.paintlib.haveAction(PaintActionType.CROP)) {
+      rotateGroup.add(new ActionButton(this.paintlib, () => new CropAction(this.paintlib), CropSVG));
+    }
+    if (rotateGroup['children'].length > 0) {
+      actionsView.add(rotateGroup);
+    }
+
+    /* ************************************ */
+    /* ************ SAVE GROUP ************ */
+    /* ************************************ */
+    const saveGroup = new View('paintlib-menu-group');
+
+    if (this.paintlib.haveAction(PaintActionType.CANCEL)) {
+      saveGroup.add(new ActionButton(this.paintlib, () => new CancelAction(this.paintlib), CancelSVG));
+    }
+    if (this.paintlib.haveAction(PaintActionType.SAVE)) {
+      saveGroup.add(new ActionButton(this.paintlib, () => new SaveAction(this.paintlib), SaveSVG));
+    }
+    if (saveGroup['children'].length > 0) {
+      actionsView.add(saveGroup);
+    }
+
     this.add(actionsView);
 
+    /* ************************************ */
+    /* ************** OPTIONS ************* */
+    /* ************************************ */
     this.optionsMenu = new View('paintlib-menu-line');
 
     // Update options value on option bar
@@ -123,24 +165,28 @@ export class MainMenu extends Component<'div'> {
       this.paintlib.uiStore,
       (store) => store.selectedObject,
       (selected) => {
-        trash.setDisable(!selected);
+        trash?.setDisable(!selected);
         this.updateOptions(selected ? (selected.constructor as any) : PaintActionType.SELECT);
       },
     );
 
     // Set undo/redo enable
-    useState(
-      this.paintlib.uiStore,
-      (store) => store.canUndo,
-      (canUndo) => {
-        undo.setDisable(!canUndo);
-      },
-    );
-    useState(
-      this.paintlib.uiStore,
-      (store) => store.canRedo,
-      (canRedo) => redo.setDisable(!canRedo),
-    );
+    if (undo) {
+      useState(
+        this.paintlib.uiStore,
+        (store) => store.canUndo,
+        (canUndo) => {
+          undo.setDisable(!canUndo);
+        },
+      );
+    }
+    if (redo) {
+      useState(
+        this.paintlib.uiStore,
+        (store) => store.canRedo,
+        (canRedo) => redo.setDisable(!canRedo),
+      );
+    }
 
     // Action shortcut
     document.addEventListener('keydown', this.keydownEvent);
@@ -159,14 +205,20 @@ export class MainMenu extends Component<'div'> {
 
     if (ctrl && key === 'z') {
       if (event.shiftKey) {
-        this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'redo'));
+        if (this.paintlib.haveAction(PaintActionType.UNDO)) {
+          this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'redo'));
+        }
       } else {
-        this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'undo'));
+        if (this.paintlib.haveAction(PaintActionType.REDO)) {
+          this.paintlib.uiStore.getState().setAction(new UndoRedoAction(this.paintlib, 'undo'));
+        }
       }
     }
 
     if (key === 'delete' || key === 'backspace') {
-      this.paintlib.uiStore.getState().setAction(new TrashAction(this.paintlib));
+      if (this.paintlib.haveAction(PaintActionType.TRASH)) {
+        this.paintlib.uiStore.getState().setAction(new TrashAction(this.paintlib));
+      }
     }
   };
 

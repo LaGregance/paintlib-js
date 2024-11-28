@@ -26,12 +26,28 @@ export class CreateObjectMenuGroup extends Component<'div'> {
 
   constructor(private paintlib: PaintLib) {
     super('div');
-    this.availableActions = ObjectRegistry.getAllObjectActions();
+    this.availableActions = ObjectRegistry.getAllObjectActions().filter((x) => this.paintlib.haveAction(x));
 
     const style = this.paintlib.customization.style;
-    const countButtons = Object.values(PaintActionType).length - (this.paintlib.customization.allowRotate ? 0 : 2);
-    const countGroup = 3 + (this.paintlib.customization.allowRotate ? 1 : 0);
-    // TODO: Manage allowCrop
+
+    const selectGroupCount = this.countAvailableActionsInArray([
+      PaintActionType.SELECT,
+      PaintActionType.TRASH,
+      PaintActionType.UNDO,
+      PaintActionType.REDO,
+    ]);
+    const objectGroupCount = this.countAvailableActionsInArray(this.availableActions);
+    const rotateGroupCount = this.countAvailableActionsInArray([
+      PaintActionType.ROTATE_LEFT,
+      PaintActionType.ROTATE_RIGHT,
+      PaintActionType.CROP,
+    ]);
+    const saveGroupCount = this.countAvailableActionsInArray([PaintActionType.CANCEL, PaintActionType.SAVE]);
+
+    const countButtons = selectGroupCount + objectGroupCount + rotateGroupCount + saveGroupCount;
+    const countGroup =
+      (selectGroupCount ? 1 : 0) + (objectGroupCount ? 1 : 0) + (rotateGroupCount ? 1 : 0) + (saveGroupCount ? 1 : 0);
+
     this.MIN_WIDTH =
       style.groupGap * (countGroup - 1) +
       (style.buttonSize + style.buttonGap) * countButtons -
@@ -39,6 +55,16 @@ export class CreateObjectMenuGroup extends Component<'div'> {
 
     this.calcAvailableBtnCount();
     this.userActionSlots = [];
+  }
+
+  private countAvailableActionsInArray(actions: PaintActionType[]) {
+    let available = 0;
+    for (const action of actions) {
+      if (this.paintlib.haveAction(action)) {
+        available += 1;
+      }
+    }
+    return available;
   }
 
   private calcAvailableBtnCount() {
