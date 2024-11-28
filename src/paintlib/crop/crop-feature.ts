@@ -1,5 +1,7 @@
-import { Path, TBBox } from 'fabric';
+import { Control, InteractiveFabricObject, Path, Point, TBBox, TMat2D, Transform } from 'fabric';
 import { PaintLib } from '../paintlib';
+import { renderControl } from '../utils/improve-default-control';
+import { TransformCorner } from '../utils/transform-corner';
 
 export class CropFeature {
   private path: Path;
@@ -20,9 +22,71 @@ export class CropFeature {
       fill: '#000000',
       opacity: 0.4,
       fillRule: 'evenodd',
+      hasBorders: false,
+      lockMovementX: true,
+      lockMovementY: true,
     });
+    this.path.controls = {};
+
     this.paintlib.canvas.add(this.path);
     this.calcPath();
+
+    let originalEventInfo: { point: Point; cropSection: TBBox } = undefined;
+    let lastTransform: Transform = undefined;
+    const handler = (eventData: Event, transform: Transform, eventX: number, eventY: number) => {
+      if (transform.action === 'moveCrop') {
+        if (lastTransform !== transform) {
+          originalEventInfo = { point: new Point(eventX, eventY), cropSection: { ...this.cropSection } };
+        }
+        lastTransform = transform;
+
+        const delta = new Point(eventX - originalEventInfo.point.x, eventY - originalEventInfo.point.y);
+
+        this.cropSection.width = originalEventInfo.cropSection.width + delta.x;
+        this.cropSection.height = originalEventInfo.cropSection.height + delta.y;
+        this.calcPath();
+      }
+      return false;
+    };
+
+    const positionHandlerFactory = (corner: TransformCorner) => {
+      return () => {
+        const pos = new Point(this.cropSection.left, this.cropSection.top);
+
+        if (corner.horizontal === 'm') {
+          pos.x += this.cropSection.width / 2;
+        } else if (corner.horizontal === 'r') {
+          pos.x += this.cropSection.width;
+        }
+
+        if (corner.vertical === 'm') {
+          pos.y += this.cropSection.height / 2;
+        } else if (corner.vertical === 'b') {
+          pos.y += this.cropSection.height;
+        }
+
+        return pos;
+      };
+    };
+
+    const controls: Record<string, Control> = {};
+    for (const vertical of ['t', 'm', 'b']) {
+      for (const horizontal of ['l', 'm', 'r']) {
+        if (vertical === 'm' && horizontal === 'm') {
+          continue;
+        }
+
+        controls[vertical + horizontal] = new Control({
+          positionHandler: positionHandlerFactory(TransformCorner.parse(vertical + horizontal)),
+          cursorStyle: 'pointer',
+          actionHandler: handler,
+          actionName: 'moveCrop',
+          render: renderControl,
+        });
+      }
+    }
+
+    this.path.controls = controls;
   }
 
   private buildAbsoluteLinePath(startX: number, startY: number, size: number, type: 'h' | 'v') {
@@ -102,9 +166,6 @@ export class CropFeature {
       width: updatedPath.width,
       height: updatedPath.height,
       pathOffset: updatedPath.pathOffset,
-      hasBorders: false,
-      lockMovementX: true,
-      lockMovementY: true,
       top: 0,
       left: 0,
     });
