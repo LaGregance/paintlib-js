@@ -313,7 +313,11 @@ export class PaintLib {
     const rotation = this.transform.rotation;
     const viewportWidth = this.canvasContainer.clientWidth;
     const viewportHeight = this.canvasContainer.clientHeight;
-    const usedSize: Size = this.image ?? this.realSize;
+
+    let usedSize: Size = this.image ?? this.realSize;
+    if (this.transform.crop) {
+      usedSize = { width: this.transform.crop.width, height: this.transform.crop.height };
+    }
 
     const {
       width: canvasWidth,
@@ -337,7 +341,7 @@ export class PaintLib {
     }
 
     const newWidth = rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
-    const objScale = newWidth / this.realSize.width;
+    const objScale = newWidth / (this.transform.crop?.width ?? this.realSize.width);
     this.setGlobalTransform({ scale: objScale });
   };
 
@@ -371,6 +375,7 @@ export class PaintLib {
 
         const newCrop = cropFeature.save();
         if (
+          originalCrop &&
           newCrop.top === originalCrop.top &&
           newCrop.left === originalCrop.left &&
           newCrop.width === originalCrop.width &&
@@ -592,7 +597,7 @@ export class PaintLib {
     }
 
     const scale = this.canvas.width / data.width;
-    this.setGlobalTransform({ scale: scale * this.transform.scale });
+    this.setGlobalTransform({ scale: scale * this.transform.scale, crop: data.transform.crop });
     if (data.transform.rotation) {
       this.setRotation(data.transform.rotation);
     }
@@ -658,13 +663,13 @@ export class PaintLib {
 
     if (this.transform.rotation === 90) {
       // height because realSize is fixed (so in case 90º rotation, realSize.height is actually width)
-      x = this.realSize.height;
+      x = this.transform.crop?.height || this.realSize.height;
     } else if (this.transform.rotation === 180) {
-      x = this.realSize.width;
-      y = this.realSize.height;
+      x = this.transform.crop?.width || this.realSize.width;
+      y = this.transform.crop?.height || this.realSize.height;
     } else if (this.transform.rotation === 270) {
       // width because realSize is fixed (so in case 270º rotation, realSize.width is actually height)
-      y = this.realSize.width;
+      y = this.transform.crop?.width || this.realSize.width;
     }
 
     return new Point(x, y);
@@ -676,6 +681,7 @@ export class PaintLib {
   getCanvasPosFromReal(realPos: Point) {
     const reference = this.getReferencePoint();
     return realPos
+      .subtract(new Point(this.transform.crop?.left || 0, this.transform.crop?.top || 0))
       .rotate(util.degreesToRadians(this.transform.rotation))
       .add(reference)
       .scalarMultiply(this.transform.scale);
@@ -689,7 +695,8 @@ export class PaintLib {
     return canvasPos
       .scalarDivide(this.transform.scale)
       .subtract(reference)
-      .rotate(-util.degreesToRadians(this.transform.rotation));
+      .rotate(-util.degreesToRadians(this.transform.rotation))
+      .add(new Point(this.transform.crop?.left || 0, this.transform.crop?.top || 0));
   }
 
   /* ************************************ */
