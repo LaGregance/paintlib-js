@@ -45,7 +45,13 @@ export class TransformCorner {
    * @param delta
    * @param scale
    */
-  transformLayoutVector(layout: TBBox, vector: Point, rotation: number, delta: Point, scale: Point): [TBBox, Point] {
+  transformLayoutVectorWithRotation(
+    layout: TBBox,
+    vector: Point,
+    rotation: number,
+    delta: Point,
+    scale: Point,
+  ): [TBBox, Point] {
     layout = { ...layout };
 
     if (this.horizontal === 'l') {
@@ -86,6 +92,44 @@ export class TransformCorner {
     }
 
     return [layout, vector];
+  }
+
+  /**
+   * This function take the actual layout of an object and return the new layout after resizing the object.
+   *
+   * @param layout
+   * @param delta
+   */
+  transformLayout(layout: TBBox, delta: Point): TBBox {
+    layout = { ...layout };
+
+    if (this.horizontal === 'l') {
+      // We move the left point: adjust x & width
+      layout.width -= delta.x;
+      layout.left += delta.x;
+    } else if (this.horizontal === 'r') {
+      // We move the right point: adjust width
+      layout.width += delta.x;
+    }
+
+    if (this.vertical === 't') {
+      layout.height -= delta.y;
+      layout.top += delta.y;
+    } else if (this.vertical === 'b') {
+      // We move the bottom point: adjust height
+      layout.height += delta.y;
+    }
+
+    if (layout.width < 0) {
+      layout.width = -layout.width;
+      layout.left -= layout.width;
+    }
+    if (layout.height < 0) {
+      layout.height = -layout.height;
+      layout.top -= layout.height;
+    }
+
+    return layout;
   }
 
   toString() {

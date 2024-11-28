@@ -39,7 +39,7 @@ export const createResizeControls = (paintlib: PaintLib, obj: PaintObject<any>, 
         eventPoint.y - originalEventInfo.point.y,
       ).rotate(-rotation);
 
-      const [layout, vector] = corner.transformLayoutVector(
+      const [layout, vector] = corner.transformLayoutVectorWithRotation(
         originalEventInfo.layout,
         originalEventInfo.vector,
         rotation,

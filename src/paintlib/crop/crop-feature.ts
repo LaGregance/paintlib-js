@@ -1,4 +1,4 @@
-import { Control, InteractiveFabricObject, Path, Point, TBBox, TMat2D, Transform } from 'fabric';
+import { Control, Path, Point, TBBox, TPointerEventInfo, Transform } from 'fabric';
 import { PaintLib } from '../paintlib';
 import { renderControl } from '../utils/improve-default-control';
 import { TransformCorner } from '../utils/transform-corner';
@@ -6,6 +6,8 @@ import { TransformCorner } from '../utils/transform-corner';
 export class CropFeature {
   private path: Path;
   private cropSection: TBBox;
+
+  private moveInitialInfo?: { point: Point; cropSection: TBBox };
 
   constructor(private paintlib: PaintLib) {
     const canvasWidth = paintlib.canvas.width;
@@ -25,6 +27,8 @@ export class CropFeature {
       hasBorders: false,
       lockMovementX: true,
       lockMovementY: true,
+      hoverCursor: 'default',
+      moveCursor: 'default',
     });
     this.path.controls = {};
 
@@ -40,10 +44,9 @@ export class CropFeature {
         }
         lastTransform = transform;
 
+        const corner = TransformCorner.parse(transform.corner);
         const delta = new Point(eventX - originalEventInfo.point.x, eventY - originalEventInfo.point.y);
-
-        this.cropSection.width = originalEventInfo.cropSection.width + delta.x;
-        this.cropSection.height = originalEventInfo.cropSection.height + delta.y;
+        this.cropSection = corner.transformLayout(originalEventInfo.cropSection, delta);
         this.calcPath();
       }
       return false;
@@ -87,7 +90,82 @@ export class CropFeature {
     }
 
     this.path.controls = controls;
+
+    this.paintlib.canvas.on('mouse:down', this.onPointerDown);
+    this.paintlib.canvas.on('mouse:move', this.onPointerMove);
+    this.paintlib.canvas.on('mouse:up', this.onPointerUp);
   }
+
+  public finish() {
+    this.paintlib.canvas.off('mouse:down', this.onPointerDown);
+    this.paintlib.canvas.off('mouse:move', this.onPointerMove);
+    this.paintlib.canvas.off('mouse:up', this.onPointerUp);
+    document.querySelectorAll('canvas').forEach((el) => {
+      el.style.removeProperty('cursor');
+    });
+  }
+
+  private isPointOnCropSection(point: Point) {
+    const SAFE_DELTA = 5;
+    return (
+      point.x >= this.cropSection.left + SAFE_DELTA &&
+      point.x <= this.cropSection.left + this.cropSection.width - 2 * SAFE_DELTA &&
+      point.y >= this.cropSection.top + SAFE_DELTA &&
+      point.y <= this.cropSection.top + this.cropSection.height - 2 * SAFE_DELTA
+    );
+  }
+
+  private onPointerDown = (event: TPointerEventInfo) => {
+    if (this.isPointOnCropSection(event.scenePoint)) {
+      this.moveInitialInfo = { point: event.scenePoint, cropSection: { ...this.cropSection } };
+    }
+  };
+
+  private onPointerMove = (event: TPointerEventInfo) => {
+    if (this.moveInitialInfo) {
+      const canvasWidth = this.paintlib.canvas.width;
+      const canvasHeight = this.paintlib.canvas.height;
+
+      const delta = new Point(
+        event.scenePoint.x - this.moveInitialInfo.point.x,
+        event.scenePoint.y - this.moveInitialInfo.point.y,
+      );
+
+      this.cropSection.left = this.moveInitialInfo.cropSection.left + delta.x;
+      if (this.cropSection.left < 0) {
+        this.cropSection.left = 0;
+      }
+      if (this.cropSection.left + this.cropSection.width > canvasWidth) {
+        this.cropSection.left = canvasWidth - this.cropSection.width;
+      }
+
+      this.cropSection.top = this.moveInitialInfo.cropSection.top + delta.y;
+      if (this.cropSection.top < 0) {
+        this.cropSection.top = 0;
+      }
+      if (this.cropSection.top + this.cropSection.height > canvasHeight) {
+        this.cropSection.top = canvasHeight - this.cropSection.height;
+      }
+      this.calcPath();
+    } else {
+      if (this.isPointOnCropSection(event.scenePoint)) {
+        document.querySelectorAll('canvas').forEach((el) => {
+          el.style.cursor = 'pointer';
+        });
+      } else {
+        document.querySelectorAll('canvas').forEach((el) => {
+          el.style.removeProperty('cursor');
+        });
+      }
+    }
+  };
+
+  private onPointerUp = () => {
+    this.moveInitialInfo = undefined;
+    document.querySelectorAll('canvas').forEach((el) => {
+      el.style.removeProperty('cursor');
+    });
+  };
 
   private buildAbsoluteLinePath(startX: number, startY: number, size: number, type: 'h' | 'v') {
     if (type === 'h') {
@@ -171,78 +249,12 @@ export class CropFeature {
     });
     this.path.setCoords();
     this.paintlib.canvas.renderAll();
+
+    if (!this.paintlib.canvas.getActiveObject()) {
+      setTimeout(() => {
+        this.paintlib.canvas.setActiveObject(this.path);
+        this.paintlib.canvas.renderAll();
+      });
+    }
   }
-
-  /*private topRect: Rect;
-  private bottomRect: Rect;
-  private leftRect: Rect;
-  private rightRect: Rect;
-
-  private group: Group;
-  private cropSection: TBBox;
-
-  constructor(private paintlib: PaintLib) {
-    const canvasWidth = paintlib.canvas.width;
-    const canvasHeight = paintlib.canvas.height;
-
-    this.cropSection = {
-      left: canvasWidth / 4,
-      top: canvasHeight / 4,
-      width: canvasWidth / 2,
-      height: canvasHeight / 2,
-    };
-
-    this.topRect = new Rect();
-    this.bottomRect = new Rect();
-    this.leftRect = new Rect();
-    this.rightRect = new Rect();
-    // this.group = new Group([this.topRect, this.bottomRect, this.leftRect, this.rightRect]);
-    // this.paintlib.canvas.add(this.group);
-    this.paintlib.canvas.add(this.topRect);
-    this.paintlib.canvas.add(this.bottomRect);
-    this.paintlib.canvas.add(this.leftRect);
-    this.paintlib.canvas.add(this.rightRect);
-    this.calcRects();
-  }
-
-  private calcRects() {
-    const canvasWidth = this.paintlib.canvas.width;
-    const canvasHeight = this.paintlib.canvas.height;
-
-    const overlayColor = '#00000055';
-
-    this.topRect.set({
-      top: 0,
-      left: 0,
-      width: canvasWidth,
-      height: this.cropSection.top,
-      fill: overlayColor,
-      strokeWidth: 0,
-    });
-    this.bottomRect.set({
-      top: this.cropSection.top + this.cropSection.height,
-      left: 0,
-      width: canvasWidth,
-      height: canvasHeight - this.cropSection.top - this.cropSection.height,
-      fill: overlayColor,
-      strokeWidth: 0,
-    });
-    this.leftRect.set({
-      top: this.cropSection.top,
-      left: 0,
-      width: this.cropSection.left,
-      height: this.cropSection.height,
-      fill: overlayColor,
-      strokeWidth: 0,
-    });
-    this.rightRect.set({
-      top: this.cropSection.top,
-      left: this.cropSection.left + this.cropSection.width,
-      width: canvasWidth - this.cropSection.left - this.cropSection.width,
-      height: this.cropSection.height,
-      fill: overlayColor,
-      strokeWidth: 0,
-    });
-    this.paintlib.canvas.renderAll();
-  }*/
 }
