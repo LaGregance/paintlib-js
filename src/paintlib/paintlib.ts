@@ -356,7 +356,9 @@ export class PaintLib {
   }
 
   public startCrop() {
-    // TODO: 1. Restore original non-cropped image
+    // 1. Restore original non-cropped image
+    const originalCrop = this.transform.crop;
+    this.setGlobalTransform({ crop: undefined });
 
     // 2. Create crop feature
     const cropFeature = new CropFeature(this);
@@ -364,22 +366,35 @@ export class PaintLib {
     // 3. Override menu
     this.cropMenu = new CropMenu(
       () => {
-        this.cropImage(cropFeature.save());
+        this.element.removeChild(this.cropMenu.element);
+        this.cropMenu = undefined;
+
+        const newCrop = cropFeature.save();
+        if (
+          newCrop.top === originalCrop.top &&
+          newCrop.left === originalCrop.left &&
+          newCrop.width === originalCrop.width &&
+          newCrop.height === originalCrop.height
+        ) {
+          this.discardLastCheckpoint();
+        }
+        this.cropImage(newCrop);
       },
       () => {
         this.element.removeChild(this.cropMenu.element);
         this.cropMenu = undefined;
         cropFeature.cancel();
+        this.cropImage(originalCrop);
+        this.discardLastCheckpoint();
       },
     );
     this.cropMenu.init();
     this.element.appendChild(this.cropMenu.element);
   }
 
-  public cropImage(cropSection: TBBox) {
-    this.element.removeChild(this.cropMenu.element);
-    this.cropMenu = undefined;
-    this.setGlobalTransform({ crop: cropSection });
+  public cropImage(cropSection: TBBox | undefined) {
+    this.transform.crop = cropSection;
+    this.calcCanvasSize();
   }
 
   private setGlobalTransform(props: Partial<GlobalTransformProps>) {
