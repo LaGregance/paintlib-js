@@ -289,7 +289,7 @@ export class PaintLib {
     this.undoStack = [];
     this.redoStack = [];
 
-    this.resizeObserver = new ResizeObserver(this.fitViewport);
+    this.resizeObserver = new ResizeObserver(this.calcCanvasSize);
     this.resizeObserver.observe(this.container);
   }
 
@@ -297,9 +297,51 @@ export class PaintLib {
   /* ********** GLOBAL TRANSFORMATION ********** */
   /* ******************************************* */
 
-  setRotation(rotation: number) {
+  /**
+   * This function is responsive to calculate the canvas size and adjusting the scale by take multiple things into account:
+   *  - viewPort sizes
+   *  - image size (or realSize)
+   *  - rotation
+   *  - crop
+   *
+   * @private
+   */
+  private calcCanvasSize = () => {
     this.canvas.discardActiveObject();
 
+    // 1. Calculate new canvas dimension
+    const rotation = this.transform.rotation;
+    const viewportWidth = this.canvasContainer.clientWidth;
+    const viewportHeight = this.canvasContainer.clientHeight;
+    const usedSize: Size = this.image ?? this.realSize;
+
+    const {
+      width: canvasWidth,
+      height: canvasHeight,
+      scale: imgScale,
+    } = calculateImageScaleToFitViewport(
+      { width: viewportWidth, height: viewportHeight },
+      {
+        width: rotation % 180 === 0 ? usedSize.width : usedSize.height,
+        height: rotation % 180 === 0 ? usedSize.height : usedSize.width,
+      },
+    );
+
+    // 2. Apply dimension & scale
+    this.canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
+
+    if (this.image) {
+      this.image.scale(imgScale);
+      this.image.rotate(rotation);
+      this.canvas.centerObject(this.image);
+    }
+
+    const newWidth = rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
+    const objScale = newWidth / this.realSize.width;
+    this.setGlobalTransform({ scale: objScale });
+  };
+
+  setRotation(rotation: number) {
     // 1. Convert rotation to be between 0 and 360
     if (rotation % 90 !== 0) {
       throw new Error(`PaintLib.setRotation only work with multiple of 90`);
@@ -309,69 +351,9 @@ export class PaintLib {
       rotation = rotation + 360;
     }
 
-    // 2. Calculate new canvas dimension
-    const containerWidth = this.canvasContainer.clientWidth;
-    const containerHeight = this.canvasContainer.clientHeight;
-    const usedSize: Size = this.image ?? this.realSize;
-
-    const {
-      width: canvasWidth,
-      height: canvasHeight,
-      scale: imgScale,
-    } = calculateImageScaleToFitViewport(
-      { width: containerWidth, height: containerHeight },
-      {
-        width: rotation % 180 === 0 ? usedSize.width : usedSize.height,
-        height: rotation % 180 === 0 ? usedSize.height : usedSize.width,
-      },
-    );
-
-    this.canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
-
-    if (this.image) {
-      this.image.scale(imgScale);
-      this.image.rotate(rotation);
-      this.canvas.centerObject(this.image);
-    }
-
-    // 3. Apply new global scale to objects
-    const newWidth = rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
-    const objScale = newWidth / this.realSize.width;
-    this.setGlobalTransform({
-      scale: objScale,
-      rotation,
-    });
+    this.transform.rotation = rotation;
+    this.calcCanvasSize();
   }
-
-  private fitViewport = () => {
-    this.canvas.discardActiveObject();
-
-    const containerWidth = this.canvasContainer.clientWidth;
-    const containerHeight = this.canvasContainer.clientHeight;
-
-    const usedSize: Size = this.image ?? this.realSize;
-
-    const {
-      width: canvasWidth,
-      height: canvasHeight,
-      scale: imgScale,
-    } = calculateImageScaleToFitViewport(
-      { width: containerWidth, height: containerHeight },
-      {
-        width: this.transform.rotation % 180 === 0 ? usedSize.width : usedSize.height,
-        height: this.transform.rotation % 180 === 0 ? usedSize.height : usedSize.width,
-      },
-    );
-
-    this.canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
-    if (this.image) {
-      this.image.scale(imgScale);
-      this.canvas.centerObject(this.image);
-    }
-
-    const newWidth = this.transform.rotation % 180 === 0 ? canvasWidth : canvasHeight;
-    this.setGlobalTransform({ scale: newWidth / this.realSize.width });
-  };
 
   public startCrop() {
     // TODO: 1. Restore original non-cropped image
@@ -395,9 +377,9 @@ export class PaintLib {
   }
 
   public cropImage(cropSection: TBBox) {
-    // TODO: Crop the image
     this.element.removeChild(this.cropMenu.element);
     this.cropMenu = undefined;
+    this.setGlobalTransform({ crop: cropSection });
   }
 
   private setGlobalTransform(props: Partial<GlobalTransformProps>) {
