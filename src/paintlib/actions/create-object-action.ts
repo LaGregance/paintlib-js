@@ -3,7 +3,7 @@ import { PaintLib } from '../paintlib';
 import { SelectAction } from './select-action';
 import { BaseSelectableAction } from './abstract/base-selectable-action';
 import { PaintObject } from '../objects/abstract/paint-object';
-import { UIActionType } from '../config/ui-action-type';
+import { PaintActionType } from '../config/paint-action-type';
 import { ObjectRegistry } from '../config/object-registry';
 
 export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectableAction {
@@ -13,7 +13,7 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
 
   constructor(
     paintlib: PaintLib,
-    type: UIActionType,
+    type: PaintActionType,
     private objectConstructor: new () => T,
   ) {
     super(paintlib, type);

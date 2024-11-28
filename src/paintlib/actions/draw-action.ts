@@ -2,13 +2,13 @@ import { FabricObject, Path, PencilBrush } from 'fabric';
 import { PaintLib } from '../paintlib';
 import { BaseSelectableAction } from './abstract/base-selectable-action';
 import { PaintDraw } from '../objects/paint-draw';
-import { UIActionType } from '../config/ui-action-type';
+import { PaintActionType } from '../config/paint-action-type';
 
 export class DrawAction extends BaseSelectableAction {
   private pencil: PencilBrush;
 
   constructor(paintlib: PaintLib) {
-    super(paintlib, UIActionType.DRAW);
+    super(paintlib, PaintActionType.DRAW);
   }
 
   onSelected() {

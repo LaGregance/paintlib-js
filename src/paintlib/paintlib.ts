@@ -17,7 +17,7 @@ import { PaintlibCustomization } from './models/paintlib-customization';
 import { useState } from './utils/use-state';
 import { DrawAction } from './actions/draw-action';
 import { PaintObject } from './objects/abstract/paint-object';
-import { UIActionType } from './config/ui-action-type';
+import { PaintActionType } from './config/paint-action-type';
 import { boxEqual, getUrlExtension, px, setCssProperty } from './utils/utils';
 import { CanvasSerializedJson } from './models/canvas-serialized-json';
 import { PaintlibLoadOptions } from './models/paintlib-load-options';
@@ -182,8 +182,8 @@ export class PaintLib {
     // 6. Update selected object with option on change
     const updateFactory = (field: string) => {
       return (newValue: any) => {
-        if (this.uiStore.getState().activeAction === UIActionType.DRAW) {
-          (this.uiStore.getState().allActions[UIActionType.DRAW] as DrawAction).update();
+        if (this.uiStore.getState().activeAction === PaintActionType.DRAW) {
+          (this.uiStore.getState().allActions[PaintActionType.DRAW] as DrawAction).update();
         }
         const selectedObj = this.getSelectedObject();
         if (selectedObj) {
@@ -286,7 +286,7 @@ export class PaintLib {
       this.restore(JSON.parse(atob(options.restoreData)));
     }
 
-    this.enableSelection(this.uiStore.getState().activeAction === UIActionType.SELECT);
+    this.enableSelection(this.uiStore.getState().activeAction === PaintActionType.SELECT);
 
     this.undoStack = [];
     this.redoStack = [];
@@ -390,7 +390,7 @@ export class PaintLib {
   }
 
   private setGlobalTransform(props: Partial<GlobalTransformProps>) {
-    (this.uiStore.getState().allActions[UIActionType.DRAW] as DrawAction)?.update();
+    (this.uiStore.getState().allActions[PaintActionType.DRAW] as DrawAction)?.update();
     this.transform = Object.assign(this.transform, props);
     for (const obj of this.objects) {
       obj.update(this);

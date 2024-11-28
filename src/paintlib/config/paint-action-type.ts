@@ -1,4 +1,4 @@
-export enum UIActionType {
+export enum PaintActionType {
   SELECT = 'select',
   TRASH = 'trash',
   SAVE = 'save',

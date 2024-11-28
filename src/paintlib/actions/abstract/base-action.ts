@@ -1,11 +1,11 @@
 import { TPointerEvent, TPointerEventInfo } from 'fabric';
 import { PaintLib } from '../../paintlib';
-import { UIActionType } from '../../config/ui-action-type';
+import { PaintActionType } from '../../config/paint-action-type';
 
 export abstract class BaseAction {
   constructor(
     public readonly paintlib: PaintLib,
-    public readonly type: UIActionType,
+    public readonly type: PaintActionType,
     public readonly behavior: 'selectable' | 'clickable',
   ) {}
 

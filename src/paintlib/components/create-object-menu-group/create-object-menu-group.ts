@@ -4,7 +4,7 @@ import { ActionButton } from '../buttons/action-button';
 import { ShowMoreActionButton } from './show-more-action-button';
 import { ActionGroup } from '../action-group';
 import { useState } from '../../utils/use-state';
-import { UIActionType } from '../../config/ui-action-type';
+import { PaintActionType } from '../../config/paint-action-type';
 import { ObjectRegistry } from '../../config/object-registry';
 
 /**
@@ -14,12 +14,12 @@ import { ObjectRegistry } from '../../config/object-registry';
 export class CreateObjectMenuGroup extends Component<'div'> {
   private readonly MIN_WIDTH: number;
 
-  private availableActions: UIActionType[];
-  private userActionSlots: { action: UIActionType; addedAt: number }[];
+  private availableActions: PaintActionType[];
+  private userActionSlots: { action: PaintActionType; addedAt: number }[];
   private moreBtn: ShowMoreActionButton;
 
-  private mainButtonsMap = new Map<UIActionType, ActionButton>();
-  private menuButtonsMap = new Map<UIActionType, ActionButton>();
+  private mainButtonsMap = new Map<PaintActionType, ActionButton>();
+  private menuButtonsMap = new Map<PaintActionType, ActionButton>();
 
   private availableBtnCount: number;
   private container: HTMLDivElement;
@@ -29,7 +29,7 @@ export class CreateObjectMenuGroup extends Component<'div'> {
     this.availableActions = ObjectRegistry.getAllObjectActions();
 
     const style = this.paintlib.customization.style;
-    const countButtons = Object.values(UIActionType).length - (this.paintlib.customization.allowRotate ? 0 : 2);
+    const countButtons = Object.values(PaintActionType).length - (this.paintlib.customization.allowRotate ? 0 : 2);
     const countGroup = 3 + (this.paintlib.customization.allowRotate ? 1 : 0);
     // TODO: Manage allowCrop
     this.MIN_WIDTH =
@@ -54,7 +54,7 @@ export class CreateObjectMenuGroup extends Component<'div'> {
     }
   }
 
-  private updateUserActionSlot(action: UIActionType) {
+  private updateUserActionSlot(action: PaintActionType) {
     let updated = false;
 
     // 1. Trunc the slots to fit availableBtnCount
@@ -84,7 +84,7 @@ export class CreateObjectMenuGroup extends Component<'div'> {
     return updated;
   }
 
-  private createObjectBtn(type: UIActionType, targetMore = false) {
+  private createObjectBtn(type: PaintActionType, targetMore = false) {
     const meta = ObjectRegistry.getObjectMeta(type);
     const onClick = targetMore ? () => this.moreBtn?.hideMenu() : undefined;
     return new ActionButton(this.paintlib, () => ObjectRegistry.createAction(type, this.paintlib), meta.icon, onClick);

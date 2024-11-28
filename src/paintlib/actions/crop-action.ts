@@ -1,10 +1,10 @@
 import { PaintLib } from '../paintlib';
-import { UIActionType } from '../config/ui-action-type';
+import { PaintActionType } from '../config/paint-action-type';
 import { BaseClickableAction } from './abstract/base-clickable-action';
 
 export class CropAction extends BaseClickableAction {
   constructor(paintlib: PaintLib) {
-    super(paintlib, UIActionType.CROP);
+    super(paintlib, PaintActionType.CROP);
   }
 
   onClick() {

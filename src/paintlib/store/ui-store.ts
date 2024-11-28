@@ -3,14 +3,14 @@ import { createStore } from 'zustand/vanilla';
 import { PaintLib } from '../paintlib';
 import { SelectAction } from '../actions/select-action';
 import { PaintObject } from '../objects/abstract/paint-object';
-import { UIActionType } from '../config/ui-action-type';
+import { PaintActionType } from '../config/paint-action-type';
 import { PaintObjectOptions } from '../models/paint-object-options';
 
 export type UIStore = {
   allActions: {
-    [key in UIActionType]?: BaseAction;
+    [key in PaintActionType]?: BaseAction;
   };
-  activeAction?: UIActionType;
+  activeAction?: PaintActionType;
   setAction: (action: BaseAction) => void;
   selectedObject?: PaintObject<any>;
   options: PaintObjectOptions;
@@ -40,9 +40,9 @@ export const createUIStore = (paintlib: PaintLib) => {
     };
 
     return {
-      activeAction: UIActionType.SELECT,
+      activeAction: PaintActionType.SELECT,
       allActions: {
-        [UIActionType.SELECT]: new SelectAction(paintlib),
+        [PaintActionType.SELECT]: new SelectAction(paintlib),
       },
       setAction,
       globalScale: 1,

@@ -28,7 +28,7 @@ import { useState } from '../utils/use-state';
 import { CreateObjectMenuGroup } from './create-object-menu-group/create-object-menu-group';
 import { RotateAction } from '../actions/rotate-action';
 import { xor } from '../utils/utils';
-import { UIActionType } from '../config/ui-action-type';
+import { PaintActionType } from '../config/paint-action-type';
 import { DrawingOption } from '../config/drawing-option';
 import { ObjectRegistry, PaintObjectClass } from '../config/object-registry';
 import { PaintText } from '../objects/paint-text';
@@ -124,7 +124,7 @@ export class MainMenu extends Component<'div'> {
       (store) => store.selectedObject,
       (selected) => {
         trash.setDisable(!selected);
-        this.updateOptions(selected ? (selected.constructor as any) : UIActionType.SELECT);
+        this.updateOptions(selected ? (selected.constructor as any) : PaintActionType.SELECT);
       },
     );
 
@@ -179,9 +179,9 @@ export class MainMenu extends Component<'div'> {
     document.removeEventListener('keydown', this.keydownEvent);
   }
 
-  updateOptions = (actionOrClazz: UIActionType | PaintObjectClass) => {
+  updateOptions = (actionOrClazz: PaintActionType | PaintObjectClass) => {
     const meta = ObjectRegistry.getObjectMeta(actionOrClazz);
-    const action = (meta?.action || actionOrClazz) as UIActionType;
+    const action = (meta?.action || actionOrClazz) as PaintActionType;
 
     if (this.paintlib.customization?.proactivelyShowOptions) {
       const available: DrawingOption[] = meta?.allowedOptions;
@@ -194,6 +194,6 @@ export class MainMenu extends Component<'div'> {
       this.optionsMenu.setVisible(available?.length > 0);
     }
 
-    this.options.fgColor.setImage(action === UIActionType.TEXT ? TextColorSVG : ForegroundColorSVG);
+    this.options.fgColor.setImage(action === PaintActionType.TEXT ? TextColorSVG : ForegroundColorSVG);
   };
 }

@@ -14,14 +14,14 @@ import DrawSVG from '../svgs/draw.svg';
 import { DrawAction } from '../actions/draw-action';
 import { PaintLib } from '../paintlib';
 import { CreateObjectAction } from '../actions/create-object-action';
-import { UIActionType } from './ui-action-type';
+import { PaintActionType } from './paint-action-type';
 import { DrawingOption } from './drawing-option';
 import { PaintObjectJson } from '../models/paint-object-json';
 
 export type PaintObjectClass = new () => PaintObject<any>;
 
 export type PaintObjectMetadata = {
-  action: UIActionType;
+  action: PaintActionType;
   clazz: PaintObjectClass;
   icon: string;
   allowedOptions?: DrawingOption[];
@@ -29,44 +29,44 @@ export type PaintObjectMetadata = {
 };
 
 export abstract class ObjectRegistry {
-  private static allObjectActions: UIActionType[];
-  private static mapActionToMeta = new Map<UIActionType, PaintObjectMetadata>();
+  private static allObjectActions: PaintActionType[];
+  private static mapActionToMeta = new Map<PaintActionType, PaintObjectMetadata>();
   private static mapClazzToMeta = new Map<string, PaintObjectMetadata>();
 
   private static readonly configs: PaintObjectMetadata[] = [
     {
-      action: UIActionType.RECT,
+      action: PaintActionType.RECT,
       clazz: PaintRect,
       icon: RectangleSVG,
       allowedOptions: [DrawingOption.FG_COLOR, DrawingOption.BG_COLOR, DrawingOption.TICKNESS],
     },
     {
-      action: UIActionType.ELLIPSE,
+      action: PaintActionType.ELLIPSE,
       clazz: PaintEllipse,
       icon: EllipseSVG,
       allowedOptions: [DrawingOption.FG_COLOR, DrawingOption.BG_COLOR, DrawingOption.TICKNESS],
     },
     {
-      action: UIActionType.ARROW,
+      action: PaintActionType.ARROW,
       clazz: PaintArrow,
       icon: ArrowSVG,
       allowedOptions: [DrawingOption.FG_COLOR, DrawingOption.TICKNESS],
     },
     {
-      action: UIActionType.LINE,
+      action: PaintActionType.LINE,
       clazz: PaintLine,
       icon: LineSVG,
       allowedOptions: [DrawingOption.FG_COLOR, DrawingOption.TICKNESS],
     },
     {
-      action: UIActionType.TEXT,
+      action: PaintActionType.TEXT,
       clazz: PaintText,
       icon: TextSVG,
       allowedOptions: [DrawingOption.FG_COLOR],
       creationAlwaysHorizontal: true,
     },
     {
-      action: UIActionType.DRAW,
+      action: PaintActionType.DRAW,
       clazz: PaintDraw,
       icon: DrawSVG,
       allowedOptions: [DrawingOption.FG_COLOR, DrawingOption.TICKNESS],
@@ -86,7 +86,7 @@ export abstract class ObjectRegistry {
     }
   }
 
-  public static createAction(type: UIActionType, paintlib: PaintLib) {
+  public static createAction(type: PaintActionType, paintlib: PaintLib) {
     ObjectRegistry.init();
 
     const meta = this.mapActionToMeta.get(type);
@@ -94,7 +94,7 @@ export abstract class ObjectRegistry {
       throw new Error(`Unable to create action: ${type}`);
     }
 
-    if (type === UIActionType.DRAW) {
+    if (type === PaintActionType.DRAW) {
       return new DrawAction(paintlib);
     } else {
       return new CreateObjectAction(paintlib, type, meta.clazz);
@@ -106,12 +106,12 @@ export abstract class ObjectRegistry {
     return this.allObjectActions;
   }
 
-  public static getObjectMeta(actionOrClass: UIActionType | PaintObjectClass | string) {
+  public static getObjectMeta(actionOrClass: PaintActionType | PaintObjectClass | string) {
     ObjectRegistry.init();
 
     if (typeof actionOrClass === 'function') {
       return this.mapClazzToMeta.get(actionOrClass.name);
-    } else if (Object.values(UIActionType).includes(actionOrClass as any)) {
+    } else if (Object.values(PaintActionType).includes(actionOrClass as any)) {
       return this.mapActionToMeta.get(actionOrClass as any);
     } else {
       return this.mapClazzToMeta.get(actionOrClass);

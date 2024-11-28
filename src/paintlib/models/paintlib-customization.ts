@@ -1,3 +1,5 @@
+import { PaintActionType } from '../config/paint-action-type';
+
 export type PaintlibCustomization = {
   /**
    * Define available colors in color picker
@@ -10,19 +12,16 @@ export type PaintlibCustomization = {
   tickness?: number[];
 
   /**
+   * Define available actions. Pro tips: use UIActionType
+   *
+   * Default: All
+   */
+  actions: PaintActionType[];
+
+  /**
    * When false, the options bar (for color, tickness picker) is always visible
    */
   proactivelyShowOptions?: boolean;
-
-  /**
-   * If true, allow the image to be rotated
-   */
-  allowRotate?: boolean;
-
-  /**
-   * If true, allow the image to be cropped
-   */
-  allowCrop?: boolean;
 
   /**
    * When true the clear action only trigger the onCancel callback.

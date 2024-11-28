@@ -1,14 +1,14 @@
 import { PaintLib } from '../paintlib';
 import { Object } from 'fabric';
 import { BaseSelectableAction } from './abstract/base-selectable-action';
-import { UIActionType } from '../config/ui-action-type';
+import { PaintActionType } from '../config/paint-action-type';
 
 export class SelectAction extends BaseSelectableAction {
   constructor(
     paintlib: PaintLib,
     private defaultSelected?: Object,
   ) {
-    super(paintlib, UIActionType.SELECT);
+    super(paintlib, PaintActionType.SELECT);
   }
 
   onSelected() {
