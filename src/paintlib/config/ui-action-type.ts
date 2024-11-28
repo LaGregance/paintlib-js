@@ -16,4 +16,5 @@ export enum UIActionType {
 
   ROTATE_LEFT = 'rotate-left',
   ROTATE_RIGHT = 'rotate-right',
+  CROP = 'crop',
 }

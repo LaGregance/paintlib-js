@@ -1,4 +1,14 @@
-import { BasicTransformEvent, Canvas, FabricImage, FabricObject, Point, TPointerEvent, Transform, util } from 'fabric';
+import {
+  BasicTransformEvent,
+  Canvas,
+  FabricImage,
+  FabricObject,
+  Point,
+  TBBox,
+  TPointerEvent,
+  Transform,
+  util,
+} from 'fabric';
 import { calculateImageScaleToFitViewport } from './utils/size-utils';
 import { MainMenu } from './components/main-menu';
 import { createUIStore, UIStore } from './store/ui-store';
@@ -15,11 +25,15 @@ import { GlobalTransformProps } from './models/global-transform-props';
 import { ObjectRegistry } from './config/object-registry';
 import { Size } from './models/size';
 import { Checkpoint } from './models/checkpoint';
+import { CropMenu } from './crop/crop-menu';
+import { CropFeature } from './crop/crop-feature';
 
 export class PaintLib {
   public readonly element: HTMLDivElement;
 
   private mainMenu: MainMenu;
+  private cropMenu: CropMenu;
+
   public canvas: Canvas;
   public readonly uiStore: StoreApi<UIStore>;
 
@@ -358,6 +372,33 @@ export class PaintLib {
     const newWidth = this.transform.rotation % 180 === 0 ? canvasWidth : canvasHeight;
     this.setGlobalTransform({ scale: newWidth / this.realSize.width });
   };
+
+  public startCrop() {
+    // TODO: 1. Restore original non-cropped image
+
+    // 2. Create crop feature
+    const cropFeature = new CropFeature(this);
+
+    // 3. Override menu
+    this.cropMenu = new CropMenu(
+      () => {
+        this.cropImage(cropFeature.save());
+      },
+      () => {
+        this.element.removeChild(this.cropMenu.element);
+        this.cropMenu = undefined;
+        cropFeature.cancel();
+      },
+    );
+    this.cropMenu.init();
+    this.element.appendChild(this.cropMenu.element);
+  }
+
+  public cropImage(cropSection: TBBox) {
+    // TODO: Crop the image
+    this.element.removeChild(this.cropMenu.element);
+    this.cropMenu = undefined;
+  }
 
   private setGlobalTransform(props: Partial<GlobalTransformProps>) {
     (this.uiStore.getState().allActions[UIActionType.DRAW] as DrawAction)?.update();

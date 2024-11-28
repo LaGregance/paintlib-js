@@ -31,6 +31,7 @@ export class CreateObjectMenuGroup extends Component<'div'> {
     const style = this.paintlib.customization.style;
     const countButtons = Object.values(UIActionType).length - (this.paintlib.customization.allowRotate ? 0 : 2);
     const countGroup = 3 + (this.paintlib.customization.allowRotate ? 1 : 0);
+    // TODO: Manage allowCrop
     this.MIN_WIDTH =
       style.groupGap * (countGroup - 1) +
       (style.buttonSize + style.buttonGap) * countButtons -

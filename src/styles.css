@@ -44,7 +44,6 @@ body {
 .paintlib-menu {
     background-color: var(--paintlib-menu-color);
     color: var(--paintlib-icon-color);
-    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 10px;

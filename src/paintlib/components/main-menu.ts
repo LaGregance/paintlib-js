@@ -4,6 +4,7 @@ import UndoSVG from '../svgs/undo.svg';
 import RedoSVG from '../svgs/redo.svg';
 import RotateLeftSVG from '../svgs/rotate-left.svg';
 import RotateRightSVG from '../svgs/rotate-right.svg';
+import CropSVG from '../svgs/crop.svg';
 import CancelSVG from '../svgs/cancel.svg';
 import SaveSVG from '../svgs/save.svg';
 import TextColorSVG from '../svgs/text-color.svg';
@@ -31,6 +32,7 @@ import { UIActionType } from '../config/ui-action-type';
 import { DrawingOption } from '../config/drawing-option';
 import { ObjectRegistry, PaintObjectClass } from '../config/object-registry';
 import { PaintText } from '../objects/paint-text';
+import { CropAction } from '../actions/crop-action';
 
 export class MainMenu extends Component<'div'> {
   private optionsMenu: View;
@@ -59,6 +61,8 @@ export class MainMenu extends Component<'div'> {
 
     actionsView.add(new ActionGroup([select, trash, undo, redo]));
     actionsView.add(new CreateObjectMenuGroup(this.paintlib));
+
+    // TODO: Manage allowCrop
     if (this.paintlib.customization?.allowRotate) {
       const rotateLeft = new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'left'), RotateLeftSVG);
       const rotateRight = new ActionButton(
@@ -66,8 +70,10 @@ export class MainMenu extends Component<'div'> {
         () => new RotateAction(this.paintlib, 'right'),
         RotateRightSVG,
       );
-      actionsView.add(new ActionGroup([rotateLeft, rotateRight]));
+      const crop = new ActionButton(this.paintlib, () => new CropAction(this.paintlib), CropSVG);
+      actionsView.add(new ActionGroup([rotateLeft, rotateRight, crop]));
     }
+
     actionsView.add(new ActionGroup([cancel, save]));
     this.add(actionsView);
 

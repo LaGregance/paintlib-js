@@ -1,7 +1,6 @@
 import './styles.css';
 import { PaintLib } from './paintlib/paintlib';
 import * as fabric from 'fabric';
-import { CropFeature } from './paintlib/crop/crop-feature';
 
 export async function init(container: HTMLElement) {
   const paintlib = new PaintLib(container, {
@@ -28,7 +27,7 @@ export async function init(container: HTMLElement) {
   (window as any).paintlib = paintlib;
   (window as any).fabric = fabric;
 
-  const crop = new CropFeature(paintlib);
+  // const crop = new CropFeature(paintlib);
 }
 
 const container = document.getElementById('root');

@@ -96,13 +96,35 @@ export class CropFeature {
     this.paintlib.canvas.on('mouse:up', this.onPointerUp);
   }
 
-  public finish() {
+  save(): TBBox {
+    // Convert cropSection to relative image position
+    const topLeftPoint = this.paintlib.getRealPosFromCanvas(new Point(this.cropSection.left, this.cropSection.top));
+    const bottomRightPoint = this.paintlib.getRealPosFromCanvas(
+      new Point(this.cropSection.left + this.cropSection.width, this.cropSection.top + this.cropSection.height),
+    );
+    const realCrop: TBBox = {
+      left: Math.min(topLeftPoint.x, bottomRightPoint.x),
+      top: Math.min(topLeftPoint.y, bottomRightPoint.y),
+      width: Math.abs(topLeftPoint.x - bottomRightPoint.x),
+      height: Math.abs(topLeftPoint.y - bottomRightPoint.y),
+    };
+
+    this.destroy();
+    return realCrop;
+  }
+
+  cancel() {
+    this.destroy();
+  }
+
+  private destroy() {
     this.paintlib.canvas.off('mouse:down', this.onPointerDown);
     this.paintlib.canvas.off('mouse:move', this.onPointerMove);
     this.paintlib.canvas.off('mouse:up', this.onPointerUp);
     document.querySelectorAll('canvas').forEach((el) => {
       el.style.removeProperty('cursor');
     });
+    this.paintlib.canvas.remove(this.path);
   }
 
   private isPointOnCropSection(point: Point) {

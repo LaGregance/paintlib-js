@@ -20,6 +20,11 @@ export type PaintlibCustomization = {
   allowRotate?: boolean;
 
   /**
+   * If true, allow the image to be cropped
+   */
+  allowCrop?: boolean;
+
+  /**
    * When true the clear action only trigger the onCancel callback.
    * When false, cancel action restart the edition from the beginning (onCancel callback is still fire in every case).
    */
