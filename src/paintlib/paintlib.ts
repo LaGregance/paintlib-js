@@ -365,28 +365,13 @@ export class PaintLib {
     this.cropImage(undefined);
 
     // 2. Create crop feature
-    const cropFeature = new CropFeature(this);
+    const cropFeature = new CropFeature(this, originalCrop);
 
     // 3. Override menu
-    this.cropMenu = new CropMenu(
-      () => {
-        this.element.removeChild(this.cropMenu.element);
-        this.cropMenu = undefined;
-
-        const newCrop = cropFeature.save();
-        if (boxEqual(originalCrop, newCrop)) {
-          this.discardLastCheckpoint();
-        }
-        this.cropImage(newCrop);
-      },
-      () => {
-        this.element.removeChild(this.cropMenu.element);
-        this.cropMenu = undefined;
-        cropFeature.cancel();
-        this.cropImage(originalCrop);
-        this.discardLastCheckpoint();
-      },
-    );
+    this.cropMenu = new CropMenu(this, cropFeature, originalCrop, () => {
+      this.element.removeChild(this.cropMenu.element);
+      this.cropMenu = undefined;
+    });
     this.cropMenu.init();
     this.element.appendChild(this.cropMenu.element);
   }

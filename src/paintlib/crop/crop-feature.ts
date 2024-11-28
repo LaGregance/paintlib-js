@@ -2,6 +2,7 @@ import { Control, Path, Point, TBBox, TPointerEventInfo, Transform } from 'fabri
 import { PaintLib } from '../paintlib';
 import { renderControl } from '../utils/improve-default-control';
 import { TransformCorner } from '../utils/transform-corner';
+import { boxEqual } from '../utils/utils';
 
 export class CropFeature {
   private path: Path;
@@ -9,11 +10,14 @@ export class CropFeature {
 
   private moveInitialInfo?: { point: Point; cropSection: TBBox };
 
-  constructor(private paintlib: PaintLib) {
+  constructor(
+    private paintlib: PaintLib,
+    defaultCrop?: TBBox,
+  ) {
     const canvasWidth = paintlib.canvas.width;
     const canvasHeight = paintlib.canvas.height;
 
-    this.cropSection = {
+    this.cropSection = defaultCrop || {
       left: canvasWidth / 4,
       top: canvasHeight / 4,
       width: canvasWidth / 2,
@@ -47,6 +51,25 @@ export class CropFeature {
         const corner = TransformCorner.parse(transform.corner);
         const delta = new Point(eventX - originalEventInfo.point.x, eventY - originalEventInfo.point.y);
         this.cropSection = corner.transformLayout(originalEventInfo.cropSection, delta);
+
+        const canvasWidth = paintlib.canvas.width;
+        const canvasHeight = paintlib.canvas.height;
+        if (this.cropSection.top < 0) {
+          this.cropSection.height += this.cropSection.top;
+          this.cropSection.top = 0;
+        }
+        if (this.cropSection.top + this.cropSection.height > canvasHeight) {
+          this.cropSection.height = canvasHeight - this.cropSection.top;
+        }
+
+        if (this.cropSection.left < 0) {
+          this.cropSection.width += this.cropSection.left;
+          this.cropSection.left = 0;
+        }
+        if (this.cropSection.left + this.cropSection.width > canvasWidth) {
+          this.cropSection.width = canvasWidth - this.cropSection.left;
+        }
+
         this.calcPath();
       }
       return false;
@@ -96,6 +119,13 @@ export class CropFeature {
     this.paintlib.canvas.on('mouse:up', this.onPointerUp);
   }
 
+  full() {
+    const canvasWidth = this.paintlib.canvas.width;
+    const canvasHeight = this.paintlib.canvas.height;
+    this.cropSection = { left: 0, top: 0, width: canvasWidth, height: canvasHeight };
+    this.calcPath();
+  }
+
   save(): TBBox {
     // Convert cropSection to relative image position
     const topLeftPoint = this.paintlib.getRealPosFromCanvas(new Point(this.cropSection.left, this.cropSection.top));
@@ -110,7 +140,10 @@ export class CropFeature {
     };
 
     this.destroy();
-    return realCrop;
+
+    const canvasWidth = this.paintlib.canvas.width;
+    const canvasHeight = this.paintlib.canvas.height;
+    return boxEqual(realCrop, { left: 0, top: 0, width: canvasWidth, height: canvasHeight }) ? undefined : realCrop;
   }
 
   cancel() {
