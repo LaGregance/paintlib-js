@@ -11,13 +11,16 @@ import { TBBox } from 'fabric';
 import { boxEqual } from '../utils/utils';
 
 export class CropMenu extends Component<'div'> {
+  private cropFeature: CropFeature;
+  private originalCrop: TBBox;
+
   constructor(
     private paintlib: PaintLib,
-    private cropFeature: CropFeature,
-    private originalCrop: TBBox,
     private cleanup: () => any,
   ) {
     super('div');
+    this.cropFeature = paintlib['cropFeature'];
+    this.originalCrop = this.cropFeature['originalCrop'];
   }
 
   init() {

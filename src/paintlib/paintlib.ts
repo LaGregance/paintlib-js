@@ -32,7 +32,9 @@ export class PaintLib {
   public readonly element: HTMLDivElement;
 
   private mainMenu: MainMenu;
+
   private cropMenu: CropMenu;
+  private cropFeature: CropFeature;
 
   public canvas: Canvas;
   public readonly uiStore: StoreApi<UIStore>;
@@ -343,6 +345,10 @@ export class PaintLib {
     const newWidth = rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
     const objScale = newWidth / (this.transform.crop?.width ?? this.realSize.width);
     this.setGlobalTransform({ scale: objScale });
+
+    if (this.cropFeature) {
+      this.cropFeature.resizeCanvas(canvasWidth, canvasHeight);
+    }
   };
 
   setRotation(rotation: number) {
@@ -365,18 +371,20 @@ export class PaintLib {
     this.cropImage(undefined);
 
     // 2. Create crop feature
-    const cropFeature = new CropFeature(this, originalCrop);
+    this.cropFeature = new CropFeature(this, originalCrop);
 
     // 3. Override menu
-    this.cropMenu = new CropMenu(this, cropFeature, originalCrop, () => {
+    this.cropMenu = new CropMenu(this, () => {
       this.element.removeChild(this.cropMenu.element);
       this.cropMenu = undefined;
+      this.cropFeature = undefined;
     });
     this.cropMenu.init();
     this.element.appendChild(this.cropMenu.element);
   }
 
   public cropImage(cropSection: TBBox | undefined) {
+    this.cropFeature = undefined;
     this.transform.crop = cropSection;
     this.calcCanvasSize();
   }

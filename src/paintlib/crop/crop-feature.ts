@@ -3,25 +3,26 @@ import { PaintLib } from '../paintlib';
 import { renderControl } from '../utils/improve-default-control';
 import { TransformCorner } from '../utils/transform-corner';
 import { boxEqual } from '../utils/utils';
+import { Size } from '../models/size';
 
 export class CropFeature {
   private path: Path;
   private cropSection: TBBox;
+  private canvasSize: Size;
 
   private moveInitialInfo?: { point: Point; cropSection: TBBox };
 
   constructor(
     private paintlib: PaintLib,
-    defaultCrop?: TBBox,
+    private originalCrop?: TBBox,
   ) {
-    const canvasWidth = paintlib.canvas.width;
-    const canvasHeight = paintlib.canvas.height;
+    this.canvasSize = { width: paintlib.canvas.width, height: paintlib.canvas.height };
 
-    this.cropSection = defaultCrop || {
-      left: canvasWidth / 4,
-      top: canvasHeight / 4,
-      width: canvasWidth / 2,
-      height: canvasHeight / 2,
+    this.cropSection = originalCrop || {
+      left: this.canvasSize.width / 4,
+      top: this.canvasSize.height / 4,
+      width: this.canvasSize.width / 2,
+      height: this.canvasSize.height / 2,
     };
 
     this.path = new Path('', {
@@ -52,22 +53,20 @@ export class CropFeature {
         const delta = new Point(eventX - originalEventInfo.point.x, eventY - originalEventInfo.point.y);
         this.cropSection = corner.transformLayout(originalEventInfo.cropSection, delta);
 
-        const canvasWidth = paintlib.canvas.width;
-        const canvasHeight = paintlib.canvas.height;
         if (this.cropSection.top < 0) {
           this.cropSection.height += this.cropSection.top;
           this.cropSection.top = 0;
         }
-        if (this.cropSection.top + this.cropSection.height > canvasHeight) {
-          this.cropSection.height = canvasHeight - this.cropSection.top;
+        if (this.cropSection.top + this.cropSection.height > this.canvasSize.height) {
+          this.cropSection.height = this.canvasSize.height - this.cropSection.top;
         }
 
         if (this.cropSection.left < 0) {
           this.cropSection.width += this.cropSection.left;
           this.cropSection.left = 0;
         }
-        if (this.cropSection.left + this.cropSection.width > canvasWidth) {
-          this.cropSection.width = canvasWidth - this.cropSection.left;
+        if (this.cropSection.left + this.cropSection.width > this.canvasSize.width) {
+          this.cropSection.width = this.canvasSize.width - this.cropSection.left;
         }
 
         this.calcPath();
@@ -119,10 +118,22 @@ export class CropFeature {
     this.paintlib.canvas.on('mouse:up', this.onPointerUp);
   }
 
+  resizeCanvas(canvasWidth: number, canvasHeight: number) {
+    const scaleX = canvasWidth / this.canvasSize.width;
+    const scaleY = canvasHeight / this.canvasSize.height;
+    this.canvasSize = { width: canvasWidth, height: canvasHeight };
+
+    this.cropSection = {
+      left: this.cropSection.left * scaleX,
+      top: this.cropSection.top * scaleY,
+      width: this.cropSection.width * scaleX,
+      height: this.cropSection.height * scaleY,
+    };
+    this.calcPath();
+  }
+
   full() {
-    const canvasWidth = this.paintlib.canvas.width;
-    const canvasHeight = this.paintlib.canvas.height;
-    this.cropSection = { left: 0, top: 0, width: canvasWidth, height: canvasHeight };
+    this.cropSection = { left: 0, top: 0, width: this.canvasSize.width, height: this.canvasSize.height };
     this.calcPath();
   }
 
@@ -141,9 +152,9 @@ export class CropFeature {
 
     this.destroy();
 
-    const canvasWidth = this.paintlib.canvas.width;
-    const canvasHeight = this.paintlib.canvas.height;
-    return boxEqual(realCrop, { left: 0, top: 0, width: canvasWidth, height: canvasHeight }) ? undefined : realCrop;
+    return boxEqual(realCrop, { left: 0, top: 0, width: this.canvasSize.width, height: this.canvasSize.height })
+      ? undefined
+      : realCrop;
   }
 
   cancel() {
@@ -178,9 +189,6 @@ export class CropFeature {
 
   private onPointerMove = (event: TPointerEventInfo) => {
     if (this.moveInitialInfo) {
-      const canvasWidth = this.paintlib.canvas.width;
-      const canvasHeight = this.paintlib.canvas.height;
-
       const delta = new Point(
         event.scenePoint.x - this.moveInitialInfo.point.x,
         event.scenePoint.y - this.moveInitialInfo.point.y,
@@ -190,16 +198,16 @@ export class CropFeature {
       if (this.cropSection.left < 0) {
         this.cropSection.left = 0;
       }
-      if (this.cropSection.left + this.cropSection.width > canvasWidth) {
-        this.cropSection.left = canvasWidth - this.cropSection.width;
+      if (this.cropSection.left + this.cropSection.width > this.canvasSize.width) {
+        this.cropSection.left = this.canvasSize.width - this.cropSection.width;
       }
 
       this.cropSection.top = this.moveInitialInfo.cropSection.top + delta.y;
       if (this.cropSection.top < 0) {
         this.cropSection.top = 0;
       }
-      if (this.cropSection.top + this.cropSection.height > canvasHeight) {
-        this.cropSection.top = canvasHeight - this.cropSection.height;
+      if (this.cropSection.top + this.cropSection.height > this.canvasSize.height) {
+        this.cropSection.top = this.canvasSize.height - this.cropSection.height;
       }
       this.calcPath();
     } else {
@@ -231,12 +239,10 @@ export class CropFeature {
   }
 
   private calcPath() {
-    const canvasWidth = this.paintlib.canvas.width;
-    const canvasHeight = this.paintlib.canvas.height;
     const updatedPath = new Path(
       [
         // Outer rect
-        `M 0 0 h ${canvasWidth} v ${canvasHeight} h -${canvasWidth} Z`,
+        `M 0 0 h ${this.canvasSize.width} v ${this.canvasSize.height} h -${this.canvasSize.width} Z`,
         // Inner rect
         `M ${this.cropSection.left} ${this.cropSection.top} v ${this.cropSection.height} h ${this.cropSection.width} v -${this.cropSection.height} Z`,
         // First vertical line
