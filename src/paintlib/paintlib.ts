@@ -18,7 +18,7 @@ import { useState } from './utils/use-state';
 import { DrawAction } from './actions/draw-action';
 import { PaintObject } from './objects/abstract/paint-object';
 import { UIActionType } from './config/ui-action-type';
-import { getUrlExtension, px, setCssProperty } from './utils/utils';
+import { boxEqual, getUrlExtension, px, setCssProperty } from './utils/utils';
 import { CanvasSerializedJson } from './models/canvas-serialized-json';
 import { PaintlibLoadOptions } from './models/paintlib-load-options';
 import { GlobalTransformProps } from './models/global-transform-props';
@@ -362,7 +362,7 @@ export class PaintLib {
   public startCrop() {
     // 1. Restore original non-cropped image
     const originalCrop = this.transform.crop;
-    this.setGlobalTransform({ crop: undefined });
+    this.cropImage(undefined);
 
     // 2. Create crop feature
     const cropFeature = new CropFeature(this);
@@ -374,13 +374,7 @@ export class PaintLib {
         this.cropMenu = undefined;
 
         const newCrop = cropFeature.save();
-        if (
-          originalCrop &&
-          newCrop.top === originalCrop.top &&
-          newCrop.left === originalCrop.left &&
-          newCrop.width === originalCrop.width &&
-          newCrop.height === originalCrop.height
-        ) {
+        if (boxEqual(originalCrop, newCrop)) {
           this.discardLastCheckpoint();
         }
         this.cropImage(newCrop);
@@ -512,6 +506,9 @@ export class PaintLib {
     if (checkpoint.type === 'canvas') {
       if (this.transform.rotation !== checkpoint.checkpoint.transform.rotation) {
         this.setRotation(checkpoint.checkpoint.transform.rotation);
+      }
+      if (!boxEqual(this.transform.crop, checkpoint.checkpoint.transform.crop)) {
+        this.cropImage(checkpoint.checkpoint.transform.crop);
       }
     } else {
       const obj = checkpoint.checkpoint.object;

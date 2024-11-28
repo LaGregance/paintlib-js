@@ -1,3 +1,5 @@
+import { TBBox } from 'fabric';
+
 export const xor = (a: boolean, b: boolean) => {
   return (a || b) && !(a && b);
 };
@@ -33,5 +35,15 @@ export const getUrlExtension = (url: string) => {
     return match ? match[1] : undefined;
   } catch {
     return undefined;
+  }
+};
+
+export const boxEqual = (a: TBBox, b: TBBox) => {
+  if (a === b) {
+    return true;
+  } else if (!a || !b) {
+    return false;
+  } else {
+    return a.left === b.left && a.top === b.top && a.width === b.width && a.height === b.height;
   }
 };
