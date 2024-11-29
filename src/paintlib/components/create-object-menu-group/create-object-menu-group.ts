@@ -6,6 +6,7 @@ import { ActionGroup } from '../action-group';
 import { useState } from '../../utils/use-state';
 import { PaintActionType } from '../../config/paint-action-type';
 import { ObjectRegistry } from '../../config/object-registry';
+import { MenuSizing } from '../../config/menu-sizing';
 
 /**
  * This component is responsible to manage the middle part of the menu (object part).
@@ -28,43 +29,10 @@ export class CreateObjectMenuGroup extends Component<'div'> {
     super('div');
     this.availableActions = ObjectRegistry.getAllObjectActions().filter((x) => this.paintlib.haveAction(x));
 
-    const style = this.paintlib.customization.style;
-
-    const selectGroupCount = this.countAvailableActionsInArray([
-      PaintActionType.SELECT,
-      PaintActionType.TRASH,
-      PaintActionType.UNDO,
-      PaintActionType.REDO,
-    ]);
-    const objectGroupCount = this.countAvailableActionsInArray(this.availableActions);
-    const rotateGroupCount = this.countAvailableActionsInArray([
-      PaintActionType.ROTATE_LEFT,
-      PaintActionType.ROTATE_RIGHT,
-      PaintActionType.CROP,
-    ]);
-    const saveGroupCount = this.countAvailableActionsInArray([PaintActionType.CANCEL, PaintActionType.SAVE]);
-
-    const countButtons = selectGroupCount + objectGroupCount + rotateGroupCount + saveGroupCount;
-    const countGroup =
-      (selectGroupCount ? 1 : 0) + (objectGroupCount ? 1 : 0) + (rotateGroupCount ? 1 : 0) + (saveGroupCount ? 1 : 0);
-
-    this.MIN_WIDTH =
-      style.groupGap * (countGroup - 1) +
-      (style.buttonSize + style.buttonGap) * countButtons -
-      style.buttonGap * countGroup;
+    this.MIN_WIDTH = MenuSizing.getSizing(paintlib).WIDTH_FULL_SIZE;
 
     this.calcAvailableBtnCount();
     this.userActionSlots = [];
-  }
-
-  private countAvailableActionsInArray(actions: PaintActionType[]) {
-    let available = 0;
-    for (const action of actions) {
-      if (this.paintlib.haveAction(action)) {
-        available += 1;
-      }
-    }
-    return available;
   }
 
   private calcAvailableBtnCount() {

@@ -33,6 +33,7 @@ import { DrawingOption } from '../config/drawing-option';
 import { ObjectRegistry, PaintObjectClass } from '../config/object-registry';
 import { PaintText } from '../objects/paint-text';
 import { CropAction } from '../actions/crop-action';
+import { MenuSizing } from '../config/menu-sizing';
 
 export class MainMenu extends Component<'div'> {
   private optionsMenu: View;
@@ -49,6 +50,8 @@ export class MainMenu extends Component<'div'> {
     this.element.className = 'paintlib-menu';
 
     const actionsView = new View('paintlib-menu-line');
+    const minWidth = MenuSizing.getSizing(this.paintlib).WIDTH_MIN_SIZE;
+    actionsView.element.style.minWidth = minWidth + 'px';
 
     let trash: ActionButton = undefined;
     let undo: ActionButton = undefined;

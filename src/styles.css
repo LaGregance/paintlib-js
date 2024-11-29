@@ -60,6 +60,7 @@ body {
     display: flex;
     flex: 1;
     justify-content: space-between;
+    overflow-x: auto;
 }
 
 .paintlib-menu-group {
