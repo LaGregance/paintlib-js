@@ -1,18 +1,3 @@
-/* TODO: Should not be in this file */
-body {
-    padding: 0;
-    margin: 0;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-}
-
-#root {
-    width: 100%;
-    height: 100%;
-}
-/* ******************************** */
-
 :root {
     /* Note: effective default are in paintlib constructor */
     --paintlib-background-color: #c0c0c0;

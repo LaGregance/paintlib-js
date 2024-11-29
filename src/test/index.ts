@@ -1,4 +1,4 @@
-import { PaintLib } from '../paintlib/paintlib';
+import { PaintLib } from '../paintlib';
 import * as fabric from 'fabric';
 
 export async function init(container: HTMLElement) {
