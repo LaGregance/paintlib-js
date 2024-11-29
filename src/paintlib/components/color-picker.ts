@@ -4,6 +4,8 @@ import { useState } from '../utils/use-state';
 import { UIStore } from '../store/ui-store';
 
 export class ColorPicker extends Component<'div'> {
+  static shadowIndex = 0;
+
   constructor(
     private paintlib: PaintLib,
     private getColor: (store: UIStore) => string,
@@ -25,8 +27,8 @@ export class ColorPicker extends Component<'div'> {
 
       svg.style.cursor = 'pointer';
       svg.innerHTML = `
-          <ellipse class="selector-circle" cx="17" cy="17" rx="16" ry="16" stroke-width="2" stroke-opacity="0" fill-opacity="0" stroke="#000000" />
-          <ellipse cx="17" cy="17" rx="13" ry="13" stroke-width="0" fill="#ffffff" />
+          <ellipse class="paintlib-selector-circle" cx="17" cy="17" rx="16" ry="16" stroke-width="2" stroke-opacity="0" fill-opacity="0" stroke="#000000" />
+          <ellipse cx="17" cy="17" rx="13" ry="13" stroke-width="0" fill="#ffffff" filter="url(#shadow1)" />
           <line x1="7.8076" y1="7.8076" x2="26.1923" y2="26.1923" stroke="#000000" />
           <line x1="26.1923" y1="7.8076" x2="7.8076" y2="26.1923" stroke="#000000" />`;
 
@@ -45,8 +47,13 @@ export class ColorPicker extends Component<'div'> {
 
       svg.style.cursor = 'pointer';
       svg.innerHTML = `
-          <ellipse class="selector-circle" cx="17" cy="17" rx="16" ry="16" stroke-width="2" stroke-opacity="0" fill-opacity="0" stroke="#000000" />
-          <ellipse cx="17" cy="17" rx="13" ry="13" stroke-width="0" fill="${color}" />`;
+          <defs>
+            <filter id="shadow-${ColorPicker.shadowIndex}" width="17" height="17">
+              <feDropShadow dx="0.5" dy="0.5" stdDeviation="1" flood-opacity="0.5"/>
+            </filter>
+          </defs>
+          <ellipse class="paintlib-selector-circle" cx="17" cy="17" rx="16" ry="16" stroke-width="2" stroke-opacity="0" fill-opacity="0" stroke="#000000" />
+          <ellipse cx="17" cy="17" rx="13" ry="13" stroke-width="0" fill="${color}" filter="url(#shadow-${ColorPicker.shadowIndex++})" />`;
 
       svg.onclick = () => {
         this.setColor(color);
@@ -58,7 +65,9 @@ export class ColorPicker extends Component<'div'> {
     useState(this.paintlib.uiStore, this.getColor, (activeColor) => {
       for (const color of colorComponents.keys()) {
         const compo = colorComponents.get(color);
-        compo.querySelector('.selector-circle').setAttribute('stroke-opacity', color === activeColor ? '100%' : '0');
+        compo
+          .querySelector('.paintlib-selector-circle')
+          .setAttribute('stroke-opacity', color === activeColor ? '100%' : '0');
       }
     });
   }

@@ -27,6 +27,7 @@ import { Size } from './models/size';
 import { Checkpoint } from './models/checkpoint';
 import { CropMenu } from './crop/crop-menu';
 import { CropFeature } from './crop/crop-feature';
+import { SelectAction } from './actions/select-action';
 
 export class PaintLib {
   public readonly element: HTMLDivElement;
@@ -35,6 +36,7 @@ export class PaintLib {
 
   private cropMenu: CropMenu;
   private cropFeature: CropFeature;
+  private ignoreSelectionEvent = false;
 
   public canvas: Canvas;
   public readonly uiStore: StoreApi<UIStore>;
@@ -140,6 +142,10 @@ export class PaintLib {
     });
 
     const selectionEvent = () => {
+      if (this.ignoreSelectionEvent) {
+        return;
+      }
+
       const selected = this.getSelectedObject();
       this.uiStore.setState({ selectedObject: selected });
     };
@@ -382,6 +388,7 @@ export class PaintLib {
       this.element.removeChild(this.cropMenu.element);
       this.cropMenu = undefined;
       this.cropFeature = undefined;
+      this.uiStore.getState().setAction(new SelectAction(this));
     });
     this.cropMenu.init();
     this.element.appendChild(this.cropMenu.element);
@@ -412,6 +419,7 @@ export class PaintLib {
   }
 
   enableSelection(enable: boolean) {
+    this.ignoreSelectionEvent = true;
     this.canvas.forEachObject((object) => {
       if (!(object instanceof FabricImage)) {
         object.hasControls = enable;
@@ -428,6 +436,7 @@ export class PaintLib {
     });
 
     this.canvas.discardActiveObject();
+    this.ignoreSelectionEvent = false;
     this.canvas.renderAll();
   }
 

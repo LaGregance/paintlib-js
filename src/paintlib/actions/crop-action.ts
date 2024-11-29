@@ -1,14 +1,19 @@
 import { PaintLib } from '../paintlib';
 import { PaintActionType } from '../config/paint-action-type';
-import { BaseClickableAction } from './abstract/base-clickable-action';
+import { BaseSelectableAction } from './abstract/base-selectable-action';
 
-export class CropAction extends BaseClickableAction {
+export class CropAction extends BaseSelectableAction {
   constructor(paintlib: PaintLib) {
     super(paintlib, PaintActionType.CROP);
   }
 
-  onClick() {
+  onSelected() {
     this.paintlib.saveCheckpoint();
     this.paintlib.startCrop();
   }
+
+  onDeselected() {}
+  onMouseDown() {}
+  onMouseMove() {}
+  onMouseUp() {}
 }

@@ -165,8 +165,8 @@ export class CropFeature {
     this.paintlib.canvas.off('mouse:down', this.onPointerDown);
     this.paintlib.canvas.off('mouse:move', this.onPointerMove);
     this.paintlib.canvas.off('mouse:up', this.onPointerUp);
-    document.querySelectorAll('canvas').forEach((el) => {
-      el.style.removeProperty('cursor');
+    document.querySelectorAll('.paintlib-canvas-container canvas').forEach((el) => {
+      (el as HTMLElement).style.removeProperty('cursor');
     });
     this.paintlib.canvas.remove(this.path);
   }
@@ -212,12 +212,12 @@ export class CropFeature {
       this.calcPath();
     } else {
       if (this.isPointOnCropSection(event.scenePoint)) {
-        document.querySelectorAll('canvas').forEach((el) => {
-          el.style.cursor = 'pointer';
+        document.querySelectorAll('.paintlib-canvas-container canvas').forEach((el) => {
+          (el as HTMLElement).style.cursor = 'pointer';
         });
       } else {
-        document.querySelectorAll('canvas').forEach((el) => {
-          el.style.removeProperty('cursor');
+        document.querySelectorAll('.paintlib-canvas-container canvas').forEach((el) => {
+          (el as HTMLElement).style.removeProperty('cursor');
         });
       }
     }
@@ -225,8 +225,8 @@ export class CropFeature {
 
   private onPointerUp = () => {
     this.moveInitialInfo = undefined;
-    document.querySelectorAll('canvas').forEach((el) => {
-      el.style.removeProperty('cursor');
+    document.querySelectorAll('.paintlib-canvas-container canvas').forEach((el) => {
+      (el as HTMLElement).style.removeProperty('cursor');
     });
   };
 
