@@ -4,6 +4,7 @@ import { PaintObjectJson } from '../../models/paint-object-json';
 import { PaintObjectTransformProps } from '../../models/global-transform-props';
 import { PaintLib } from '../../paintlib';
 import { PaintObjectCheckpoint } from '../../models/checkpoint';
+import { PaintObjectClass } from '../../config/object-registry';
 
 export abstract class PaintObject<T extends FabricObject> {
   protected layout: TBBox;
@@ -168,7 +169,7 @@ export abstract class PaintObject<T extends FabricObject> {
    */
   serialize(): PaintObjectJson {
     return {
-      type: this.constructor.name,
+      type: (this.constructor as PaintObjectClass).getName(),
       layout: this.layout,
       vector: this.vector,
       options: this.options,

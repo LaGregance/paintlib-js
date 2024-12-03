@@ -656,13 +656,17 @@ export class PaintLib {
     document.body.removeChild(link);
   }
 
-  serialize(): CanvasSerializedJson {
-    return {
+  /**
+   * Return the actual state in base64 format
+   */
+  saveState() {
+    const state: CanvasSerializedJson = {
       width: this.transform.rotation % 180 === 0 ? this.realSize.width : this.realSize.height,
       height: this.transform.rotation % 180 === 0 ? this.realSize.width : this.realSize.width,
       transform: { rotation: this.transform.rotation },
       objects: this.objects.map((x) => x.serialize()),
     };
+    return btoa(JSON.stringify(state));
   }
 
   /* ************************************ */

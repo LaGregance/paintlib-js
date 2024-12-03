@@ -4,6 +4,10 @@ import { PaintLib } from '../paintlib';
 import { improveDefaultControl } from '../utils/improve-default-control';
 
 export class PaintText extends PaintObject<Textbox> {
+  public static getName() {
+    return 'PaintText';
+  }
+
   instantiate(point: Point, extras?: any) {
     this.fabricObject = new Textbox(extras?.text || 'Text', {
       top: point.y,

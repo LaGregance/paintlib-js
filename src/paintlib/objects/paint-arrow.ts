@@ -10,6 +10,10 @@ const ARROW_WIDTH_FACTOR = 2;
 const ARROW_HEIGHT_FACTOR = 2;
 
 export class PaintArrow extends PaintObject<Group> {
+  public static getName() {
+    return 'PaintArrow';
+  }
+
   private line: Line;
   private arrow: Triangle;
 

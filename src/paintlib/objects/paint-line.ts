@@ -5,6 +5,10 @@ import { PaintLib } from '../paintlib';
 import { createResizeControls } from '../utils/object-resize-controls';
 
 export class PaintLine extends PaintObject<Line> {
+  public static getName() {
+    return 'PaintLine';
+  }
+
   instantiate(point: Point) {
     this.fabricObject = new Line([point.x, point.y, point.x + 1, point.y + 1], {
       hasBorders: false,

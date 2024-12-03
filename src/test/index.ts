@@ -18,7 +18,7 @@ export async function init(container: HTMLElement) {
     restoreData,
     imageSizeMode: 'viewport',
     onSave: () => {
-      console.log(paintlib.getBase64());
+      console.log(paintlib.saveState());
     },
     // width: 500,
     // height: 800,

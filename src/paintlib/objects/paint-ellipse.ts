@@ -5,6 +5,10 @@ import { PaintLib } from '../paintlib';
 import { createRotateControls } from '../utils/rotate-control';
 
 export class PaintEllipse extends PaintObject<Ellipse> {
+  public static getName() {
+    return 'PaintEllipse';
+  }
+
   instantiate(point: Point) {
     this.fabricObject = new Ellipse({ x: point.x, y: point.y, rx: 1, ry: 1, objectCaching: false });
     this.fabricObject.controls = {};

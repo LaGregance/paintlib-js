@@ -5,6 +5,10 @@ import { PaintLib } from '../paintlib';
 import { createRotateControls } from '../utils/rotate-control';
 
 export class PaintRect extends PaintObject<Rect> {
+  public static getName() {
+    return 'PaintRect';
+  }
+
   instantiate(point: Point) {
     this.fabricObject = new Rect({ left: point.x, top: point.y, width: 1, height: 1, objectCaching: false });
     this.fabricObject.controls = {};

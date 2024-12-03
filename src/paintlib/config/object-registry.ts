@@ -18,7 +18,7 @@ import { PaintActionType } from '../models/paint-action-type';
 import { DrawingOption } from './drawing-option';
 import { PaintObjectJson } from '../models/paint-object-json';
 
-export type PaintObjectClass = new () => PaintObject<any>;
+export type PaintObjectClass = (new () => PaintObject<any>) & { getName(): string };
 
 export type PaintObjectMetadata = {
   action: PaintActionType;
@@ -82,7 +82,7 @@ export abstract class ObjectRegistry {
     for (const meta of this.configs) {
       this.allObjectActions.push(meta.action);
       this.mapActionToMeta.set(meta.action, meta);
-      this.mapClazzToMeta.set(meta.clazz.name, meta);
+      this.mapClazzToMeta.set(meta.clazz.getName(), meta);
     }
   }
 
@@ -110,7 +110,7 @@ export abstract class ObjectRegistry {
     ObjectRegistry.init();
 
     if (typeof actionOrClass === 'function') {
-      return this.mapClazzToMeta.get(actionOrClass.name);
+      return this.mapClazzToMeta.get(actionOrClass.getName());
     } else if (Object.values(PaintActionType).includes(actionOrClass as any)) {
       return this.mapActionToMeta.get(actionOrClass as any);
     } else {

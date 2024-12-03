@@ -4,6 +4,10 @@ import { PaintLib } from '../paintlib';
 import { improveDefaultControl } from '../utils/improve-default-control';
 
 export class PaintDraw extends PaintObject<Path> {
+  public static getName() {
+    return 'PaintDraw';
+  }
+
   instantiate(point: Point, extras?: any) {
     this.fabricObject = new Path(extras.path, extras);
     improveDefaultControl(this.fabricObject.controls);
