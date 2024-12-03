@@ -4,7 +4,7 @@ import { ActionButton } from '../buttons/action-button';
 import { ShowMoreActionButton } from './show-more-action-button';
 import { ActionGroup } from '../action-group';
 import { useState } from '../../utils/use-state';
-import { PaintActionType } from '../../config/paint-action-type';
+import { PaintActionType } from '../../models/paint-action-type';
 import { ObjectRegistry } from '../../config/object-registry';
 import { MenuSizing } from '../../config/menu-sizing';
 

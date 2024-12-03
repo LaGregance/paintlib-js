@@ -1,7 +1,7 @@
 import { PaintLib } from '../paintlib';
 import { Object } from 'fabric';
 import { BaseSelectableAction } from './abstract/base-selectable-action';
-import { PaintActionType } from '../config/paint-action-type';
+import { PaintActionType } from '../models/paint-action-type';
 
 export class SelectAction extends BaseSelectableAction {
   constructor(

@@ -3,7 +3,7 @@ import { PaintLib } from '../paintlib';
 import { SelectAction } from './select-action';
 import { BaseSelectableAction } from './abstract/base-selectable-action';
 import { PaintObject } from '../objects/abstract/paint-object';
-import { PaintActionType } from '../config/paint-action-type';
+import { PaintActionType } from '../models/paint-action-type';
 import { ObjectRegistry } from '../config/object-registry';
 
 export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectableAction {

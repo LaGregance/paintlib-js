@@ -14,7 +14,7 @@ import DrawSVG from '../svgs/draw.svg';
 import { DrawAction } from '../actions/draw-action';
 import { PaintLib } from '../paintlib';
 import { CreateObjectAction } from '../actions/create-object-action';
-import { PaintActionType } from './paint-action-type';
+import { PaintActionType } from '../models/paint-action-type';
 import { DrawingOption } from './drawing-option';
 import { PaintObjectJson } from '../models/paint-object-json';
 

@@ -2,7 +2,7 @@ import { FabricObject, Path, PencilBrush } from 'fabric';
 import { PaintLib } from '../paintlib';
 import { BaseSelectableAction } from './abstract/base-selectable-action';
 import { PaintDraw } from '../objects/paint-draw';
-import { PaintActionType } from '../config/paint-action-type';
+import { PaintActionType } from '../models/paint-action-type';
 
 export class DrawAction extends BaseSelectableAction {
   private pencil: PencilBrush;

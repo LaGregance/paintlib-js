@@ -1,6 +1,6 @@
 import { TPointerEvent, TPointerEventInfo } from 'fabric';
 import { PaintLib } from '../../paintlib';
-import { PaintActionType } from '../../config/paint-action-type';
+import { PaintActionType } from '../../models/paint-action-type';
 
 export abstract class BaseAction {
   constructor(

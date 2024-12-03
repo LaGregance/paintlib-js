@@ -1,6 +1,6 @@
 import { PaintLib } from '../../paintlib';
 import { BaseAction } from './base-action';
-import { PaintActionType } from '../../config/paint-action-type';
+import { PaintActionType } from '../../models/paint-action-type';
 
 export abstract class BaseClickableAction extends BaseAction {
   constructor(

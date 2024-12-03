@@ -17,7 +17,7 @@ import { PaintlibCustomization } from './models/paintlib-customization';
 import { useState } from './utils/use-state';
 import { DrawAction } from './actions/draw-action';
 import { PaintObject } from './objects/abstract/paint-object';
-import { PaintActionType } from './config/paint-action-type';
+import { PaintActionType } from './models/paint-action-type';
 import { boxEqual, getUrlFileType, px, setCssProperty } from './utils/utils';
 import { CanvasSerializedJson } from './models/canvas-serialized-json';
 import { PaintlibLoadOptions } from './models/paintlib-load-options';

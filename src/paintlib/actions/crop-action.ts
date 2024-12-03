@@ -1,5 +1,5 @@
 import { PaintLib } from '../paintlib';
-import { PaintActionType } from '../config/paint-action-type';
+import { PaintActionType } from '../models/paint-action-type';
 import { BaseSelectableAction } from './abstract/base-selectable-action';
 
 export class CropAction extends BaseSelectableAction {

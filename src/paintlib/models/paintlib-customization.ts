@@ -1,4 +1,4 @@
-import { PaintActionType } from '../config/paint-action-type';
+import { PaintActionType } from './paint-action-type';
 
 export type PaintlibCustomization = {
   /**

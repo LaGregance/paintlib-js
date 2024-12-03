@@ -1,4 +1,4 @@
-import { PaintActionType } from './paint-action-type';
+import { PaintActionType } from '../models/paint-action-type';
 import { PaintLib } from '../paintlib';
 import { ObjectRegistry } from './object-registry';
 

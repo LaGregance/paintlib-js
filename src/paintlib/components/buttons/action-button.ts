@@ -2,7 +2,7 @@ import { BaseAction } from '../../actions/abstract/base-action';
 import { Component } from '../component';
 import { useState } from '../../utils/use-state';
 import { PaintLib } from '../../paintlib';
-import { PaintActionType } from '../../config/paint-action-type';
+import { PaintActionType } from '../../models/paint-action-type';
 
 export class ActionButton extends Component<'button'> {
   private type: PaintActionType;

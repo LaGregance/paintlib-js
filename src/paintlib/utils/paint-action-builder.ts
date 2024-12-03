@@ -1,5 +1,5 @@
 import { ObjectRegistry } from '../config/object-registry';
-import { PaintActionType } from '../config/paint-action-type';
+import { PaintActionType } from '../models/paint-action-type';
 
 export class PaintActionBuilder {
   private actions: PaintActionType[];

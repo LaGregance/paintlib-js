@@ -3,7 +3,7 @@ import { createStore } from 'zustand/vanilla';
 import { PaintLib } from '../paintlib';
 import { SelectAction } from '../actions/select-action';
 import { PaintObject } from '../objects/abstract/paint-object';
-import { PaintActionType } from '../config/paint-action-type';
+import { PaintActionType } from '../models/paint-action-type';
 import { PaintObjectOptions } from '../models/paint-object-options';
 
 export type UIStore = {

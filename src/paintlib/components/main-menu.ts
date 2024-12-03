@@ -28,7 +28,7 @@ import { useState } from '../utils/use-state';
 import { CreateObjectMenuGroup } from './create-object-menu-group/create-object-menu-group';
 import { RotateAction } from '../actions/rotate-action';
 import { xor } from '../utils/utils';
-import { PaintActionType } from '../config/paint-action-type';
+import { PaintActionType } from '../models/paint-action-type';
 import { DrawingOption } from '../config/drawing-option';
 import { ObjectRegistry, PaintObjectClass } from '../config/object-registry';
 import { PaintText } from '../objects/paint-text';
