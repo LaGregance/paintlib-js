@@ -49,8 +49,8 @@ export class PaintLib {
   private realSize?: Size;
   private resizeObserver: ResizeObserver;
 
-  private objects: PaintObject<any>[] = [];
-  private transform: GlobalTransformProps = { scale: 1, rotation: 0 };
+  private objects: PaintObject<any>[];
+  private transform: GlobalTransformProps;
 
   private undoStack: Checkpoint[];
   private redoStack: Checkpoint[];
@@ -142,7 +142,7 @@ export class PaintLib {
     });
 
     const selectionEvent = () => {
-      if (this.ignoreSelectionEvent) {
+      if (this.ignoreSelectionEvent || !this.objects) {
         return;
       }
 
@@ -177,11 +177,13 @@ export class PaintLib {
           obj.getVector(),
         );
 
-        obj.setTransform({
-          scaleX: (target.scaleX / this.transform.scale) * (target.flipX ? -1 : 1),
-          scaleY: (target.scaleY / this.transform.scale) * (target.flipY ? -1 : 1),
-          rotation: target.angle - this.transform.rotation,
-        });
+        if (this.transform) {
+          obj.setTransform({
+            scaleX: (target.scaleX / this.transform.scale) * (target.flipX ? -1 : 1),
+            scaleY: (target.scaleY / this.transform.scale) * (target.flipY ? -1 : 1),
+            rotation: target.angle - this.transform.rotation,
+          });
+        }
       }
     };
 
@@ -195,12 +197,15 @@ export class PaintLib {
         if (this.uiStore.getState().activeAction === PaintActionType.DRAW) {
           (this.uiStore.getState().allActions[PaintActionType.DRAW] as DrawAction).update();
         }
-        const selectedObj = this.getSelectedObject();
-        if (selectedObj) {
-          this.saveCheckpoint(selectedObj);
-          selectedObj.setOptions({ [field]: newValue });
-          selectedObj.update(this);
-          this.canvas.renderAll();
+
+        if (this.objects) {
+          const selectedObj = this.getSelectedObject();
+          if (selectedObj) {
+            this.saveCheckpoint(selectedObj);
+            selectedObj.setOptions({ [field]: newValue });
+            selectedObj.update(this);
+            this.canvas.renderAll();
+          }
         }
       };
     };
@@ -243,6 +248,9 @@ export class PaintLib {
       this.clear();
     }
 
+    this.objects = [];
+    this.transform = { scale: 1, rotation: 0 };
+
     this.options = options;
     if (options.image) {
       this.image = await FabricImage.fromURL(options.image, { crossOrigin: 'anonymous' });
@@ -273,10 +281,9 @@ export class PaintLib {
       height: options.height ?? this.canvasContainer.clientHeight,
     };
     const { width, height, scale } = calculateImageScaleToFitViewport(
-      { width: this.canvas.width, height: this.canvas.height },
+      { width: this.canvasContainer.clientWidth, height: this.canvasContainer.clientHeight },
       { width: usedSize.width, height: usedSize.height },
     );
-
     this.canvas.setDimensions({ width, height });
 
     if (this.options.imageSizeMode === 'real') {
@@ -471,8 +478,14 @@ export class PaintLib {
     this.canvas.backgroundColor = '#ffffff';
     this.canvasContainer.style.visibility = 'hidden';
     this.objects = [];
+    this.transform = { scale: 1, rotation: 0 };
     this.undoStack = [];
     this.redoStack = [];
+    this.uiStore.setState({
+      canRedo: false,
+      canUndo: false,
+      activeAction: PaintActionType.SELECT,
+    });
 
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();

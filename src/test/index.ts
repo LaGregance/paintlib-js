@@ -16,6 +16,7 @@ export async function init(container: HTMLElement) {
   await paintlib.load({
     // image: 'http://localhost:8080/assets/dummy_hz.jpeg',
     restoreData,
+    imageSizeMode: 'viewport',
     onSave: () => {
       console.log(paintlib.getBase64());
     },

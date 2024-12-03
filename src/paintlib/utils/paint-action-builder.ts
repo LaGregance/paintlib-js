@@ -14,10 +14,12 @@ export class PaintActionBuilder {
         this.actions.push(action);
       }
     }
+    return this;
   }
 
   remove(...actions: PaintActionType[]) {
     this.actions = this.actions.filter((action) => !actions.includes(action));
+    return this;
   }
 
   /**
