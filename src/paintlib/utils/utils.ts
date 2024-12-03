@@ -27,12 +27,31 @@ export const setCssProperty = (style: any, field: string, property: string, defa
   }
 };
 
-export const getUrlExtension = (url: string) => {
+export const getUrlFileType = (urlOrPath: string) => {
+  const mapType = (type: string) => {
+    if (type === 'jpg') return 'jpeg';
+    else return type;
+  };
+
   try {
-    const parsedUrl = new URL(url);
-    const pathname = parsedUrl.pathname;
-    const match = pathname.match(/\.([a-zA-Z0-9]+)$/);
-    return match ? match[1] : undefined;
+    // Check for data URLs
+    const dataUrlRegex = /^data:([\w/+-]+);/;
+    const matchDataUrl = urlOrPath.match(dataUrlRegex);
+    if (matchDataUrl) {
+      // Extract the MIME type and return the subtype as the extension
+      const mimeType = matchDataUrl[1];
+      return mapType(mimeType.split('/')[1]);
+    }
+
+    // General file or URL path
+    const filePathRegex = /\.([a-zA-Z0-9]+)(?=\?|#|$)/;
+    const matchFilePath = urlOrPath.match(filePathRegex);
+    if (matchFilePath) {
+      return mapType(matchFilePath[1]);
+    }
+
+    // If no extension is found, return null
+    return null;
   } catch {
     return undefined;
   }

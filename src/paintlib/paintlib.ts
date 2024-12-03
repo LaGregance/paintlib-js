@@ -18,7 +18,7 @@ import { useState } from './utils/use-state';
 import { DrawAction } from './actions/draw-action';
 import { PaintObject } from './objects/abstract/paint-object';
 import { PaintActionType } from './config/paint-action-type';
-import { boxEqual, getUrlExtension, px, setCssProperty } from './utils/utils';
+import { boxEqual, getUrlFileType, px, setCssProperty } from './utils/utils';
 import { CanvasSerializedJson } from './models/canvas-serialized-json';
 import { PaintlibLoadOptions } from './models/paintlib-load-options';
 import { GlobalTransformProps } from './models/global-transform-props';
@@ -259,7 +259,7 @@ export class PaintLib {
 
     // Auto-detect format if possible (else fallback png)
     if (!options.format) {
-      const ext = options.image ? getUrlExtension(options.image).toLowerCase() : null;
+      const ext = options.image ? getUrlFileType(options.image).toLowerCase() : null;
       if (ext === 'jpg' || ext === 'jped') {
         this.options.format = 'jpeg';
       } else {
