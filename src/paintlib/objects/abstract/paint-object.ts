@@ -187,7 +187,7 @@ export abstract class PaintObject<T extends FabricObject> {
     this.setOptions({ ...data.options });
     this.setTransform({ ...data.transform });
     this.restoreExtras(data.extras);
-    this.updateLayout({ ...data.layout });
+    this.updateLayout({ ...data.layout }, new Point(data.vector?.x || 1, data.vector?.y || 1));
   }
 
   saveCheckpoint(): PaintObjectCheckpoint {
