@@ -3,7 +3,7 @@ import * as fabric from 'fabric';
 
 export async function init(container: HTMLElement) {
   const paintlib = new PaintLib(container, {
-    proactivelyShowOptions: true,
+    proactivelyShowOptions: false,
     // actions: new PaintActionBuilder().basics().objects().save().build(),
   });
 

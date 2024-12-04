@@ -471,6 +471,14 @@ export class PaintLib {
   /* ****************************************** */
 
   /**
+   * Destroy everything related to paintlib
+   */
+  public destroy() {
+    this.clear();
+    this.element.remove();
+  }
+
+  /**
    * This method clear the canvas and unload all object & image
    */
   public clear() {
