@@ -9,7 +9,7 @@ import {
   Transform,
   util,
 } from 'fabric';
-import { calculateImageScaleToFitViewport } from './utils/size-utils';
+import { calculateCanvasSizeToFitViewport } from './utils/size-utils';
 import { MainMenu } from './components/main-menu';
 import { createUIStore, UIStore } from './store/ui-store';
 import { StoreApi } from 'zustand/vanilla';
@@ -261,6 +261,8 @@ export class PaintLib {
       this.image.lockMovementY = true;
       this.image.moveCursor = 'pointer';
       this.image.hoverCursor = 'pointer';
+
+      this.canvas.add(this.image);
     }
     this.canvasContainer.style.visibility = 'visible';
     this.canvas.backgroundColor = '#ffffff';
@@ -280,7 +282,7 @@ export class PaintLib {
       width: options.width ?? this.canvasContainer.clientWidth,
       height: options.height ?? this.canvasContainer.clientHeight,
     };
-    const { width, height, scale } = calculateImageScaleToFitViewport(
+    const { width, height } = calculateCanvasSizeToFitViewport(
       { width: this.canvasContainer.clientWidth, height: this.canvasContainer.clientHeight },
       { width: usedSize.width, height: usedSize.height },
     );
@@ -293,16 +295,8 @@ export class PaintLib {
     }
     this.transform.scale = width / this.realSize.width;
 
-    if (this.image) {
-      this.image.scale(scale);
-      this.canvas.add(this.image);
-      this.canvas.centerObject(this.image);
-    }
-
     if (options.restoreData) {
       this.restore(JSON.parse(atob(options.restoreData)));
-    } else {
-      this.calcCanvasSize();
     }
 
     this.enableSelection(this.uiStore.getState().activeAction === PaintActionType.SELECT);
@@ -337,7 +331,7 @@ export class PaintLib {
 
     const usedSize: Size = this.transform.crop ?? this.realSize;
 
-    const { width: canvasWidth, height: canvasHeight } = calculateImageScaleToFitViewport(
+    const { width: canvasWidth, height: canvasHeight } = calculateCanvasSizeToFitViewport(
       { width: viewportWidth, height: viewportHeight },
       {
         width: rotation % 180 === 0 ? usedSize.width : usedSize.height,
@@ -350,6 +344,7 @@ export class PaintLib {
 
     if (this.image) {
       const imageSize: Size = { width: this.image.width, height: this.image.height };
+
       if (this.transform.crop) {
         // Crop the image size relatively
         imageSize.width *= this.transform.crop.width / this.realSize.width;
