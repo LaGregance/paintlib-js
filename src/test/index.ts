@@ -7,7 +7,7 @@ export async function init(container: HTMLElement) {
     clearEraseImage: true,
     onActionOverride: (action) => {
       if (action === PaintActionType.CLEAR) {
-        return true;
+        return false;
       }
       return false;
     },

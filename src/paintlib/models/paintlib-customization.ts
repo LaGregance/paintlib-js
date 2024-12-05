@@ -35,7 +35,7 @@ export type PaintlibCustomization = {
    *
    * @param paintlib
    */
-  onActionOverride?: (action: PaintActionType, paintlib: PaintLib) => boolean;
+  onActionOverride?: (action: PaintActionType, paintlib: PaintLib) => boolean | Promise<boolean>;
 
   /**
    * Customize the style of the UI

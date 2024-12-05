@@ -20,10 +20,10 @@ export type UIStore = {
 
 export const createUIStore = (paintlib: PaintLib) => {
   return createStore<UIStore>((set, get) => {
-    const setAction = (action: BaseAction) => {
+    const setAction = async (action: BaseAction) => {
       if (action.behavior === 'clickable') {
         if (paintlib.customization.onActionOverride) {
-          const shouldStop = paintlib.customization.onActionOverride(action.type, paintlib);
+          const shouldStop = await paintlib.customization.onActionOverride(action.type, paintlib);
           if (shouldStop) {
             return;
           }
