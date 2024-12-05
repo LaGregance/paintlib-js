@@ -244,8 +244,8 @@ export class PaintLib {
     }
 
     if (this.realSize) {
-      // Already loaded, clear first
-      this.clear();
+      // Already loaded, reset first
+      this.reset();
     }
 
     this.objects = [];
@@ -474,14 +474,20 @@ export class PaintLib {
    * Destroy everything related to paintlib
    */
   public destroy() {
-    this.clear();
+    this.unmount();
     this.element.remove();
   }
 
+  private unmount() {
+    this.reset();
+    this.mainMenu.unmount();
+  }
+
   /**
-   * This method clear the canvas and unload all object & image
+   * Reset the canvas at the initial state (before load)
+   * @private
    */
-  public clear() {
+  private reset() {
     this.canvas.clear();
     this.canvas.backgroundColor = '#ffffff';
     this.canvasContainer.style.visibility = 'hidden';
@@ -501,9 +507,16 @@ export class PaintLib {
     }
   }
 
-  private unmount() {
-    this.clear();
-    this.mainMenu.unmount();
+  /**
+   * Clear all the object from the canvas (but keep the image)
+   */
+  public clear() {
+    this.ignoreSelectionEvent = true;
+    this.canvas.discardActiveObject();
+    for (const obj of this.objects) {
+      this.remove(obj);
+    }
+    this.ignoreSelectionEvent = false;
   }
 
   /* ****************************************** */

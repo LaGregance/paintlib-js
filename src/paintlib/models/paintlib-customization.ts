@@ -24,12 +24,6 @@ export type PaintlibCustomization = {
   proactivelyShowOptions?: boolean;
 
   /**
-   * When true the clear action only trigger the onCancel callback.
-   * When false, cancel action restart the edition from the beginning (onCancel callback is still fire in every case).
-   */
-  cancelOnlyCustom?: boolean;
-
-  /**
    * Customize the style of the UI
    */
   style?: {

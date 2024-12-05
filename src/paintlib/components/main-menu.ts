@@ -1,5 +1,6 @@
 import CursorSVG from '../svgs/cursor.svg';
 import TrashSVG from '../svgs/trash.svg';
+import ClearSVG from '../svgs/clear.svg';
 import UndoSVG from '../svgs/undo.svg';
 import RedoSVG from '../svgs/redo.svg';
 import RotateLeftSVG from '../svgs/rotate-left.svg';
@@ -34,6 +35,7 @@ import { ObjectRegistry, PaintObjectClass } from '../config/object-registry';
 import { PaintText } from '../objects/paint-text';
 import { CropAction } from '../actions/crop-action';
 import { MenuSizing } from '../config/menu-sizing';
+import { ClearAction } from '../actions/clear-action';
 
 export class MainMenu extends Component<'div'> {
   private optionsMenu: View;
@@ -67,6 +69,9 @@ export class MainMenu extends Component<'div'> {
     if (this.paintlib.haveAction(PaintActionType.TRASH)) {
       trash = new ActionButton(this.paintlib, () => new TrashAction(this.paintlib), TrashSVG);
       selectGroup.add(trash);
+    }
+    if (this.paintlib.haveAction(PaintActionType.CLEAR)) {
+      selectGroup.add(new ActionButton(this.paintlib, () => new ClearAction(this.paintlib), ClearSVG));
     }
     if (this.paintlib.haveAction(PaintActionType.UNDO)) {
       undo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'undo'), UndoSVG);

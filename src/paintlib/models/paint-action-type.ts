@@ -3,6 +3,7 @@ export enum PaintActionType {
   TRASH = 'trash',
   SAVE = 'save',
   CANCEL = 'cancel',
+  CLEAR = 'clear',
 
   UNDO = 'undo',
   REDO = 'redo',

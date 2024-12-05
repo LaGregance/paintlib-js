@@ -10,6 +10,7 @@ export abstract class MenuSizing {
     const selectGroupCount = MenuSizing.countAvailableActionsInArray(paintlib, [
       PaintActionType.SELECT,
       PaintActionType.TRASH,
+      PaintActionType.CLEAR,
       PaintActionType.UNDO,
       PaintActionType.REDO,
     ]);
