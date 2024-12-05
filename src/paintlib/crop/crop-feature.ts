@@ -18,12 +18,16 @@ export class CropFeature {
   ) {
     this.canvasSize = { width: paintlib.canvas.width, height: paintlib.canvas.height };
 
-    this.cropSection = originalCrop || {
-      left: this.canvasSize.width / 4,
-      top: this.canvasSize.height / 4,
-      width: this.canvasSize.width / 2,
-      height: this.canvasSize.height / 2,
-    };
+    if (originalCrop) {
+      this.cropSection = this.realCropToCanvasCrop(originalCrop);
+    } else {
+      this.cropSection = {
+        left: this.canvasSize.width / 4,
+        top: this.canvasSize.height / 4,
+        width: this.canvasSize.width / 2,
+        height: this.canvasSize.height / 2,
+      };
+    }
 
     this.path = new Path('', {
       fill: '#000000',
@@ -137,19 +141,46 @@ export class CropFeature {
     this.calcPath();
   }
 
-  save(): TBBox {
-    // Convert cropSection to relative image position
-    const topLeftPoint = this.paintlib.getRealPosFromCanvas(new Point(this.cropSection.left, this.cropSection.top));
+  /**
+   * Convert crop in canvas position to real position
+   *
+   * @param canvasCrop
+   * @private
+   */
+  private canvasCropToRealCrop(canvasCrop: TBBox) {
+    const topLeftPoint = this.paintlib.getRealPosFromCanvas(new Point(canvasCrop.left, canvasCrop.top));
     const bottomRightPoint = this.paintlib.getRealPosFromCanvas(
-      new Point(this.cropSection.left + this.cropSection.width, this.cropSection.top + this.cropSection.height),
+      new Point(canvasCrop.left + canvasCrop.width, canvasCrop.top + canvasCrop.height),
     );
-    const realCrop: TBBox = {
+    return {
       left: Math.min(topLeftPoint.x, bottomRightPoint.x),
       top: Math.min(topLeftPoint.y, bottomRightPoint.y),
       width: Math.abs(topLeftPoint.x - bottomRightPoint.x),
       height: Math.abs(topLeftPoint.y - bottomRightPoint.y),
     };
+  }
 
+  /**
+   * Convert crop in real position to canvas position
+   *
+   * @param realCrop
+   * @private
+   */
+  private realCropToCanvasCrop(realCrop: TBBox) {
+    const topLeftPoint = this.paintlib.getCanvasPosFromReal(new Point(realCrop.left, realCrop.top));
+    const bottomRightPoint = this.paintlib.getCanvasPosFromReal(
+      new Point(realCrop.left + realCrop.width, realCrop.top + realCrop.height),
+    );
+    return {
+      left: Math.min(topLeftPoint.x, bottomRightPoint.x),
+      top: Math.min(topLeftPoint.y, bottomRightPoint.y),
+      width: Math.abs(topLeftPoint.x - bottomRightPoint.x),
+      height: Math.abs(topLeftPoint.y - bottomRightPoint.y),
+    };
+  }
+
+  save(): TBBox {
+    const realCrop = this.canvasCropToRealCrop(this.cropSection);
     this.destroy();
 
     return boxEqual(realCrop, { left: 0, top: 0, width: this.canvasSize.width, height: this.canvasSize.height })

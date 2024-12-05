@@ -9,7 +9,7 @@ import {
   Transform,
   util,
 } from 'fabric';
-import { calculateImageScaleToFitViewport } from './utils/size-utils';
+import { calculateCanvasSizeToFitViewport } from './utils/size-utils';
 import { MainMenu } from './components/main-menu';
 import { createUIStore, UIStore } from './store/ui-store';
 import { StoreApi } from 'zustand/vanilla';
@@ -261,6 +261,8 @@ export class PaintLib {
       this.image.lockMovementY = true;
       this.image.moveCursor = 'pointer';
       this.image.hoverCursor = 'pointer';
+
+      this.canvas.add(this.image);
     }
     this.canvasContainer.style.visibility = 'visible';
     this.canvas.backgroundColor = '#ffffff';
@@ -276,11 +278,12 @@ export class PaintLib {
     }
     // --------------------------------------------------
 
+    // TODO: Maybe we should use options.width in priority than image size
     const usedSize: Size = this.image ?? {
       width: options.width ?? this.canvasContainer.clientWidth,
       height: options.height ?? this.canvasContainer.clientHeight,
     };
-    const { width, height, scale } = calculateImageScaleToFitViewport(
+    const { width, height } = calculateCanvasSizeToFitViewport(
       { width: this.canvasContainer.clientWidth, height: this.canvasContainer.clientHeight },
       { width: usedSize.width, height: usedSize.height },
     );
@@ -292,12 +295,6 @@ export class PaintLib {
       this.realSize = { width, height };
     }
     this.transform.scale = width / this.realSize.width;
-
-    if (this.image) {
-      this.image.scale(scale);
-      this.canvas.add(this.image);
-      this.canvas.centerObject(this.image);
-    }
 
     if (options.restoreData) {
       this.restore(JSON.parse(atob(options.restoreData)));
@@ -333,16 +330,9 @@ export class PaintLib {
     const viewportWidth = this.canvasContainer.clientWidth;
     const viewportHeight = this.canvasContainer.clientHeight;
 
-    let usedSize: Size = this.image ?? this.realSize;
-    if (this.transform.crop) {
-      usedSize = { width: this.transform.crop.width, height: this.transform.crop.height };
-    }
+    const usedSize: Size = this.transform.crop ?? this.realSize;
 
-    const {
-      width: canvasWidth,
-      height: canvasHeight,
-      scale: imgScale,
-    } = calculateImageScaleToFitViewport(
+    const { width: canvasWidth, height: canvasHeight } = calculateCanvasSizeToFitViewport(
       { width: viewportWidth, height: viewportHeight },
       {
         width: rotation % 180 === 0 ? usedSize.width : usedSize.height,
@@ -354,9 +344,47 @@ export class PaintLib {
     this.canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
 
     if (this.image) {
+      const imageSize: Size = { width: this.image.width, height: this.image.height };
+
+      if (this.transform.crop) {
+        // Crop the image size relatively
+        imageSize.width *= this.transform.crop.width / this.realSize.width;
+        imageSize.height *= this.transform.crop.height / this.realSize.height;
+      }
+
+      const canvasSize: Size =
+        this.transform.rotation % 180 === 0
+          ? { width: canvasWidth, height: canvasHeight }
+          : { width: canvasHeight, height: canvasWidth };
+
+      const scaleX = canvasSize.width / imageSize.width;
+      const scaleY = canvasSize.height / imageSize.height;
+      const imgScale = Math.min(scaleX, scaleY);
+
       this.image.scale(imgScale);
       this.image.rotate(rotation);
-      this.canvas.centerObject(this.image);
+
+      if (this.transform.rotation === 90) {
+        this.image.left = canvasSize.height;
+        this.image.top = 0;
+      } else if (this.transform.rotation === 180) {
+        this.image.left = canvasSize.width;
+        this.image.top = canvasSize.height;
+      } else if (this.transform.rotation === 270) {
+        this.image.left = 0;
+        this.image.top = canvasSize.width;
+      } else {
+        this.image.left = 0;
+        this.image.top = 0;
+      }
+
+      if (this.transform.crop) {
+        this.image.cropX = (canvasSize.width * this.transform.crop.left) / (imgScale * this.transform.crop.width);
+        this.image.cropY = (canvasSize.height * this.transform.crop.top) / (imgScale * this.transform.crop.height);
+      } else {
+        this.image.cropX = 0;
+        this.image.cropY = 0;
+      }
     }
 
     const newWidth = rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
@@ -508,13 +536,19 @@ export class PaintLib {
   }
 
   /**
-   * Clear all the object from the canvas (but keep the image)
+   * Clear all the object from the canvas
+   *
+   * @param clearImage additionally clear the image if clearImage is true
    */
-  public clear() {
+  public clear(clearImage = false) {
     this.ignoreSelectionEvent = true;
     this.canvas.discardActiveObject();
     for (const obj of this.objects) {
       this.remove(obj);
+    }
+    if (clearImage && this.image) {
+      this.canvas.remove(this.image);
+      this.image = undefined;
     }
     this.ignoreSelectionEvent = false;
   }
@@ -681,10 +715,14 @@ export class PaintLib {
    * Return the actual state in base64 format
    */
   saveState() {
+    if (!this.transform.rotation && !this.transform.crop && this.objects.length <= 0) {
+      return null;
+    }
+
     const state: CanvasSerializedJson = {
       width: this.transform.rotation % 180 === 0 ? this.realSize.width : this.realSize.height,
       height: this.transform.rotation % 180 === 0 ? this.realSize.width : this.realSize.width,
-      transform: { rotation: this.transform.rotation },
+      transform: { rotation: this.transform.rotation, crop: this.transform.crop },
       objects: this.objects.map((x) => x.serialize()),
     };
     return btoa(JSON.stringify(state));
