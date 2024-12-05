@@ -4,10 +4,10 @@ import { PaintActionType } from '../models/paint-action-type';
 
 export class ClearAction extends BaseClickableAction {
   constructor(paintlib: PaintLib) {
-    super(paintlib, PaintActionType.CANCEL);
+    super(paintlib, PaintActionType.CLEAR);
   }
 
   async onClick() {
-    this.paintlib.clear();
+    this.paintlib.clear(this.paintlib.customization.clearEraseImage);
   }
 }

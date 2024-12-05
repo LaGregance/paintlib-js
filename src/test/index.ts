@@ -1,9 +1,16 @@
-import { PaintLib } from '../paintlib';
+import { PaintActionType, PaintLib } from '../paintlib';
 import * as fabric from 'fabric';
 
 export async function init(container: HTMLElement) {
   const paintlib = new PaintLib(container, {
     proactivelyShowOptions: false,
+    clearEraseImage: true,
+    onActionOverride: (action) => {
+      if (action === PaintActionType.CLEAR) {
+        return true;
+      }
+      return false;
+    },
     // actions: new PaintActionBuilder().basics().objects().save().build(),
   });
 

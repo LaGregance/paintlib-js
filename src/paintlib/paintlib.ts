@@ -278,6 +278,7 @@ export class PaintLib {
     }
     // --------------------------------------------------
 
+    // TODO: Maybe we should use options.width in priority than image size
     const usedSize: Size = this.image ?? {
       width: options.width ?? this.canvasContainer.clientWidth,
       height: options.height ?? this.canvasContainer.clientHeight,
@@ -535,13 +536,19 @@ export class PaintLib {
   }
 
   /**
-   * Clear all the object from the canvas (but keep the image)
+   * Clear all the object from the canvas
+   *
+   * @param clearImage additionally clear the image if clearImage is true
    */
-  public clear() {
+  public clear(clearImage = false) {
     this.ignoreSelectionEvent = true;
     this.canvas.discardActiveObject();
     for (const obj of this.objects) {
       this.remove(obj);
+    }
+    if (clearImage && this.image) {
+      this.canvas.remove(this.image);
+      this.image = undefined;
     }
     this.ignoreSelectionEvent = false;
   }

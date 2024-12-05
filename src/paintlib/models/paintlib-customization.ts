@@ -1,4 +1,5 @@
 import { PaintActionType } from './paint-action-type';
+import { PaintLib } from '../paintlib';
 
 export type PaintlibCustomization = {
   /**
@@ -22,6 +23,19 @@ export type PaintlibCustomization = {
    * When false, the options bar (for color, tickness picker) is always visible
    */
   proactivelyShowOptions?: boolean;
+
+  /**
+   * When true, the clear button will also erase the image
+   */
+  clearEraseImage?: boolean;
+
+  /**
+   * Override the behavior of the specified action (only work for click action).
+   * Return true if the behavior is well override, else return false to execute the default action.
+   *
+   * @param paintlib
+   */
+  onActionOverride?: (action: PaintActionType, paintlib: PaintLib) => boolean;
 
   /**
    * Customize the style of the UI
