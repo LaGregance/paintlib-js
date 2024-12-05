@@ -270,7 +270,7 @@ export class PaintLib {
     // Auto-detect format if possible (else fallback png)
     if (!options.format) {
       const ext = options.image ? getUrlFileType(options.image).toLowerCase() : null;
-      if (ext === 'jpg' || ext === 'jped') {
+      if (ext === 'jpg' || ext === 'jpeg') {
         this.options.format = 'jpeg';
       } else {
         this.options.format = 'png';
