@@ -82,15 +82,6 @@
     cursor: not-allowed !important;
 }
 
-.paintlib-menu-button.disable:hover {
-    background-image: none !important;
-}
-
-.paintlib-menu-button:hover {
-    background-image: linear-gradient(to top, var(--paintlib-icon-color) 0%, transparent 30%);
-    opacity: 80%;
-}
-
 .paintlib-picker-floating-menu {
     position: absolute;
     left: 0;
@@ -120,4 +111,28 @@
 
 .paintlib-icon {
     height: var(--paintlib-icon-size);
+}
+
+/* Hover for non-touch devices */
+@media (hover: hover) and (pointer: fine) {
+    .paintlib-menu-button.disable:hover {
+        background-image: none !important;
+    }
+
+    .paintlib-menu-button:hover {
+        background-image: linear-gradient(to top, var(--paintlib-icon-color) 0%, transparent 30%);
+        opacity: 80%;
+    }
+}
+
+/* Active for touch devices */
+@media (hover: none) and (pointer: coarse) {
+    .paintlib-menu-button.disable:active {
+        background-image: none !important;
+    }
+
+    .paintlib-menu-button:active {
+        background-image: linear-gradient(to top, var(--paintlib-icon-color) 0%, transparent 30%);
+        opacity: 80%;
+    }
 }
