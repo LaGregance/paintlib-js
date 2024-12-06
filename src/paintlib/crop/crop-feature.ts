@@ -4,6 +4,7 @@ import { renderControl } from '../utils/improve-default-control';
 import { TransformCorner } from '../utils/transform-corner';
 import { boxEqual } from '../utils/utils';
 import { Size } from '../models/size';
+import { getBoxFromPoints } from '../utils/box-utils';
 
 export class CropFeature {
   private path: Path;
@@ -152,12 +153,7 @@ export class CropFeature {
     const bottomRightPoint = this.paintlib.getRealPosFromCanvas(
       new Point(canvasCrop.left + canvasCrop.width, canvasCrop.top + canvasCrop.height),
     );
-    return {
-      left: Math.min(topLeftPoint.x, bottomRightPoint.x),
-      top: Math.min(topLeftPoint.y, bottomRightPoint.y),
-      width: Math.abs(topLeftPoint.x - bottomRightPoint.x),
-      height: Math.abs(topLeftPoint.y - bottomRightPoint.y),
-    };
+    return getBoxFromPoints(topLeftPoint, bottomRightPoint);
   }
 
   /**
@@ -171,12 +167,7 @@ export class CropFeature {
     const bottomRightPoint = this.paintlib.getCanvasPosFromReal(
       new Point(realCrop.left + realCrop.width, realCrop.top + realCrop.height),
     );
-    return {
-      left: Math.min(topLeftPoint.x, bottomRightPoint.x),
-      top: Math.min(topLeftPoint.y, bottomRightPoint.y),
-      width: Math.abs(topLeftPoint.x - bottomRightPoint.x),
-      height: Math.abs(topLeftPoint.y - bottomRightPoint.y),
-    };
+    return getBoxFromPoints(topLeftPoint, bottomRightPoint);
   }
 
   save(): TBBox {
