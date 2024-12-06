@@ -24,7 +24,8 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
   onDeselected() {}
 
   /**
-   * Fix for altitude to keep a minimum size on text but it's really weird
+   * Fix for altitude to keep a minimum size on text but it's really weird and it should be an option on public
+   * library
    *
    * @param layout
    * @param vector
@@ -34,66 +35,27 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
     if (this.object instanceof PaintText) {
       vector = new Point(vector?.x || layout.width || 1, vector?.y || layout.height || 1);
 
-      const minHeight = Math.min(50, this.paintlib.canvas.height / 10);
-      const minWidth = minHeight * 2;
+      const minSide = Math.min(50, this.paintlib.canvas.height / 10, this.paintlib.canvas.width / 10);
+      let minSize = new Point(minSide * 2, minSide);
 
-      /*if (Math.abs(this.object.getTransform().rotation) % 180 !== 0) {
-        const swap = minHeight;
-        minHeight = minWidth;
-        minWidth = swap;
-      }*/
+      const rotation = -this.object.getTransform().rotation;
+      if (rotation % 180 === 90) {
+        minSize = new Point(minSize.y, minSize.x);
+      }
 
-      console.log('[before] min = ', { width: minWidth, height: minHeight });
-      console.log('[before] vector = ', vector);
-      console.log('[before] layout = ', layout);
-      if (layout.width < minWidth) {
+      if (layout.width < minSize.x) {
         if (vector.x < 0) {
-          layout.left -= minWidth - layout.width;
+          layout.left += layout.width - minSize.x;
         }
-        layout.width = minWidth;
+        layout.width = minSize.x;
       }
 
-      if (layout.height < minHeight) {
+      if (layout.height < minSize.y) {
         if (vector.y < 0) {
-          layout.top -= minHeight - layout.height;
+          layout.top += layout.height - minSize.y;
         }
-        layout.height = minHeight;
+        layout.height = minSize.y;
       }
-      console.log(' [after] layout = ', layout);
-      console.log('====================');
-
-      /*if (layout.width <= 0 && layout.width > -5) {
-        layout.width = 1;
-      }
-      if (layout.height <= 0 && layout.height > -5) {
-        layout.height = 1;
-      }
-
-      console.log('[before] layout = ', layout);
-      const minHeight = Math.min(50, this.paintlib.canvas.height / 10);
-      const minWidth = minHeight * 2;
-
-      const widthSign = layout.width > 0 ? 1 : -1;
-      const widthAbs = Math.abs(layout.width);
-
-      const heightSign = layout.height > 0 ? 1 : -1;
-      const heightAbs = Math.abs(layout.height);
-
-      if (widthAbs < minWidth) {
-        layout.width = minWidth;
-        if (widthSign < 0) {
-          layout.left -= minWidth;
-        }
-      }
-
-      if (heightAbs < minHeight) {
-        layout.height = minHeight;
-        if (heightSign < 0) {
-          layout.top -= minHeight;
-        }
-      }
-      console.log(' [after] layout = ', layout);
-      console.log('====================');*/
     }
     return layout;
   }
@@ -120,8 +82,8 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
     });
 
     this.object.updateLayout(
-      // this.fixMinimumLayoutSize({ left: this.originalXY.x, top: this.originalXY.y, width: 1, height: 1 }),
-      { left: this.originalXY.x, top: this.originalXY.y, width: 1, height: 1 },
+      this.fixMinimumLayoutSize({ left: this.originalXY.x, top: this.originalXY.y, width: 1, height: 1 }),
+      // { left: this.originalXY.x, top: this.originalXY.y, width: 1, height: 1 },
       new Point(1, 1),
     );
     this.paintlib.add(this.object);
@@ -129,23 +91,6 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
 
   onMouseMove(event: TPointerEventInfo<TPointerEvent>): void {
     const eventPoint = this.paintlib.getRealPosFromCanvas(event.scenePoint);
-
-    /*const minHeight = Math.min(50, this.paintlib.canvas.height / 10);
-    const minWidth = minHeight * 2;
-    if (Math.abs(eventPoint.x - this.originalXY.x) < minWidth) {
-      if (vector.x > 0) {
-        eventPoint.x = minWidth + this.originalXY.x;
-      } else {
-        eventPoint.x = this.originalXY.x - minWidth;
-      }
-    }
-    if (Math.abs(eventPoint.y - this.originalXY.y) < minHeight) {
-      if (vector.y > 0) {
-        eventPoint.y = minHeight + this.originalXY.y;
-      } else {
-        eventPoint.y = this.originalXY.y - minHeight;
-      }
-    }*/
 
     let layout: TBBox = {
       left: this.originalXY.x,
@@ -164,6 +109,7 @@ export class CreateObjectAction<T extends PaintObject<any>> extends BaseSelectab
     }
 
     let vector = eventPoint.subtract(this.originalXY);
+    layout = this.fixMinimumLayoutSize(layout, vector);
 
     const rotation = -this.object.getTransform().rotation;
     if (rotation) {
