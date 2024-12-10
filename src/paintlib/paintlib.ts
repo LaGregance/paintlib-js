@@ -675,6 +675,13 @@ export class PaintLib {
       this.add(obj);
     }
 
+    if (scale !== 1 && data.transform?.crop) {
+      data.transform.crop.top *= scale;
+      data.transform.crop.left *= scale;
+      data.transform.crop.width *= scale;
+      data.transform.crop.height *= scale;
+    }
+
     this.setGlobalTransform({ crop: data.transform.crop });
     if (data.transform.rotation) {
       this.setRotation(data.transform.rotation);
