@@ -294,11 +294,11 @@ export class PaintLib {
     } else {
       this.realSize = { width, height };
     }
-    this.transform.scale = width / this.realSize.width;
-
     if (options.restoreData) {
       this.restore(JSON.parse(atob(options.restoreData)));
     }
+
+    this.transform.scale = width / this.realSize.width;
 
     this.enableSelection(this.uiStore.getState().activeAction === PaintActionType.SELECT);
 
@@ -662,13 +662,20 @@ export class PaintLib {
   /* ************************************ */
 
   private restore(data: CanvasSerializedJson) {
+    const scale = this.realSize.width / data.width;
+
     for (const objData of data.objects) {
+      if (scale !== 1) {
+        objData.layout.top *= scale;
+        objData.layout.left *= scale;
+        objData.layout.width *= scale;
+        objData.layout.height *= scale;
+      }
       const obj = ObjectRegistry.restoreObject(objData);
       this.add(obj);
     }
 
-    const scale = this.canvas.width / data.width;
-    this.setGlobalTransform({ scale: scale * this.transform.scale, crop: data.transform.crop });
+    this.setGlobalTransform({ crop: data.transform.crop });
     if (data.transform.rotation) {
       this.setRotation(data.transform.rotation);
     }
@@ -720,8 +727,8 @@ export class PaintLib {
     }
 
     const state: CanvasSerializedJson = {
-      width: this.transform.rotation % 180 === 0 ? this.realSize.width : this.realSize.height,
-      height: this.transform.rotation % 180 === 0 ? this.realSize.width : this.realSize.width,
+      width: this.realSize.width,
+      height: this.realSize.height,
       transform: { rotation: this.transform.rotation, crop: this.transform.crop },
       objects: this.objects.map((x) => x.serialize()),
     };
