@@ -8,7 +8,6 @@ import { IconButton } from '../components/buttons/icon-button';
 import { PaintLib } from '../paintlib';
 import { CropFeature } from './crop-feature';
 import { TBBox } from 'fabric';
-import { boxEqual } from '../utils/utils';
 
 export class CropMenu extends Component<'div'> {
   private cropFeature: CropFeature;
@@ -16,7 +15,7 @@ export class CropMenu extends Component<'div'> {
 
   constructor(
     private paintlib: PaintLib,
-    private cleanup: () => any,
+    public cleanup: () => any,
   ) {
     super('div');
     this.cropFeature = paintlib['cropFeature'];
@@ -43,13 +42,7 @@ export class CropMenu extends Component<'div'> {
     }, CancelSVG);
 
     const save = new IconButton(() => {
-      this.cleanup();
-
-      const newCrop = this.cropFeature.save();
-      if (boxEqual(this.originalCrop, newCrop)) {
-        this.paintlib.discardLastCheckpoint();
-      }
-      this.paintlib.cropImage(newCrop);
+      this.paintlib.saveCropFromFeature();
     }, SaveSVG);
 
     actionsView.add(new ActionGroup([full]));

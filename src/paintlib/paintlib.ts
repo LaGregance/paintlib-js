@@ -429,6 +429,19 @@ export class PaintLib {
     this.element.appendChild(this.cropMenu.element);
   }
 
+  public saveCropFromFeature() {
+    if (!this.cropFeature) {
+      return;
+    }
+
+    const newCrop = this.cropFeature.save();
+    if (boxEqual(this.cropFeature['originalCrop'], newCrop)) {
+      this.discardLastCheckpoint();
+    }
+    this.cropMenu.cleanup();
+    this.cropImage(newCrop);
+  }
+
   public cropImage(cropSection: TBBox | undefined) {
     this.cropFeature = undefined;
     this.transform.crop = cropSection;
@@ -692,9 +705,22 @@ export class PaintLib {
   }
 
   /**
+   * This function is called just before the user request for saveState or dataURL. It cleans the canvas before.
+   * For the moment it only force pending cropping to finish.
+   *
+   * @private
+   */
+  private finishEdition() {
+    if (this.cropFeature) {
+      this.saveCropFromFeature();
+    }
+  }
+
+  /**
    * Return the base64 URL encoded image
    */
   getDataURL() {
+    this.finishEdition();
     const canvasWidth = this.transform.rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
     const scale = (this.image?.width ?? this.realSize.width) / canvasWidth;
 
@@ -717,6 +743,7 @@ export class PaintLib {
    * @param filename
    */
   downloadImage(filename: string) {
+    this.finishEdition();
     const link = document.createElement('a');
     link.href = this.getDataURL();
     link.download = filename;
@@ -729,6 +756,7 @@ export class PaintLib {
    * Return the actual state in base64 format
    */
   saveState() {
+    this.finishEdition();
     if (!this.transform.rotation && !this.transform.crop && this.objects.length <= 0) {
       return null;
     }
