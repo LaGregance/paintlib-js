@@ -41,13 +41,13 @@ export class ActionButton extends Component<'button'> {
         portal.appendChild(tooltip);
 
         const tooltipRect = tooltip.getBoundingClientRect();
-
-        let leftAnchor = Math.max(anchorRect.left - tooltipRect.width / 2 + anchorRect.width / 2, 0);
-        if (leftAnchor + tooltipRect.width > portalRect.right) {
-          leftAnchor = portalRect.right - tooltipRect.width;
+        const topAnchor = anchorRect.top + anchorRect.height + 3 - portalRect.top;
+        let leftAnchor = Math.max(anchorRect.left - tooltipRect.width / 2 + anchorRect.width / 2 - portalRect.left, 1);
+        if (leftAnchor + tooltipRect.width > portalRect.width) {
+          leftAnchor = portalRect.width - tooltipRect.width - 1;
         }
 
-        tooltip.style.top = anchorRect.top + anchorRect.height + 3 + 'px';
+        tooltip.style.top = topAnchor + 'px';
         tooltip.style.left = leftAnchor + 'px';
       };
 
