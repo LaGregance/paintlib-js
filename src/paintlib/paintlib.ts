@@ -68,10 +68,30 @@ export class PaintLib {
     setCssProperty(customization.style, 'buttonSize', '--paintlib-button-size', 40);
     setCssProperty(customization.style, 'buttonGap', '--paintlib-button-gap', 6);
     setCssProperty(customization.style, 'groupGap', '--paintlib-group-gap', 20);
+    setCssProperty(customization.style, 'tooltipBackgroundColor', '--paintlib-tooltip-background-color', '#000000');
+    setCssProperty(customization.style, 'tooltipColor', '--paintlib-tooltip-color', '#ffffff');
+    setCssProperty(customization.style, 'tooltipFontFamily', '--paintlib-tooltip-font-family', 'Trebuchet MS');
 
-    if (!customization.actions) {
-      customization.actions = Object.values(PaintActionType);
-    }
+    customization.actions ??= Object.values(PaintActionType);
+    customization.labels ??= {};
+    customization.labels.tooltip ??= {
+      [PaintActionType.SELECT]: 'Select object',
+      [PaintActionType.TRASH]: 'Delete selected object',
+      [PaintActionType.SAVE]: 'Save',
+      [PaintActionType.CANCEL]: 'Cancel',
+      [PaintActionType.CLEAR]: 'Clear all',
+      [PaintActionType.UNDO]: 'Undo',
+      [PaintActionType.REDO]: 'Redo',
+      [PaintActionType.RECT]: null,
+      [PaintActionType.ELLIPSE]: null,
+      [PaintActionType.LINE]: null,
+      [PaintActionType.ARROW]: null,
+      [PaintActionType.DRAW]: null,
+      [PaintActionType.TEXT]: null,
+      [PaintActionType.ROTATE_LEFT]: 'Rotate Left',
+      [PaintActionType.ROTATE_RIGHT]: 'Rotate Right',
+      [PaintActionType.CROP]: 'Crop',
+    };
     // -------------
 
     this.element = document.createElement('div');

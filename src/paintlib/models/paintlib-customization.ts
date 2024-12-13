@@ -25,6 +25,11 @@ export type PaintlibCustomization = {
   proactivelyShowOptions?: boolean;
 
   /**
+   * When true, there will be tooltip when button are hover (you can customize the text in the "label" field)
+   */
+  enableTooltip?: boolean;
+
+  /**
    * When true, the clear button will also erase the image
    */
   clearEraseImage?: boolean;
@@ -48,5 +53,17 @@ export type PaintlibCustomization = {
     iconSize?: number;
     buttonGap?: number;
     groupGap?: number;
+    tooltipBackgroundColor?: string;
+    tooltipColor?: string;
+    tooltipFontFamily?: string;
+  };
+
+  /**
+   * Customize texts
+   */
+  labels?: {
+    tooltip?: {
+      [key in PaintActionType]?: string;
+    };
   };
 };

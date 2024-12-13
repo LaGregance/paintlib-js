@@ -5,6 +5,7 @@ export async function init(container: HTMLElement) {
   const paintlib = new PaintLib(container, {
     proactivelyShowOptions: false,
     clearEraseImage: true,
+    enableTooltip: true,
     onActionOverride: (action) => {
       if (action === PaintActionType.CLEAR) {
         return false;

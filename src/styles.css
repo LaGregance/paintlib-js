@@ -7,6 +7,9 @@
     --paintlib-button-size: 40px;
     --paintlib-button-gap: 6px;
     --paintlib-group-gap: 20px;
+    --paintlib-tooltip-background-color: #000000;
+    --paintlib-tooltip-color: #ffffff;
+    --paintlib-tooltip-font-family: "Trebuchet MS";
 }
 
 .paintlib-root {
@@ -111,6 +114,20 @@
 
 .paintlib-icon {
     height: var(--paintlib-icon-size);
+}
+
+.paintlib-tooltip {
+    background-color: var(--paintlib-tooltip-background-color);
+    color: var(--paintlib-tooltip-color);
+    font-family: var(--paintlib-tooltip-font-family), serif;
+    text-align: center;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 10000;
 }
 
 /* Hover for non-touch devices */

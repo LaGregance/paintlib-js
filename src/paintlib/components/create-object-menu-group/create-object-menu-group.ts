@@ -81,7 +81,13 @@ export class CreateObjectMenuGroup extends Component<'div'> {
   private createObjectBtn(type: PaintActionType, targetMore = false) {
     const meta = ObjectRegistry.getObjectMeta(type);
     const onClick = targetMore ? () => this.moreBtn?.hideMenu() : undefined;
-    return new ActionButton(this.paintlib, () => ObjectRegistry.createAction(type, this.paintlib), meta.icon, onClick);
+    return new ActionButton(
+      this.paintlib,
+      () => ObjectRegistry.createAction(type, this.paintlib),
+      meta.icon,
+      this.paintlib.customization.labels.tooltip[type],
+      onClick,
+    );
   }
 
   init() {

@@ -62,23 +62,27 @@ export class MainMenu extends Component<'div'> {
     /* ************************************ */
     /* *********** SELECT GROUP *********** */
     /* ************************************ */
+    const tooltip = this.paintlib.customization.labels.tooltip;
+
     const selectGroup = new View('paintlib-menu-group');
     if (this.paintlib.haveAction(PaintActionType.SELECT)) {
-      selectGroup.add(new ActionButton(this.paintlib, () => new SelectAction(this.paintlib), CursorSVG));
+      selectGroup.add(
+        new ActionButton(this.paintlib, () => new SelectAction(this.paintlib), CursorSVG, tooltip.select),
+      );
     }
     if (this.paintlib.haveAction(PaintActionType.TRASH)) {
-      trash = new ActionButton(this.paintlib, () => new TrashAction(this.paintlib), TrashSVG);
+      trash = new ActionButton(this.paintlib, () => new TrashAction(this.paintlib), TrashSVG, tooltip.trash);
       selectGroup.add(trash);
     }
     if (this.paintlib.haveAction(PaintActionType.CLEAR)) {
-      selectGroup.add(new ActionButton(this.paintlib, () => new ClearAction(this.paintlib), ClearSVG));
+      selectGroup.add(new ActionButton(this.paintlib, () => new ClearAction(this.paintlib), ClearSVG, tooltip.clear));
     }
     if (this.paintlib.haveAction(PaintActionType.UNDO)) {
-      undo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'undo'), UndoSVG);
+      undo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'undo'), UndoSVG, tooltip.undo);
       selectGroup.add(undo);
     }
     if (this.paintlib.haveAction(PaintActionType.REDO)) {
-      redo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'redo'), RedoSVG);
+      redo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'redo'), RedoSVG, tooltip.redo);
       selectGroup.add(redo);
     }
     if (selectGroup['children'].length > 0) {
@@ -95,13 +99,27 @@ export class MainMenu extends Component<'div'> {
     /* ************************************ */
     const rotateGroup = new View('paintlib-menu-group');
     if (this.paintlib.haveAction(PaintActionType.ROTATE_LEFT)) {
-      rotateGroup.add(new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'left'), RotateLeftSVG));
+      rotateGroup.add(
+        new ActionButton(
+          this.paintlib,
+          () => new RotateAction(this.paintlib, 'left'),
+          RotateLeftSVG,
+          tooltip['rotate-left'],
+        ),
+      );
     }
     if (this.paintlib.haveAction(PaintActionType.ROTATE_RIGHT)) {
-      rotateGroup.add(new ActionButton(this.paintlib, () => new RotateAction(this.paintlib, 'right'), RotateRightSVG));
+      rotateGroup.add(
+        new ActionButton(
+          this.paintlib,
+          () => new RotateAction(this.paintlib, 'right'),
+          RotateRightSVG,
+          tooltip['rotate-right'],
+        ),
+      );
     }
     if (this.paintlib.haveAction(PaintActionType.CROP)) {
-      rotateGroup.add(new ActionButton(this.paintlib, () => new CropAction(this.paintlib), CropSVG));
+      rotateGroup.add(new ActionButton(this.paintlib, () => new CropAction(this.paintlib), CropSVG, tooltip.crop));
     }
     if (rotateGroup['children'].length > 0) {
       actionsView.add(rotateGroup);
@@ -113,10 +131,10 @@ export class MainMenu extends Component<'div'> {
     const saveGroup = new View('paintlib-menu-group');
 
     if (this.paintlib.haveAction(PaintActionType.CANCEL)) {
-      saveGroup.add(new ActionButton(this.paintlib, () => new CancelAction(this.paintlib), CancelSVG));
+      saveGroup.add(new ActionButton(this.paintlib, () => new CancelAction(this.paintlib), CancelSVG, tooltip.cancel));
     }
     if (this.paintlib.haveAction(PaintActionType.SAVE)) {
-      saveGroup.add(new ActionButton(this.paintlib, () => new SaveAction(this.paintlib), SaveSVG));
+      saveGroup.add(new ActionButton(this.paintlib, () => new SaveAction(this.paintlib), SaveSVG, tooltip.save));
     }
     if (saveGroup['children'].length > 0) {
       actionsView.add(saveGroup);
