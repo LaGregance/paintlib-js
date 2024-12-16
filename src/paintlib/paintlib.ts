@@ -696,24 +696,11 @@ export class PaintLib {
   /* ************************************ */
 
   private restore(data: CanvasSerializedJson) {
-    const scale = this.realSize.width / data.width;
+    this.realSize = { width: data.width, height: data.height };
 
     for (const objData of data.objects) {
-      if (scale !== 1) {
-        objData.layout.top *= scale;
-        objData.layout.left *= scale;
-        objData.layout.width *= scale;
-        objData.layout.height *= scale;
-      }
       const obj = ObjectRegistry.restoreObject(objData);
       this.add(obj);
-    }
-
-    if (scale !== 1 && data.transform?.crop) {
-      data.transform.crop.top *= scale;
-      data.transform.crop.left *= scale;
-      data.transform.crop.width *= scale;
-      data.transform.crop.height *= scale;
     }
 
     this.setGlobalTransform({ crop: data.transform.crop });

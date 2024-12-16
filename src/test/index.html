@@ -14,9 +14,16 @@
             overflow: hidden;
         }
 
+        :root {
+            --body-padding: 150px;
+        }
+
         #root {
-            width: 100%;
-            height: 100%;
+            /*width: 100%;*/
+            /*height: 100%;*/
+            width: calc(100% - 2 * var(--body-padding));
+            height: calc(100% - 2 * var(--body-padding));
+            padding: var(--body-padding);
         }
     </style>
   </head>
