@@ -362,6 +362,10 @@ export class PaintLib {
 
     // 2. Apply dimension & scale
     this.canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
+    const canvasSize: Size =
+      this.transform.rotation % 180 === 0
+        ? { width: canvasWidth, height: canvasHeight }
+        : { width: canvasHeight, height: canvasWidth };
 
     if (this.image) {
       const imageSize: Size = { width: this.image.width, height: this.image.height };
@@ -372,17 +376,13 @@ export class PaintLib {
         imageSize.height *= this.transform.crop.height / this.realSize.height;
       }
 
-      const canvasSize: Size =
-        this.transform.rotation % 180 === 0
-          ? { width: canvasWidth, height: canvasHeight }
-          : { width: canvasHeight, height: canvasWidth };
-
       const scaleX = canvasSize.width / imageSize.width;
       const scaleY = canvasSize.height / imageSize.height;
       const imgScale = Math.min(scaleX, scaleY);
 
-      this.image.scale(imgScale);
-      this.image.rotate(rotation);
+      this.image.scaleX = imgScale;
+      this.image.scaleY = imgScale;
+      this.image.angle = rotation;
 
       if (this.transform.rotation === 90) {
         this.image.left = canvasSize.height;
@@ -407,8 +407,7 @@ export class PaintLib {
       }
     }
 
-    const newWidth = rotation % 180 === 0 ? this.canvas.width : this.canvas.height;
-    const objScale = newWidth / (this.transform.crop?.width ?? this.realSize.width);
+    const objScale = canvasSize.width / (this.transform.crop?.width ?? this.realSize.width);
     this.setGlobalTransform({ scale: objScale });
 
     if (this.cropFeature) {
@@ -426,6 +425,7 @@ export class PaintLib {
       rotation = rotation + 360;
     }
 
+    // 2. Apply rotation
     this.transform.rotation = rotation;
     this.calcCanvasSize();
   }
