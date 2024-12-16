@@ -191,8 +191,8 @@ export class PaintLib {
           {
             left: realPos.x,
             top: realPos.y,
-            width: layout.width,
-            height: layout.height,
+            width: event.transform.action === 'resizing' ? target.width : layout.width,
+            height: event.transform.action === 'resizing' ? target.height : layout.height,
           },
           obj.getVector(),
         );
@@ -210,6 +210,7 @@ export class PaintLib {
     this.canvas.on('object:moving', bindFabricToPaintlibObject);
     this.canvas.on('object:scaling', bindFabricToPaintlibObject);
     this.canvas.on('object:rotating', bindFabricToPaintlibObject);
+    this.canvas.on('object:resizing', bindFabricToPaintlibObject);
 
     // 6. Update selected object with option on change
     const updateFactory = (field: string) => {
