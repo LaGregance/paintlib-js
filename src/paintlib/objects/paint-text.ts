@@ -33,6 +33,15 @@ export class PaintText extends PaintObject<Textbox> {
       paintlib.saveCheckpoint(this);
     });
 
+    this.fabricObject.on('resizing', () => {
+      this.layout = {
+        left: this.fabricObject.left,
+        top: this.fabricObject.top,
+        width: this.fabricObject.width,
+        height: this.fabricObject.height,
+      };
+    });
+
     this.fabricObject.on('editing:exited', () => {
       if (this.fabricObject.text.length <= 0) {
         paintlib.remove(this);
