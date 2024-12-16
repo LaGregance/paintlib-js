@@ -55,6 +55,8 @@ export class PaintLib {
   private undoStack: Checkpoint[];
   private redoStack: Checkpoint[];
 
+  private loadFontPromise: Promise<void> | undefined;
+
   constructor(
     public readonly container: HTMLElement,
     public readonly customization: PaintlibCustomization = {},
@@ -93,6 +95,24 @@ export class PaintLib {
       [PaintActionType.CROP]: 'Crop',
     };
     // -------------
+
+    // Load Time New Roman for Text component
+    this.loadFontPromise = (async () => {
+      const font = new FontFace(
+        'Times New Roman',
+        'url(https://fonts.gstatic.com/l/font?kit=3JnlSDvn1nCgiRnceUeBGxJoN45T0st2GndTnQ&skey=f889a07745b51249&v=v17)',
+      );
+      try {
+        await font.load();
+        document.fonts.add(font);
+      } catch (e) {
+        // Error loading font, keep default font...
+        console.warn("Can't load font", e);
+      } finally {
+        this.loadFontPromise = undefined;
+      }
+    })();
+    // --------------------------------------
 
     this.element = document.createElement('div');
     this.uiStore = createUIStore(this);
@@ -262,6 +282,10 @@ export class PaintLib {
   async load(options: PaintlibLoadOptions) {
     if (options.image && (options.width || options.height)) {
       throw new Error(`You cannot an image and specifying the size`);
+    }
+
+    if (this.loadFontPromise) {
+      await this.loadFontPromise;
     }
 
     if (this.realSize) {
