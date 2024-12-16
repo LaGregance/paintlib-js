@@ -14,7 +14,7 @@ export class PaintText extends PaintObject<Textbox> {
       left: point.x,
       objectCaching: false,
       fontSize: extras?.fontSize ?? 5,
-      // fontFamily: 'Times New Roman',
+      fontFamily: 'Times New Roman',
     });
 
     this.fabricObject.editable = true;
