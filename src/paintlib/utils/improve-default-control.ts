@@ -13,6 +13,10 @@ export const improveDefaultControl = (controls: any) => {
 
   Object.values(controls).forEach((control: any) => {
     control.render = renderControl;
+    control.sizeX = 30;
+    control.sizeY = 30;
+    control.touchSizeX = 60;
+    control.touchSizeY = 60;
   });
   controls.resize = createRotateControls();
 };

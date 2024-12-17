@@ -78,6 +78,10 @@ export const createResizeControls = (paintlib: PaintLib, obj: PaintObject<any>, 
           actionHandler: resize,
           actionName: 'resize',
           render: renderControl,
+          sizeX: 30,
+          sizeY: 30,
+          touchSizeX: 60,
+          touchSizeY: 60,
         });
       }
     }
@@ -97,6 +101,10 @@ export const createResizeControls = (paintlib: PaintLib, obj: PaintObject<any>, 
         actionHandler: resize,
         actionName: 'resize',
         render: renderControl,
+        sizeX: 30,
+        sizeY: 30,
+        touchSizeX: 60,
+        touchSizeY: 60,
       }),
       end: new Control({
         positionHandler: (dim, finalMatrix, fabricObj) => {
@@ -111,6 +119,10 @@ export const createResizeControls = (paintlib: PaintLib, obj: PaintObject<any>, 
         actionHandler: resize,
         actionName: 'resize',
         render: renderControl,
+        sizeX: 30,
+        sizeY: 30,
+        touchSizeX: 60,
+        touchSizeY: 60,
       }),
     };
   }
