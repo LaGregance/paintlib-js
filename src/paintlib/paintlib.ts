@@ -66,6 +66,8 @@ export class PaintLib {
     setCssProperty(customization.style, 'backgroundColor', '--paintlib-background-color', '#c0c0c0');
     setCssProperty(customization.style, 'menuColor', '--paintlib-menu-color', '#222831');
     setCssProperty(customization.style, 'iconColor', '--paintlib-icon-color', '#c0c0c0');
+    setCssProperty(customization.style, 'iconColorSelected', '--paintlib-icon-color-selected', '#c0c0c055');
+    setCssProperty(customization.style, 'iconColorHover', '--paintlib-icon-color-hover', '#c0c0c025');
     setCssProperty(customization.style, 'iconSize', '--paintlib-icon-size', 24);
     setCssProperty(customization.style, 'buttonSize', '--paintlib-button-size', 40);
     setCssProperty(customization.style, 'buttonGap', '--paintlib-button-gap', 6);

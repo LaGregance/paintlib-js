@@ -48,6 +48,8 @@ export type PaintlibCustomization = {
   style?: {
     menuColor?: string;
     iconColor?: string;
+    iconColorSelected?: string;
+    iconColorHover?: string;
     backgroundColor?: string;
     buttonSize?: number;
     iconSize?: number;

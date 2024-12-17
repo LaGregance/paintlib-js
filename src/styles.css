@@ -3,6 +3,8 @@
     --paintlib-background-color: #c0c0c0;
     --paintlib-menu-color: #222831;
     --paintlib-icon-color: #c0c0c0;
+    --paintlib-icon-color-selected: #c0c0c055;
+    --paintlib-icon-color-hover: #c0c0c025;
     --paintlib-icon-size: 24px;
     --paintlib-button-size: 40px;
     --paintlib-button-gap: 6px;
@@ -52,6 +54,8 @@
 }
 
 .paintlib-menu-group {
+    margin-left: 2px;
+    margin-right: 2px;
     gap: var(--paintlib-button-gap);
     display: flex;
 }
@@ -63,7 +67,9 @@
     justify-content: center;
     background: none;
     border: none;
-    margin: 0;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    border-radius: 3px;
     padding: 0;
     font: inherit;
     cursor: pointer;
@@ -77,7 +83,7 @@
 }
 
 .paintlib-menu-button.selected {
-    background-image: linear-gradient(to top, var(--paintlib-icon-color) 0%, transparent 30%);
+    background-color: var(--paintlib-icon-color-selected);
 }
 
 .paintlib-menu-button.disable {
@@ -133,23 +139,29 @@
 /* Hover for non-touch devices */
 @media (hover: hover) and (pointer: fine) {
     .paintlib-menu-button.disable:hover {
-        background-image: none !important;
+        background-color: transparent !important;
+    }
+
+    .paintlib-menu-button.selected:hover {
+        background-color: var(--paintlib-icon-color-selected) !important;
     }
 
     .paintlib-menu-button:hover {
-        background-image: linear-gradient(to top, var(--paintlib-icon-color) 0%, transparent 30%);
-        opacity: 80%;
+        background-color: var(--paintlib-icon-color-hover);
     }
 }
 
 /* Active for touch devices */
 @media (hover: none) and (pointer: coarse) {
     .paintlib-menu-button.disable:active {
-        background-image: none !important;
+        background-color: transparent !important;
+    }
+
+    .paintlib-menu-button.selected:active {
+        background-color: var(--paintlib-icon-color-selected) !important;
     }
 
     .paintlib-menu-button:active {
-        background-image: linear-gradient(to top, var(--paintlib-icon-color) 0%, transparent 30%);
-        opacity: 80%;
+        background-color: var(--paintlib-icon-color-hover);
     }
 }
