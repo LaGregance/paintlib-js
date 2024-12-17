@@ -27,7 +27,7 @@
     "webpack-dev-server": "^5.1.0"
   },
   "dependencies": {
-    "fabric": "^6.5.0",
+    "fabric": "^6.5.3",
     "zustand": "^5.0.1"
   }
 }

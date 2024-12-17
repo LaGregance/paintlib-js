@@ -32,6 +32,10 @@ export class PaintText extends PaintObject<Textbox> {
     this.fabricObject.on('editing:entered', () => {
       enterText = this.fabricObject.text;
       paintlib.saveCheckpoint(this);
+
+      // For some reason letting the default fontSize of 1px doesn't work on Android
+      // https://stackoverflow.com/questions/47307372/fabric-textbox-is-not-working-for-google-chrome/79287884#79287884
+      this.fabricObject.hiddenTextarea.style.fontSize = '100px';
     });
 
     this.fabricObject.on('editing:exited', () => {
