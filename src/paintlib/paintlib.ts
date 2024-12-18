@@ -146,7 +146,7 @@ export class PaintLib {
     this.canvasContainer.appendChild(this.canvasEl);
     this.canvasContainer.style.visibility = 'hidden';
 
-    this.canvas = new Canvas(this.canvasEl);
+    this.canvas = new Canvas(this.canvasEl, { targetFindTolerance: 15 });
     this.canvas.selection = false;
     this.canvas.defaultCursor = 'pointer';
 
