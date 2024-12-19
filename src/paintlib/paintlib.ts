@@ -24,7 +24,7 @@ import { PaintlibLoadOptions } from './models/paintlib-load-options';
 import { GlobalTransformProps } from './models/global-transform-props';
 import { ObjectRegistry } from './config/object-registry';
 import { Size } from './models/size';
-import { Checkpoint } from './models/checkpoint';
+import { CanvasCheckpoint, Checkpoint, PaintObjectCheckpoint } from './models/checkpoint';
 import { CropMenu } from './crop/crop-menu';
 import { CropFeature } from './crop/crop-feature';
 import { SelectAction } from './actions/select-action';
@@ -603,6 +603,9 @@ export class PaintLib {
   public clear(clearImage = false) {
     this.ignoreSelectionEvent = true;
     this.canvas.discardActiveObject();
+
+    this.saveCheckpoint(undefined, false, true);
+
     for (const obj of this.objects) {
       this.remove(obj);
     }
@@ -620,7 +623,7 @@ export class PaintLib {
     this.uiStore.setState({ canRedo: this.redoStack.length > 0, canUndo: this.undoStack.length > 0 });
   }
 
-  private buildCheckpoint(object?: PaintObject<any>, creation?: boolean): Checkpoint {
+  private buildCheckpoint(object?: PaintObject<any>, creation?: boolean, fullCanvas?: boolean): Checkpoint {
     if (object) {
       const objExists = !!this.objects.find((x) => x === object);
       if (objExists && !creation) {
@@ -632,7 +635,35 @@ export class PaintLib {
         };
       }
     } else {
-      return { type: 'canvas', checkpoint: { transform: this.getTransform() } };
+      const checkpoint: CanvasCheckpoint = { transform: this.getTransform(), fullCanvas };
+      if (fullCanvas) {
+        checkpoint.objects = this.objects.map((x) => x.saveCheckpoint());
+      }
+      return { type: 'canvas', checkpoint };
+    }
+  }
+
+  private restoreObjectCheckpoint(checkpoint: PaintObjectCheckpoint) {
+    const obj = checkpoint.object;
+
+    if (checkpoint.layout) {
+      const objExists = !!this.objects.find((x) => x === obj);
+      if (!objExists) {
+        // We don't find the object -> recreate it
+        obj.create(new Point(checkpoint.layout.left, checkpoint.layout.top), checkpoint.extras);
+      }
+
+      obj.setTransform(checkpoint.transform);
+      obj.setOptions(checkpoint.options);
+      obj.restoreExtras(checkpoint.extras);
+      obj.updateLayout(checkpoint.layout, checkpoint.vector);
+      obj.update(this);
+
+      if (!objExists) {
+        this.add(obj);
+      }
+    } else {
+      this.remove(obj);
     }
   }
 
@@ -644,31 +675,22 @@ export class PaintLib {
       if (!boxEqual(this.transform.crop, checkpoint.checkpoint.transform.crop)) {
         this.cropImage(checkpoint.checkpoint.transform.crop);
       }
-    } else {
-      const obj = checkpoint.checkpoint.object;
 
-      if (checkpoint.checkpoint.layout) {
-        const objExists = !!this.objects.find((x) => x === obj);
-        if (!objExists) {
-          // We don't find the object -> recreate it
-          obj.create(
-            new Point(checkpoint.checkpoint.layout.left, checkpoint.checkpoint.layout.top),
-            checkpoint.checkpoint.extras,
-          );
+      if (checkpoint.checkpoint.fullCanvas) {
+        // a. Remove object that are in canvas but not in the checkpoint
+        for (const obj of this.objects) {
+          if (!checkpoint.checkpoint.objects.find((x) => x.object === obj)) {
+            this.remove(obj);
+          }
         }
 
-        obj.setTransform(checkpoint.checkpoint.transform);
-        obj.setOptions(checkpoint.checkpoint.options);
-        obj.restoreExtras(checkpoint.checkpoint.extras);
-        obj.updateLayout(checkpoint.checkpoint.layout, checkpoint.checkpoint.vector);
-        obj.update(this);
-
-        if (!objExists) {
-          this.add(obj);
+        // b. Restore object from the checkpoint
+        for (const obj of checkpoint.checkpoint.objects) {
+          this.restoreObjectCheckpoint(obj);
         }
-      } else {
-        this.remove(obj);
       }
+    } else {
+      this.restoreObjectCheckpoint(checkpoint.checkpoint);
       this.canvas.renderAll();
     }
   }
@@ -678,8 +700,8 @@ export class PaintLib {
     this.updateCanUndoRedoState();
   }
 
-  saveCheckpoint(object?: PaintObject<any>, creation?: boolean) {
-    this.undoStack.push(this.buildCheckpoint(object, creation));
+  saveCheckpoint(object?: PaintObject<any>, creation?: boolean, fullCanvas?: boolean) {
+    this.undoStack.push(this.buildCheckpoint(object, creation, fullCanvas));
 
     if (this.undoStack.length > 50) {
       this.undoStack.shift();
@@ -696,7 +718,13 @@ export class PaintLib {
     }
 
     // 1. Save the current state to redo stack
-    this.redoStack.push(this.buildCheckpoint(checkpoint.type === 'object' ? checkpoint.checkpoint.object : undefined));
+    this.redoStack.push(
+      this.buildCheckpoint(
+        checkpoint.type === 'object' ? checkpoint.checkpoint.object : undefined,
+        false,
+        checkpoint.type === 'canvas' && checkpoint.checkpoint.fullCanvas,
+      ),
+    );
 
     // 2. Restore the object or canvas
     this.restoreCheckpoint(checkpoint);
@@ -710,7 +738,13 @@ export class PaintLib {
     }
 
     // 1. Save the current state to undo stack
-    this.undoStack.push(this.buildCheckpoint(checkpoint.type === 'object' ? checkpoint.checkpoint.object : undefined));
+    this.undoStack.push(
+      this.buildCheckpoint(
+        checkpoint.type === 'object' ? checkpoint.checkpoint.object : undefined,
+        false,
+        checkpoint.type === 'canvas' && checkpoint.checkpoint.fullCanvas,
+      ),
+    );
 
     // 2. Restore the object or canvas
     this.restoreCheckpoint(checkpoint);

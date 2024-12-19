@@ -14,6 +14,8 @@ export type PaintObjectCheckpoint = {
 
 export type CanvasCheckpoint = {
   transform: Partial<GlobalTransformProps>;
+  objects?: PaintObjectCheckpoint[];
+  fullCanvas: boolean;
 };
 
 export type Checkpoint =
