@@ -51,11 +51,11 @@
     flex: 1;
     justify-content: space-between;
     overflow-x: auto;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 .paintlib-menu-group {
-    margin-left: 2px;
-    margin-right: 2px;
     gap: var(--paintlib-button-gap);
     display: flex;
 }

@@ -31,11 +31,13 @@ export abstract class MenuSizing {
       (selectGroupCount ? 1 : 0) + (objectGroupCount ? 1 : 0) + (rotateGroupCount ? 1 : 0) + (saveGroupCount ? 1 : 0);
 
     const WIDTH_FULL_SIZE =
+      6 +
       style.groupGap * (countGroup - 1) +
       (style.buttonSize + style.buttonGap) * countButtons -
       style.buttonGap * countGroup;
 
     const WIDTH_MIN_SIZE =
+      6 +
       style.groupGap * (countGroup - 1) +
       (style.buttonSize + style.buttonGap) * (countButtons - (objectGroupCount ? objectGroupCount + 2 : 0)) -
       style.buttonGap * countGroup;

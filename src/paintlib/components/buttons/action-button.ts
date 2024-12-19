@@ -35,7 +35,10 @@ export class ActionButton extends Component<'button'> {
     let tooltipHover: HTMLDivElement;
     let tooltipConfirm: HTMLDivElement;
 
-    const hideConfirm = () => {
+    const hideConfirm = (event?: MouseEvent) => {
+      event?.preventDefault();
+      event?.stopPropagation();
+
       tooltipConfirm?.remove();
       tooltipConfirm = undefined;
       this.doubleConfirmEntered = false;
