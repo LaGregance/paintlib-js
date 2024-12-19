@@ -10,8 +10,9 @@ export class TicknessPicker extends Component<'div'> {
   init() {
     this.element.className = 'paintlib-tickness-picker';
     const ticknessComponents = new Map<number, HTMLElement>();
+    const availableTickness = this.paintlib.getAvailableTickness();
 
-    for (const tickness of this.paintlib.getAvailableTickness()) {
+    for (const tickness of availableTickness) {
       const btn = document.createElement('div');
       btn.className = 'paintlib-tickness-item';
       btn.innerHTML = `<span>${tickness}</span><div style="background-color: black; height: ${tickness}px; width: 100px;"></div>`;
@@ -23,15 +24,21 @@ export class TicknessPicker extends Component<'div'> {
       this.element.appendChild(btn);
     }
 
+    const updateValue = (value: number) => {
+      for (const tickness of ticknessComponents.keys()) {
+        const compo = ticknessComponents.get(tickness);
+        compo.style.border = value === tickness ? '1px solid black' : 'none';
+      }
+    };
+
     useState(
       this.paintlib.uiStore,
-      (store) => store.options.tickness,
-      (activeTickness) => {
-        for (const tickness of ticknessComponents.keys()) {
-          const compo = ticknessComponents.get(tickness);
-          compo.style.border = activeTickness === tickness ? '1px solid black' : 'none';
-        }
+      (store) => store.selectedObject,
+      (selectedObject) => {
+        updateValue(selectedObject?.getOptions()?.tickness || this.paintlib.uiStore.getState().options.tickness);
       },
     );
+
+    useState(this.paintlib.uiStore, (store) => store.options.tickness, updateValue);
   }
 }

@@ -8,6 +8,13 @@ export class ColorPicker extends Component<'div'> {
 
   constructor(
     private paintlib: PaintLib,
+    /**
+     * Represent the color of the active object
+     */
+    private activeColor: (store: UIStore) => string,
+    /**
+     * Represent the actual color of the option field
+     */
     private getColor: (store: UIStore) => string,
     private setColor: (color: string) => void,
     private allowTransparent: boolean,
@@ -62,13 +69,16 @@ export class ColorPicker extends Component<'div'> {
       this.element.appendChild(svg);
     }
 
-    useState(this.paintlib.uiStore, this.getColor, (activeColor) => {
+    const updateValue = (value: string) => {
       for (const color of colorComponents.keys()) {
         const compo = colorComponents.get(color);
-        compo
-          .querySelector('.paintlib-selector-circle')
-          .setAttribute('stroke-opacity', color === activeColor ? '100%' : '0');
+        compo.querySelector('.paintlib-selector-circle').setAttribute('stroke-opacity', color === value ? '100%' : '0');
       }
+    };
+
+    useState(this.paintlib.uiStore, this.activeColor, (activeColor) => {
+      updateValue(activeColor || this.getColor(this.paintlib.uiStore.getState()));
     });
+    useState(this.paintlib.uiStore, this.getColor, updateValue);
   }
 }

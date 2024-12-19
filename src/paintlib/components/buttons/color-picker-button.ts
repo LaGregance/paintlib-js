@@ -24,7 +24,7 @@ export class ColorPickerButton extends MenuButton {
   }
 
   protected buildMenu(menu: View) {
-    menu.add(new ColorPicker(this.paintlib, this.getColor, this.setColor, this.allowTransparent));
+    menu.add(new ColorPicker(this.paintlib, this.activeColor, this.getColor, this.setColor, this.allowTransparent));
   }
 
   init() {
