@@ -66,3 +66,14 @@ export const boxEqual = (a: TBBox, b: TBBox) => {
     return a.left === b.left && a.top === b.top && a.width === b.width && a.height === b.height;
   }
 };
+
+export const hasParent = (element: HTMLElement, parent: HTMLElement) => {
+  let it = element;
+  while (it) {
+    if (it === parent) {
+      return true;
+    }
+    it = it.parentElement;
+  }
+  return false;
+};

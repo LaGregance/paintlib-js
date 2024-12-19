@@ -3,6 +3,7 @@ import { Component } from '../component';
 import { useState } from '../../utils/use-state';
 import { PaintLib } from '../../paintlib';
 import { PaintActionType } from '../../models/paint-action-type';
+import { hasParent } from '../../utils/utils';
 
 export class ActionButton extends Component<'button'> {
   private type: PaintActionType;
@@ -36,13 +37,16 @@ export class ActionButton extends Component<'button'> {
     let tooltipConfirm: HTMLDivElement;
 
     const hideConfirm = (event?: MouseEvent) => {
+      if (event && hasParent(event.target as HTMLElement, this.element)) {
+        return;
+      }
       event?.preventDefault();
       event?.stopPropagation();
 
       tooltipConfirm?.remove();
       tooltipConfirm = undefined;
       this.doubleConfirmEntered = false;
-      document.removeEventListener('click', hideConfirm);
+      document.removeEventListener('click', hideConfirm, true);
     };
 
     this.element.onclick = () => {
@@ -55,10 +59,12 @@ export class ActionButton extends Component<'button'> {
         requestAnimationFrame(() => {
           // If we don't requestAnimationFrame, the hideConfirm is triggered directly
           tooltipConfirm = this.createTooltip(this.element, this.doubleConfirm);
-          document.addEventListener('click', hideConfirm);
+          document.addEventListener('click', hideConfirm, true);
         });
       } else {
-        hideConfirm();
+        if (this.doubleConfirmEntered) {
+          hideConfirm();
+        }
 
         this.paintlib.uiStore.getState().setAction(this.actionCreator());
         this.onClickFinish?.();
