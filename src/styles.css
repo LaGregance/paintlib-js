@@ -18,9 +18,16 @@
     background-color: var(--paintlib-background-color);
     height: 100%;
     width: 100%;
+    margin: 0;
     display: flex;
     flex-direction: column;
     position: relative;
+}
+
+.paintlib-canvas-container canvas {
+    margin: 0;
+    padding: 0;
+    display: block;
 }
 
 .paintlib-canvas-container {
@@ -126,6 +133,7 @@
     background-color: var(--paintlib-tooltip-background-color);
     color: var(--paintlib-tooltip-color);
     font-family: var(--paintlib-tooltip-font-family), serif;
+    font-size: 16px;
     text-align: center;
     padding: 5px 10px;
     border-radius: 6px;

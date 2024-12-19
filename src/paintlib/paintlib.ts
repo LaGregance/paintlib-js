@@ -135,9 +135,10 @@ export class PaintLib {
     this.canvasContainer = document.createElement('div');
     this.canvasContainer.className = 'paintlib-canvas-container';
     this.canvasContainer.style.marginTop = px(
-      this.customization.proactivelyShowOptions
-        ? this.customization.style.buttonSize
-        : 2 * this.customization.style.buttonSize + 10,
+      4 +
+        (this.customization.proactivelyShowOptions
+          ? this.customization.style.buttonSize
+          : 2 * this.customization.style.buttonSize + 14),
     );
 
     this.element.appendChild(this.canvasContainer);
