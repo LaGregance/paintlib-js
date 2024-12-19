@@ -6,12 +6,23 @@ import { PaintActionType } from '../../models/paint-action-type';
 
 export class ActionButton extends Component<'button'> {
   private type: PaintActionType;
+  private doubleConfirmEntered = false;
 
+  /**
+   *
+   * @param paintlib
+   * @param actionCreator
+   * @param image
+   * @param tooltipText
+   * @param doubleConfirm When defined, the action show a tooltip to ask the user to click a second time to confirm
+   * @param onClickFinish
+   */
   constructor(
     private paintlib: PaintLib,
     private actionCreator: () => BaseAction,
     private image: string,
     private tooltipText?: string,
+    private doubleConfirm?: string,
     private onClickFinish?: () => void,
   ) {
     super('button');
@@ -21,39 +32,48 @@ export class ActionButton extends Component<'button'> {
   init() {
     this.element.className = 'paintlib-menu-button';
 
+    let tooltipHover: HTMLDivElement;
+    let tooltipConfirm: HTMLDivElement;
+
+    const hideConfirm = () => {
+      tooltipConfirm?.remove();
+      tooltipConfirm = undefined;
+      this.doubleConfirmEntered = false;
+      document.removeEventListener('click', hideConfirm);
+    };
+
     this.element.onclick = () => {
-      this.paintlib.uiStore.getState().setAction(this.actionCreator());
-      this.onClickFinish?.();
+      if (this.doubleConfirm && !this.doubleConfirmEntered) {
+        this.doubleConfirmEntered = true;
+
+        tooltipHover?.remove();
+        tooltipHover = undefined;
+
+        requestAnimationFrame(() => {
+          // If we don't requestAnimationFrame, the hideConfirm is triggered directly
+          tooltipConfirm = this.createTooltip(this.element, this.doubleConfirm);
+          document.addEventListener('click', hideConfirm);
+        });
+      } else {
+        hideConfirm();
+
+        this.paintlib.uiStore.getState().setAction(this.actionCreator());
+        this.onClickFinish?.();
+      }
     };
 
     if (this.paintlib.customization.enableTooltip && this.tooltipText) {
-      const portal = this.paintlib['element'];
-      let tooltip: HTMLDivElement;
-
       this.element.onmouseenter = (event: MouseEvent) => {
-        const anchor = event.currentTarget as HTMLElement;
-        const portalRect = portal.getBoundingClientRect();
-        const anchorRect = anchor.getBoundingClientRect();
-
-        tooltip = document.createElement('div');
-        tooltip.className = 'paintlib-tooltip';
-        tooltip.innerText = this.tooltipText;
-        portal.appendChild(tooltip);
-
-        const tooltipRect = tooltip.getBoundingClientRect();
-        const topAnchor = anchorRect.top + anchorRect.height + 3 - portalRect.top;
-        let leftAnchor = Math.max(anchorRect.left - tooltipRect.width / 2 + anchorRect.width / 2 - portalRect.left, 1);
-        if (leftAnchor + tooltipRect.width > portalRect.width) {
-          leftAnchor = portalRect.width - tooltipRect.width - 1;
+        if (this.doubleConfirmEntered) {
+          return;
         }
-
-        tooltip.style.top = topAnchor + 'px';
-        tooltip.style.left = leftAnchor + 'px';
+        const anchor = event.currentTarget as HTMLElement;
+        tooltipHover = this.createTooltip(anchor, this.tooltipText);
       };
 
       this.element.onmouseleave = () => {
-        tooltip?.remove();
-        tooltip = undefined;
+        tooltipHover?.remove();
+        tooltipHover = undefined;
       };
     }
 
@@ -70,6 +90,29 @@ export class ActionButton extends Component<'button'> {
     );
 
     this.element.innerHTML = this.image;
+  }
+
+  private createTooltip(anchor: HTMLElement, label: string) {
+    const portal = this.paintlib['element'];
+
+    const portalRect = portal.getBoundingClientRect();
+    const anchorRect = anchor.getBoundingClientRect();
+
+    const tooltip = document.createElement('div');
+    tooltip.className = 'paintlib-tooltip';
+    tooltip.innerText = label;
+    portal.appendChild(tooltip);
+
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const topAnchor = anchorRect.top + anchorRect.height + 3 - portalRect.top;
+    let leftAnchor = Math.max(anchorRect.left - tooltipRect.width / 2 + anchorRect.width / 2 - portalRect.left, 1);
+    if (leftAnchor + tooltipRect.width > portalRect.width) {
+      leftAnchor = portalRect.width - tooltipRect.width - 1;
+    }
+
+    tooltip.style.top = topAnchor + 'px';
+    tooltip.style.left = leftAnchor + 'px';
+    return tooltip;
   }
 
   setDisable(disable: boolean) {

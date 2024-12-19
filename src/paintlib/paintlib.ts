@@ -78,6 +78,8 @@ export class PaintLib {
 
     customization.actions ??= Object.values(PaintActionType);
     customization.labels ??= {};
+    customization.labels.clearConfirm ??= 'Click again to confirm';
+    customization.labels.cancelConfirm ??= 'Click again to confirm';
     customization.labels.tooltip ??= {
       [PaintActionType.SELECT]: 'Select object',
       [PaintActionType.TRASH]: 'Delete selected object',

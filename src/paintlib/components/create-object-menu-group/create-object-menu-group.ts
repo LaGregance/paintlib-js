@@ -86,6 +86,7 @@ export class CreateObjectMenuGroup extends Component<'div'> {
       () => ObjectRegistry.createAction(type, this.paintlib),
       meta.icon,
       this.paintlib.customization.labels.tooltip[type],
+      undefined,
       onClick,
     );
   }

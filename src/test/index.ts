@@ -6,6 +6,11 @@ export async function init(container: HTMLElement) {
     proactivelyShowOptions: false,
     // clearEraseImage: true,
     enableTooltip: true,
+    clearConfirm: true,
+    cancelConfirm: true,
+    labels: {
+      clearConfirm: 'Appuyer une deuxième fois pour confirmer',
+    },
     onActionOverride: (action) => {
       if (action === PaintActionType.CLEAR) {
         return false;

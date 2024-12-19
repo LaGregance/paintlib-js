@@ -75,7 +75,15 @@ export class MainMenu extends Component<'div'> {
       selectGroup.add(trash);
     }
     if (this.paintlib.haveAction(PaintActionType.CLEAR)) {
-      selectGroup.add(new ActionButton(this.paintlib, () => new ClearAction(this.paintlib), ClearSVG, tooltip.clear));
+      selectGroup.add(
+        new ActionButton(
+          this.paintlib,
+          () => new ClearAction(this.paintlib),
+          ClearSVG,
+          tooltip.clear,
+          this.paintlib.customization.clearConfirm ? this.paintlib.customization.labels.clearConfirm : undefined,
+        ),
+      );
     }
     if (this.paintlib.haveAction(PaintActionType.UNDO)) {
       undo = new ActionButton(this.paintlib, () => new UndoRedoAction(this.paintlib, 'undo'), UndoSVG, tooltip.undo);
@@ -131,7 +139,15 @@ export class MainMenu extends Component<'div'> {
     const saveGroup = new View('paintlib-menu-group');
 
     if (this.paintlib.haveAction(PaintActionType.CANCEL)) {
-      saveGroup.add(new ActionButton(this.paintlib, () => new CancelAction(this.paintlib), CancelSVG, tooltip.cancel));
+      saveGroup.add(
+        new ActionButton(
+          this.paintlib,
+          () => new CancelAction(this.paintlib),
+          CancelSVG,
+          tooltip.cancel,
+          this.paintlib.customization.cancelConfirm ? this.paintlib.customization.labels.cancelConfirm : undefined,
+        ),
+      );
     }
     if (this.paintlib.haveAction(PaintActionType.SAVE)) {
       saveGroup.add(new ActionButton(this.paintlib, () => new SaveAction(this.paintlib), SaveSVG, tooltip.save));

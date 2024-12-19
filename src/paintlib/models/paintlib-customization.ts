@@ -35,6 +35,16 @@ export type PaintlibCustomization = {
   clearEraseImage?: boolean;
 
   /**
+   * When true, the clear button will show a confirmation tooltip
+   */
+  clearConfirm?: boolean;
+
+  /**
+   * When true, the clear button will show a confirmation tooltip
+   */
+  cancelConfirm?: boolean;
+
+  /**
    * Override the behavior of the specified action (only work for click action).
    * Return true if the behavior is well override, else return false to execute the default action.
    *
@@ -67,5 +77,7 @@ export type PaintlibCustomization = {
     tooltip?: {
       [key in PaintActionType]?: string;
     };
+    clearConfirm?: string;
+    cancelConfirm?: string;
   };
 };
