@@ -1,4 +1,4 @@
-import { Group, Line, Point, Triangle } from 'fabric';
+import { Group, Line, Point, TBBox, Triangle } from 'fabric';
 import { PaintObject } from './abstract/paint-object';
 import { getEndPoint, getStartPoint } from '../utils/vector-utils';
 import { PaintLib } from '../paintlib';
@@ -40,16 +40,16 @@ export class PaintArrow extends PaintObject<Group> {
 
   render() {
     // Arrowhead size
-    const arrowWidth = ARROW_WIDTH_BASE + ARROW_WIDTH_FACTOR * this.line.strokeWidth;
-    const arrowHeight = ARROW_HEIGHT_BASE + ARROW_HEIGHT_FACTOR * this.line.strokeWidth;
+    const arrowWidth = ARROW_WIDTH_BASE + ARROW_WIDTH_FACTOR * this.options.tickness;
+    const arrowHeight = ARROW_HEIGHT_BASE + ARROW_HEIGHT_FACTOR * this.options.tickness;
 
-    const layout = this.layout;
+    const layout: TBBox = { width: this.layout.width, height: this.layout.height, left: 0, top: 0 };
     let start = getStartPoint(layout, this.vector);
     let end = getEndPoint(layout, this.vector);
 
     // In group object are positioned relative to center, that's why we use width/2 & height/2
-    start = new Point(start.x - layout.left - layout.width / 2, start.y - layout.top - layout.height / 2);
-    end = new Point(end.x - layout.left - layout.width / 2, end.y - layout.top - layout.height / 2);
+    start = new Point(start.x - layout.width / 2, start.y - layout.height / 2);
+    end = new Point(end.x - layout.width / 2, end.y - layout.height / 2);
 
     // Calculate the angle for the arrowhead
     const angle = Math.atan2(end.y - start.y, end.x - start.x);
@@ -57,12 +57,19 @@ export class PaintArrow extends PaintObject<Group> {
     const deltaY = (arrowHeight / 2) * Math.sin(angle);
 
     this.fabricObject.set({
-      left: this.layout.left,
-      top: this.layout.top,
       width: this.layout.width,
       height: this.layout.height,
     });
 
+    // For some unknown reason line have to be set twice, else when editing tickness option some shit happen
+    this.line.set({
+      x1: start.x,
+      y1: start.y,
+      x2: end.x - deltaX,
+      y2: end.y - deltaY,
+      strokeWidth: this.options.tickness,
+      stroke: this.options.fgColor,
+    });
     this.line.set({
       x1: start.x,
       y1: start.y,
